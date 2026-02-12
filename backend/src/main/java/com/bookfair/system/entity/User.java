@@ -7,7 +7,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Data
+@Data //Remove this
+//@Getter
+//@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,6 +38,7 @@ public class User {
     private String role; // Values: 'VENDOR', 'EMPLOYEE', 'ADMIN'
 
     @Builder.Default
+    //@Column(nullable = false)
     private Boolean enabled = true;
 
     @CreationTimestamp
