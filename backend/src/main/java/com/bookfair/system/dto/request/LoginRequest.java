@@ -1,6 +1,7 @@
 package com.bookfair.system.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import jakarta.validation.constraints.Email;
 
 @Data
 public class LoginRequest {
