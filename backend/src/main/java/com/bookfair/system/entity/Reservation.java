@@ -4,10 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+//import java.util.ArrayList;
+//import java.util.List;
 
 @Entity
 @Table(name = "reservations")
-@Data
+/*
+@Getter 
+@Setter
+    */
+@Data //getter setter instead of data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,4 +37,19 @@ public class Reservation {
     @Column(nullable = false)
     @Builder.Default
     private String status = "PENDING"; // Pending, Confirmed, Canceled
+    /*
+
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ReservationStall> reservationStalls = new ArrayList<>();
+
+   
+    public void addStall(Stall stall) {
+        if (this.reservationStalls.size() >= 3) {
+            throw new IllegalStateException("Project limit exceeded: You cannot reserve more than 3 stalls.");
+        }
+        ReservationStall link = new ReservationStall(this, stall);
+        this.reservationStalls.add(link);
+    }
+    */
 }
