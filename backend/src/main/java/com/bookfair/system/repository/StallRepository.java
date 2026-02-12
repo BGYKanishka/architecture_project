@@ -19,11 +19,5 @@ public interface StallRepository extends JpaRepository<Stall, Long> {
     Optional<Stall> findByIdWithLock(@Param("id") Long id);
 
     List<Stall> findByFloorId(Long floorId);
-    /*
-    @Query("SELECT s FROM Stall s WHERE s.floorId = :floorId AND s.id NOT IN " +
-           "(SELECT rs.stall.id FROM ReservationStall rs " +
-           " WHERE rs.reservation.status IN ('CONFIRMED', 'PENDING'))")
-    List<Stall> findAvailableStallsByFloor(@Param("floorId") Long floorId);
-    */
     
 }
