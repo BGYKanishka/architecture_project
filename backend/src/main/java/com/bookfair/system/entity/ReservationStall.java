@@ -5,11 +5,10 @@ import lombok.*;
 
 @Entity
 @Table(name = "reservation_stalls", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"reservation_id", "stall_id"})
+    @UniqueConstraint(columnNames = {"reservation_id", "stall_id"})
 })
-@Data  // Using Getter/Setter instead of @Data to avoid recursion in toString
-//@Getter
-//@Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,10 +25,4 @@ public class ReservationStall {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stall_id", nullable = false)
     private Stall stall;
-/*
-public ReservationStall(Reservation reservation, Stall stall) {
-        this.reservation = reservation;
-        this.stall = stall;
-    }
-*/
 }
