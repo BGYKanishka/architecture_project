@@ -1,6 +1,7 @@
 import React from 'react';
 // Note: npm install react-icons 
 import { FaFacebookF, FaWordpress, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaCalendarAlt, FaClock } from 'react-icons/fa';
+import { BookOpenIcon } from "@heroicons/react/24/outline";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -8,20 +9,18 @@ const Footer = () => {
   return (
     <footer className="footer-container">
       <div className="footer-content">
-        
+
         {/* Column 1: Logo and Branding */}
         <div className="footer-section branding">
-          <img 
-            src="/assets/cibf-logo.png" 
-            alt="CIBF Logo" 
-            className="footer-logo" 
-          />
+          <div className="bg-blue-800 p-2 rounded-lg text-white w-fit mb-4">
+            <BookOpenIcon className="w-8 h-8" />
+          </div>
           <h3 className="branding-text">
             Colombo International <br />
             <span className="highlight">Book Fair</span>
           </h3>
           <p className="location-tag">
-            <FaMapMarkerAlt className="location-icon"/> <span>Colombo - Sri Lanka.</span>
+            <FaMapMarkerAlt className="location-icon" /> <span>Colombo - Sri Lanka.</span>
           </p>
         </div>
 
@@ -79,16 +78,24 @@ const Footer = () => {
             <a href="#" className="social-box"><FaFacebookF /></a>
             <a href="#" className="social-box"><FaWordpress /></a>
           </div>
-          {/* Map Preview Placeholder */}
+          {/* Map Preview */}
           <div className="map-preview">
-             <img src="/assets/map-screenshot.png" alt="BMICH Map" />
-             <div className="map-overlay">View larger map</div>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15843.46879268393!2d79.87052968715833!3d6.901682399999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2597f9d09a467%3A0xee0b9455e960eba5!2sBandaranaike%20Memorial%20International%20Conference%20Hall!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
+              width="100%"
+              height="150"
+              style={{ border: 0 }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="BMICH Map"
+            ></iframe>
           </div>
         </div>
       </div>
-      
+
       <div className="footer-bottom">
-        <p>Copyright ©{currentYear} All rights reserved | This web is made by SLBPA</p>
+        <p>Copyright ©{currentYear} All rights reserved.</p>
       </div>
 
       <style jsx>{`
@@ -194,16 +201,7 @@ const Footer = () => {
           width: 100%;
           display: block;
         }
-        .map-overlay {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            background: rgba(255,255,255,0.9);
-            color: #3182ce;
-            padding: 2px 8px;
-            font-size: 10px;
-            border-radius: 2px;
-        }
+
         .footer-bottom {
           text-align: center;
           padding-top: 2rem;
