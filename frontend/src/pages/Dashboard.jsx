@@ -6,16 +6,13 @@ import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(undefined);
+  const [user, setUser] = useState(AuthService.getCurrentUser());
 
   useEffect(() => {
-    const currentUser = AuthService.getCurrentUser();
-    if (!currentUser) {
+    if (!user) {
       navigate("/login");
-    } else {
-      setUser(currentUser);
     }
-  }, []);
+  }, [user, navigate]);
 
   const handleLogout = () => {
     AuthService.logout();

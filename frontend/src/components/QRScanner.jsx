@@ -10,11 +10,11 @@ const QRScanner = ({ onScanSuccess }) => {
         });
 
         scanner.render(onScanSuccess, (error) => {
-            // scan කරද්දී සිදුවන errors මෙහිදී handle කළ හැක
+            console.warn("QR Scan Error:", error);
         });
 
         return () => scanner.clear();
-    }, []);
+    }, [onScanSuccess]);
 
     return <div id="reader" style={{ width: '400px' }}></div>;
 };

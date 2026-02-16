@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import QRScanner from '../components/QRScanner';
-import employeeService from '../services/employee.service';
+import employeeService from '../services/employee/service';
 
 const EmployeePanel = () => {
     const [employee, setEmployee] = useState(null);
 
-    const handleScan = (decodedText) => {
+    const handleScan = useCallback((decodedText) => {
         employeeService.verifyQR(decodedText)
             .then(res => setEmployee(res.data))
-            .catch(err => alert("Employee not found!"));
-    };
+            .catch(() => alert("Employee not found!"));
+    }, []);
 
     return (
         <div style={{ padding: '20px' }}>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import StallService from "../services/stall.service";
 
 const StallMap = () => {
@@ -6,17 +6,17 @@ const StallMap = () => {
   const [selectedStalls, setSelectedStalls] = useState([]);
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    loadStalls();
-  }, []);
-
-  const loadStalls = () => {
+  const loadStalls = useCallback(() => {
     StallService.getAllStalls()
       .then((res) => {
         setStalls(res.data);
       })
       .catch((err) => console.error("Error loading stalls", err));
-  };
+  }, []);
+
+  useEffect(() => {
+    loadStalls();
+  }, [loadStalls]);
 
   const toggleSelection = (stall) => {
     if (stall.reserved) return; // Cannot select booked stalls
@@ -34,7 +34,7 @@ const StallMap = () => {
 
   const handleReservation = () => {
     StallService.reserveStalls(selectedStalls)
-      .then((res) => {
+      .then(() => {
         setMessage("Reservation Successful! Check your email.");
         setSelectedStalls([]);
         loadStalls(); // Refresh map to show red boxes
@@ -47,7 +47,7 @@ const StallMap = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-md mt-6">
       <h2 className="text-2xl font-bold mb-4">Book Your Stall</h2>
-      
+
       {/* Legend */}
       <div className="flex gap-4 mb-4 text-sm">
         <span className="flex items-center"><div className="w-4 h-4 bg-green-500 mr-2 rounded"></div> Available</span>
@@ -63,7 +63,7 @@ const StallMap = () => {
             onClick={() => toggleSelection(stall)}
             className={`
               h-24 flex flex-col items-center justify-center border rounded cursor-pointer transition-all
-              ${stall.reserved ? "bg-red-500 text-white cursor-not-allowed" : 
+              ${stall.reserved ? "bg-red-500 text-white cursor-not-allowed" :
                 selectedStalls.includes(stall.id) ? "bg-blue-500 text-white scale-105" : "bg-green-100 hover:bg-green-200 border-green-400"}
             `}
           >
