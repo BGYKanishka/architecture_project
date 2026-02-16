@@ -11,6 +11,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} /> {/* Add this route */}
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/:hallName" element={<Dashboard />} />
       </Routes>
     </Router>
   );
