@@ -79,10 +79,10 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
                 <div className="grid grid-cols-12 grid-rows-14 gap-4 w-full max-w-4xl aspect-[12/14] mx-auto bg-white rounded-2xl p-6">
 
 
-                    <div className="col-start-5 col-span-4 row-start-1 row-span-3 z-10">
+                    <div className="col-start-3 col-span-4 row-start-1 row-span-3 z-10">
                         <Octagon name="Hall A" status={getHallStatus("Hall A")} onClick={() => onHallClick("Hall A")} />
                     </div>
-                    <div className="col-start-10 col-span-3 row-start-2 row-span-2 z-10">
+                    <div className="col-start-8 col-span-3 row-start-2 row-span-2 z-10">
                         <Octagon name="Hall B" status={getHallStatus("Hall B")} onClick={() => onHallClick("Hall B")} />
                     </div>
 
@@ -108,7 +108,7 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
                         </div>
                     </div>
 
-                    <div className="col-start-8 col-span-2 row-start-11 row-span-3">
+                    <div className="col-start-6 col-span-3 row-start-11 row-span-3">
                         <MapBlock name="Hall E" height="h-full" status={getHallStatus("Hall E")} onClick={() => onHallClick("Hall E")} />
                     </div>
                 </div>
