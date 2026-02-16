@@ -29,16 +29,13 @@ public class ReservationService {
     @Transactional
     public String createReservation(Long userId, ReservationRequest request) {
 
-
         long currentBookings = reservationStallRepository.countStallsByUserId(userId);
         if (currentBookings + request.getStallIds().size() > 3) {
             throw new RuntimeException("Limit Exceeded: You can only reserve up to 3 stalls per business.");
         }
 
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
 
         String qrToken = UUID.randomUUID().toString();
         Reservation reservation = Reservation.builder()
@@ -80,8 +77,7 @@ public class ReservationService {
                     user.getEmail(),
                     user.getName(),
                     qrImageBase64,
-                    stallCodes
-            );
+                    stallCodes);
 
             return "Reservation Successful! QR Token: " + qrToken;
         } catch (Exception e) {
@@ -100,5 +96,17 @@ public class ReservationService {
         byte[] pngData = pngOutputStream.toByteArray();
 
         return Base64.getEncoder().encodeToString(pngData);
+    }
+
+    public java.util.List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
+    }
+
+    @Transactional
+    public Reservation updateReservationStatus(Long id, String status) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+        reservation.setStatus(status);
+        return reservationRepository.save(reservation);
     }
 }

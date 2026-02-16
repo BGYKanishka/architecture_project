@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="60b20bfe-a4ab-4d5d-b4ea-aaeab10d06fc" name="Changes" comment="" />
+    <list default="true" id="60b20bfe-a4ab-4d5d-b4ea-aaeab10d06fc" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/admin/AdminReservationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/admin/AdminReservationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/admin/AdminStallController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/admin/AdminStallController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/auth/AdminAuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/auth/AdminAuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/service/ReservationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/service/ReservationService.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -99,7 +104,7 @@
       <workItem from="1770974713679" duration="955000" />
       <workItem from="1771048286437" duration="164000" />
       <workItem from="1771048458649" duration="175000" />
-      <workItem from="1771224126263" duration="2555000" />
+      <workItem from="1771224126263" duration="3183000" />
     </task>
     <servers />
   </component>
