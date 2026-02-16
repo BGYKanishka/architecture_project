@@ -7,32 +7,34 @@ import lombok.*;
 @Table(name = "stalls", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"floor_id", "stall_code"})
 })
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Stall {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "floor_id", nullable = false)
+    private Floor floor;
+
     @Column(name = "stall_code", nullable = false, length = 10)
     private String stallCode;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "stall_type_id", nullable = false)
+    private StallType stallType;
 
-    @Column(name = "floor_id", nullable = false)
-    private Long floorId;
-
-    @Column(name = "stall_type_id", nullable = false)
-    private Long stallTypeId;
-
-    public Double getPrice() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPrice'");
-    }
 
     public String getSize() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getSize'");
+        return stallType != null ? stallType.getSize() : "UNKNOWN";
     }
 
+    public Double getPrice() {
+        return stallType != null ? stallType.getPrice() : 0.0;
+    }
 }

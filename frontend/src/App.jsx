@@ -2,17 +2,27 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/Register"; // Import this
 import Dashboard from "./pages/Dashboard";
+import Footer from "./components/footer";
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} /> {/* Add this route */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/dashboard/:hallName" element={<Dashboard />} />
-      </Routes>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        
+        <div style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<Login />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} /> {/* Add this route */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            {/* Preserved the dynamic route from 'dheeshana' branch */}
+            <Route path="/dashboard/:hallName" element={<Dashboard />} />
+          </Routes>
+        </div>
+
+        <Footer />
+        
+      </div>
     </Router>
   );
 }
