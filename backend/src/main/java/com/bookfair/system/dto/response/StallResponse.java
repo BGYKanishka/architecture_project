@@ -14,4 +14,23 @@ public class StallResponse {
     private boolean isReserved;
 }
 
+// package com.bookfair.system.dto.response;
 
+// public class StallResponse {
+// private Long id;
+// private String code;
+// private String size;
+// private String status;
+
+// public StallResponse(Long id, String code, String size, String status) {
+// this.id = id;
+// this.code = code;
+// this.size = size;
+// this.status = status;
+// }
+
+// public Long getId() { return id; }
+// public String getCode() { return code; }
+// public String getSize() { return size; }
+// public String getStatus() { return status; }
+// }
