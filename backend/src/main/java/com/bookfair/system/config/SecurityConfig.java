@@ -62,8 +62,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/stalls/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+                        .anyRequest().authenticated());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
@@ -84,3 +83,36 @@ public class SecurityConfig {
         return source;
     }
 }
+
+// package com.bookfair.system.config;
+
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import
+// org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+// import
+// org.springframework.security.config.annotation.web.builders.HttpSecurity;
+// import org.springframework.security.web.SecurityFilterChain;
+
+// @Configuration
+// @EnableMethodSecurity
+// public class SecurityConfig {
+
+// @Bean
+// public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+// http.csrf(csrf -> csrf.disable());
+
+// http.authorizeHttpRequests(auth -> auth
+// .requestMatchers("/auth/**").permitAll()
+// .requestMatchers("/admin/**").hasAnyRole("ADMIN", "EMPLOYEE")
+// .anyRequest().authenticated()
+// );
+
+// // ✅ If you already have a JwtFilter, add it here:
+// // http.addFilterBefore(jwtFilter,
+// UsernamePasswordAuthenticationFilter.class);
+
+// return http.build();
+// }
+// }

@@ -19,5 +19,16 @@ public interface StallRepository extends JpaRepository<Stall, Long> {
     Optional<Stall> findByIdWithLock(@Param("id") Long id);
 
     List<Stall> findByFloorId(Long floorId);
-    
+
 }
+
+// package com.bookfair.system.repository;
+
+// import com.bookfair.system.entity.Stall;
+// import org.springframework.data.jpa.repository.JpaRepository;
+
+// import java.util.Optional;
+
+// public interface StallRepository extends JpaRepository<Stall, Long> {
+// Optional<Stall> findByCode(String code);
+// }
