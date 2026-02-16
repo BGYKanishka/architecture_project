@@ -14,7 +14,7 @@ CREATE TABLE users (
 );
 CREATE TABLE floors (
     id SERIAL PRIMARY KEY,
-    floor_number INT UNIQUE NOT NULL
+    floor_name VARCHAR(10) UNIQUE NOT NULL 
 );
 CREATE TABLE stall_types (
     id SERIAL PRIMARY KEY,
