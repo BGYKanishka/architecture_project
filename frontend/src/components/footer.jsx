@@ -102,7 +102,7 @@ const Footer = () => {
         .footer-content {
           display: grid;
           grid-template-columns: 2fr 0.8fr 1.2fr 1.2fr 1.2fr;
-          gap: 4rem;
+          gap: rem;
           max-width: 1300px;
           margin: 0 auto;
           padding: 2 2rem;
