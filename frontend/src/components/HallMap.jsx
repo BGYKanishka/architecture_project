@@ -34,7 +34,7 @@ const Octagon = ({ name, status, onClick }) => {
                 clipPath: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
                 padding: "1.5px"
             }}>
-            <div className={`w-full h-full flex items-center justify-center font-bold text-lg md:text-2xl ${innerColor}`}
+            <div className={`w-full h-full flex items-center justify-center font-bold text-xs md:text-2xl ${innerColor}`}
                 style={{ clipPath: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)" }}>
                 {name}
             </div>
