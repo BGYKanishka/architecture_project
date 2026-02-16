@@ -2,7 +2,6 @@ import React from "react";
 
 const MapBlock = ({ name, height = "h-full", status, onClick }) => {
     const isAvailable = status === "available";
-    // UPDATED: status === "full" now uses gray colors
     const color = isAvailable ? "bg-green-50 border-green-500 text-green-900 hover:bg-green-100 hover:shadow-md cursor-pointer"
         : status === "full" ? "bg-gray-200 border-gray-400 text-gray-500 cursor-not-allowed opacity-80"
             : "bg-gray-50 border-gray-300 text-gray-400";
@@ -18,7 +17,6 @@ const MapBlock = ({ name, height = "h-full", status, onClick }) => {
 const Octagon = ({ name, status, onClick }) => {
     const isAvailable = status === "available";
 
-    //  gray for full
     const borderColor = isAvailable ? "bg-green-500" : status === "full" ? "bg-gray-400" : "bg-gray-300";
 
     const innerColor = isAvailable
@@ -62,14 +60,13 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
     return (
         <div className="w-full max-w-[95%] mx-auto">
 
-            {/* UPDATED LEGEND */}
+            {/*  LEGEND */}
             <div className="flex justify-center gap-6 mb-8 bg-white py-3 px-8 rounded-full shadow-md w-fit mx-auto border border-gray-200">
                 <div className="flex items-center gap-2">
                     <div className="w-5 h-5 bg-green-100 border-2 border-green-500 rounded"></div>
                     <span className="text-sm font-bold text-gray-700">Available</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    {/* Legend changed to Gray */}
                     <div className="w-5 h-5 bg-gray-200 border-2 border-gray-400 rounded"></div>
                     <span className="text-sm font-bold text-gray-700">Full</span>
                 </div>
