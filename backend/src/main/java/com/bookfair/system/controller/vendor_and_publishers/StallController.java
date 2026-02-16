@@ -20,26 +20,21 @@ public class StallController {
 
     private final StallRepository stallRepository;
     private final ReservationStallRepository reservationStallRepository;
-    private final FloorRepository floorRepository; // <--- 1. Inject this
+    private final FloorRepository floorRepository;
 
-    // 2. NEW ENDPOINT: Get all Halls (Floors) so Frontend can make tabs
     @GetMapping("/halls")
     public ResponseEntity<List<Floor>> getAllHalls() {
         return ResponseEntity.ok(floorRepository.findAll());
     }
 
-    // 3. UPDATED ENDPOINT: Allow filtering by floorId
     @GetMapping
     public ResponseEntity<List<StallResponse>> getAllStalls(@RequestParam(required = false) Long floorId) {
-
         List<Stall> stalls;
 
         if (floorId != null) {
-            // If frontend sends ?floorId=1, get only that hall's stalls
             stalls = stallRepository.findByFloorId(floorId);
         } else {
-            // Otherwise, fetch everything (fallback)
-            stalls = stallRepository.findAll();
+            stalls = stallRepository.findAllWithFloors();
         }
 
         List<StallResponse> response = stalls.stream().map(stall -> {
@@ -49,7 +44,8 @@ public class StallController {
                     stall.getStallCode(),
                     stall.getSize(),
                     stall.getPrice(),
-                    isReserved
+                    isReserved,
+                    stall.getFloor().getFloorName()
             );
         }).collect(Collectors.toList());
 

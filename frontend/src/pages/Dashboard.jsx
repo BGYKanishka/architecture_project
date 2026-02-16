@@ -25,8 +25,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <Header user={user} />
-
       <main className="py-6 sm:py-10 px-4 sm:px-8">
         <div className="max-w-[1600px] mx-auto">
             <div className="mb-8">
