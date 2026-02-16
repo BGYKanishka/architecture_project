@@ -3,13 +3,15 @@ import Login from "./pages/login";
 import Register from "./pages/Register"; // Import this
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/footer";
+import EmployeePanel from "./pages/EmployeePanel";
+
 
 function App() {
   return (
     <Router>
 
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        
+
         <div style={{ flex: 1 }}>
 
           <Routes>
@@ -22,7 +24,7 @@ function App() {
         </div>
 
         <Footer />
-        
+
       </div>
     </Router>
   );
