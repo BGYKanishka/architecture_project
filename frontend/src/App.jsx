@@ -3,17 +3,19 @@ import Login from "./pages/login";
 import Register from "./pages/Register"; // Import this
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/footer";
+import HelpCenter from "./pages/HelpCenter"; // Import HelpCenter
 
 function App() {
   return (
     <Router>
       <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        
+
         <div style={{ flex: 1 }}>
           <Routes>
             <Route path="/" element={<Login />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} /> {/* Add this route */}
+            <Route path="/help" element={<HelpCenter />} /> {/* Add Help Center route */}
             <Route path="/dashboard" element={<Dashboard />} />
             {/* Preserved the dynamic route from 'dheeshana' branch */}
             <Route path="/dashboard/:hallName" element={<Dashboard />} />
@@ -21,7 +23,7 @@ function App() {
         </div>
 
         <Footer />
-        
+
       </div>
     </Router>
   );
