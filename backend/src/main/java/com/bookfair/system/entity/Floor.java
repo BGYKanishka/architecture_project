@@ -16,6 +16,7 @@ public class Floor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "floor_number", unique = true, nullable = false)
-    private Integer floorNumber;
+
+    @Column(name = "floor_name", unique = true, nullable = false)
+    private String floorName;
 }
