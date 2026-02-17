@@ -7,6 +7,27 @@ const BookingConfirmation = () => {
   const navigate = useNavigate();
   const { reservationId, qrCodeImage, stalls, totalAmount } = location.state || {};
 
+  React.useEffect(() => {
+    if (reservationId && stalls && stalls.length > 0) {
+      // 1. Get current paid reservations
+      const existingPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+
+      // 2. Add new ones (IDs only)
+      const newPaidIds = stalls.map(s => s.id);
+      const updatedPaid = Array.from(new Set([...existingPaid, ...newPaidIds]));
+
+      // 3. Save to localStorage
+      localStorage.setItem("paidReservations", JSON.stringify(updatedPaid));
+
+      // 4. Clear selected stalls
+      localStorage.setItem("selectedStalls", "[]");
+
+      // 5. Notify other components
+      window.dispatchEvent(new Event("selectedStallsUpdated"));
+      window.dispatchEvent(new Event("paidReservationsUpdated"));
+    }
+  }, [reservationId, stalls]);
+
   if (!reservationId) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <div className="text-center">
@@ -46,7 +67,17 @@ const BookingConfirmation = () => {
 
             <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
               {qrCodeImage ? (
-                <img src={`data:image/png;base64,${qrCodeImage}`} alt="QR Code" className="w-48 h-48 object-contain" />
+                <img
+                  src={`data:image/png;base64,${qrCodeImage}`}
+                  alt="QR Code"
+                  className="w-48 h-48 object-contain"
+                />
+              ) : reservationId ? (
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${reservationId}`}
+                  alt="QR Code"
+                  className="w-48 h-48 object-contain"
+                />
               ) : (
                 <div className="w-48 h-48 flex items-center justify-center bg-slate-50 text-slate-400">
                   <QrCodeIcon className="w-12 h-12" />

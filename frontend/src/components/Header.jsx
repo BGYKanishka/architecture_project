@@ -19,6 +19,20 @@ const Header = ({ user }) => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(() => {
+    const saved = localStorage.getItem("selectedStalls");
+    return saved ? JSON.parse(saved).length : 0;
+  });
+
+  const syncCartCount = () => {
+    const saved = localStorage.getItem("selectedStalls");
+    setCartCount(saved ? JSON.parse(saved).length : 0);
+  };
+
+  useState(() => {
+    window.addEventListener("selectedStallsUpdated", syncCartCount);
+    return () => window.removeEventListener("selectedStallsUpdated", syncCartCount);
+  }, []);
 
   const handleLogout = () => {
     AuthService.logout();
@@ -26,7 +40,7 @@ const Header = ({ user }) => {
   };
 
   const handleCartClick = () => {
-    alert("Opening Cart... Items selected: 0");
+    navigate("/reservations");
   };
 
   return (
@@ -65,9 +79,11 @@ const Header = ({ user }) => {
           >
             <div className="relative">
               <ShoppingCartIcon className="w-6 h-6" />
-              <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                  {cartCount}
+                </span>
+              )}
             </div>
             <span className="hidden md:block font-bold text-sm">Cart</span>
           </button>
@@ -116,7 +132,7 @@ const Header = ({ user }) => {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Navigation</p>
             <MenuLink icon={<HomeIcon className="w-5 h-5" />} label="Dashboard" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }} active />
             <MenuLink icon={<UserCircleIcon className="w-5 h-5" />} label="My Profile" onClick={() => { navigate("/profile"); setIsMenuOpen(false); }} />
-            <MenuLink icon={<TicketIcon className="w-5 h-5" />} label="My Reservations" />
+            <MenuLink icon={<TicketIcon className="w-5 h-5" />} label="My Reservations" onClick={() => { navigate("/reservations"); setIsMenuOpen(false); }} />
 
             <hr className="my-3 border-slate-100" />
 

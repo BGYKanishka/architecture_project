@@ -20,10 +20,10 @@ const hallLayouts = {
   ],
   "Hall B": [
     { top: "10%", left: "42%" }, { top: "20%", left: "70%" }, { top: "45%", left: "80%" }, { top: "70%", left: "70%" },
-    { top: "80%", left: "42%" }, { top: "70%", left: "15%" }, { top: "45%", left: "5%" },  { top: "20%", left: "15%" }
+    { top: "80%", left: "42%" }, { top: "70%", left: "15%" }, { top: "45%", left: "5%" }, { top: "20%", left: "15%" }
   ],
   "Hall C": [
-    { top: "10%", left: "40%" }, 
+    { top: "10%", left: "40%" },
     { top: "25%", left: "15%" }, { top: "40%", left: "10%" }, { top: "55%", left: "10%" }, { top: "70%", left: "15%" }, { top: "85%", left: "25%" },
     { top: "25%", left: "65%" }, { top: "38%", left: "65%" }, { top: "51%", left: "65%" }, { top: "64%", left: "65%" }, { top: "77%", left: "65%" }, { top: "90%", left: "65%" }
   ],
@@ -51,7 +51,36 @@ const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState([]);
+  const [selectedStalls, setSelectedStalls] = useState(() => {
+    const saved = localStorage.getItem("selectedStalls");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [paidReservations, setPaidReservations] = useState(() => {
+    const saved = localStorage.getItem("paidReservations");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [cancelledReservations, setCancelledReservations] = useState(() => {
+    const saved = localStorage.getItem("cancelledReservations");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
+    window.dispatchEvent(new Event("selectedStallsUpdated"));
+  }, [selectedStalls]);
+
+  useEffect(() => {
+    const syncStates = () => {
+      setPaidReservations(JSON.parse(localStorage.getItem("paidReservations") || "[]"));
+      setCancelledReservations(JSON.parse(localStorage.getItem("cancelledReservations") || "[]"));
+    };
+    window.addEventListener("paidReservationsUpdated", syncStates);
+    window.addEventListener("cancelledReservationsUpdated", syncStates);
+    return () => {
+      window.removeEventListener("paidReservationsUpdated", syncStates);
+      window.removeEventListener("cancelledReservationsUpdated", syncStates);
+    };
+  }, []);
 
   const view = hallName ? "hall" : "map";
   const activeHall = hallName || null;
@@ -85,7 +114,9 @@ const StallMap = () => {
   const handleBackToMap = () => navigate("/dashboard");
 
   const toggleSelection = (stall) => {
-    if (stall.reserved) return;
+    const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
+    if (isActuallyReserved || paidReservations.includes(stall.id)) return;
+
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
@@ -94,8 +125,9 @@ const StallMap = () => {
     }
   };
 
-  const getSizeColor = (size, isReserved, isSelected) => {
-    if (isReserved) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
+  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled) => {
+    const isActuallyReserved = isReserved && !isCancelled;
+    if (isActuallyReserved || isPaid) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
     if (isSelected) return "bg-blue-600 border-blue-800 text-white shadow-xl z-50 scale-110";
 
     switch (size) {
@@ -117,13 +149,13 @@ const StallMap = () => {
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
     // 1. Get full objects of selected IDs
-    const selectedStallObjects = stalls.filter(stall => 
+    const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)
     );
 
     // 2. Navigate to Summary Page
-    navigate("/booking-summary", { 
-      state: { stalls: selectedStallObjects } 
+    navigate("/booking-summary", {
+      state: { stalls: selectedStallObjects }
     });
   };
 
@@ -165,22 +197,24 @@ const StallMap = () => {
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                   const isSelected = selectedStalls.includes(stall.id);
-                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected);
+                  const isPaid = paidReservations.includes(stall.id);
+                  const isCancelled = cancelledReservations.includes(stall.id);
+                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled);
 
                   return (
                     <div
                       key={stall.id}
                       onClick={() => toggleSelection(stall)}
                       style={
-                        currentLayout 
-                          ? { 
-                              position: "absolute", 
-                              top: pos.top, 
-                              left: pos.left, 
-                              width: stall.size === 'LARGE' ? "14%" : "10%", 
-                              height: stall.size === 'LARGE' ? "14%" : "10%",
-                              transform: "translate(-50%, -50%)" 
-                            } 
+                        currentLayout
+                          ? {
+                            position: "absolute",
+                            top: pos.top,
+                            left: pos.left,
+                            width: stall.size === 'LARGE' ? "14%" : "10%",
+                            height: stall.size === 'LARGE' ? "14%" : "10%",
+                            transform: "translate(-50%, -50%)"
+                          }
                           : {}
                       }
                       className={`
@@ -191,12 +225,17 @@ const StallMap = () => {
                       <span className="font-bold text-sm md:text-lg leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-                      {!stall.reserved && (
+                      {!stall.reserved && !isPaid && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {stall.reserved && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {stall.reserved && isCancelled && (
+                        <span className="text-[10px] font-mono font-medium mt-1">
+                          {stall.price / 1000}k
+                        </span>
+                      )}
+                      {(stall.reserved && !isCancelled || isPaid) && <span className="text-[8px] font-bold mt-1">SOLD</span>}
                     </div>
                   );
                 })}
@@ -205,15 +244,15 @@ const StallMap = () => {
           </HallShapeWrapper>
 
           {selectedStalls.length > 0 && (
-             <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
-                 <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
-                 <button 
-                    onClick={handleConfirmReservation}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
-                 >
-                    Confirm
-                 </button>
-             </div>
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
+              <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
+              <button
+                onClick={handleConfirmReservation}
+                className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
+              >
+                Confirm
+              </button>
+            </div>
           )}
         </div>
       )}
