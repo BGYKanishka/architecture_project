@@ -7,33 +7,35 @@ import HallShapeWrapper from "./HallShapeWrapper";
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
   "Hall A": [ // 20 Stalls (Octagon)
-    { top: "5%", left: "45%" }, // A-01 (Top)
-    { top: "15%", left: "70%" }, { top: "30%", left: "85%" }, { top: "55%", left: "85%" }, { top: "75%", left: "70%" }, // Right Side
-    { top: "85%", left: "45%" }, // Bottom
-    { top: "75%", left: "20%" }, { top: "55%", left: "5%" }, { top: "30%", left: "5%" }, { top: "15%", left: "20%" }, // Left Side
-    // Inner Ring
-    { top: "25%", left: "30%" }, { top: "25%", left: "60%" },
-    { top: "45%", left: "25%" }, { top: "45%", left: "65%" },
-    { top: "65%", left: "30%" }, { top: "65%", left: "60%" },
+    { top: "6%", left: "36%" }, // A-01 (Top)
+    { top: "6%", left: "50%" }, { top: "6%", left: "64%" }, { top: "15%", left: "75%" }, { top: "35%", left: "93%" }, // Right Side
+    { top: "50%", left: "93%" }, // A-06
+    { top: "65%", left: "93%" }, { top: "80%", left: "77%" },//7,8
+    { top: "80%", left: "23%" }, { top: "65%", left: "8%" }, // 9,10
+    { top: "50%", left: "8%" }, { top: "35%", left: "8%" }, //11,12
+
+
     // Center Block
-    { top: "35%", left: "45%" }, { top: "45%", left: "45%" }, { top: "55%", left: "45%" }, { top: "45%", left: "35%" }
+    { top: "35%", left: "36%" }, { top: "35%", left: "64%" },//13,14
+    { top: "63%", left: "64%" }, { top: "63%", left: "36%" }, { top: "35%", left: "50%" },
+    { top: "49%", left: "50%" }, { top: "49%", left: "64%" }, { top: "49%", left: "36%" }
   ],
   "Hall B": [
-    { top: "10%", left: "42%" }, { top: "20%", left: "70%" }, { top: "45%", left: "80%" }, { top: "70%", left: "70%" },
-    { top: "80%", left: "42%" }, { top: "70%", left: "15%" }, { top: "45%", left: "5%" },  { top: "20%", left: "15%" }
+    { top: "10%", left: "50%" }, { top: "20%", left: "75%" }, { top: "37%", left: "50%" }, { top: "73%", left: "75%" },
+    { top: "65%", left: "50%" }, { top: "90%", left: "50%" }, { top: "73%", left: "25%" }, { top: "20%", left: "25%" }
   ],
   "Hall C": [
-    { top: "10%", left: "40%" }, 
-    { top: "25%", left: "15%" }, { top: "40%", left: "10%" }, { top: "55%", left: "10%" }, { top: "70%", left: "15%" }, { top: "85%", left: "25%" },
-    { top: "25%", left: "65%" }, { top: "38%", left: "65%" }, { top: "51%", left: "65%" }, { top: "64%", left: "65%" }, { top: "77%", left: "65%" }, { top: "90%", left: "65%" }
+    { top: "10%", left: "80%" },
+    { top: "5%", left: "5%" }, { top: "20%", left: "5%" }, { top: "35%", left: "5%" }, { top: "50%", left: "5%" }, { top: "65%", left: "5%" },
+    { top: "30%", left: "80%" }, { top: "50%", left: "80%" }, { top: "70%", left: "80%" }, { top: "90%", left: "80%" }, { top: "90%", left: "60%" }, { top: "90%", left: "40%" }
   ],
   "Hall D": [
-    { top: "10%", left: "40%" },
-    { top: "25%", left: "70%" }, { top: "40%", left: "75%" }, { top: "55%", left: "75%" }, { top: "70%", left: "70%" }, { top: "85%", left: "60%" },
-    { top: "25%", left: "20%" }, { top: "38%", left: "20%" }, { top: "51%", left: "20%" }, { top: "64%", left: "20%" }, { top: "77%", left: "20%" }, { top: "90%", left: "20%" }
+    { top: "10%", left: "20%" },
+    { top: "5%", left: "95%" }, { top: "20%", left: "95%" }, { top: "35%", left: "95%" }, { top: "50%", left: "95%" }, { top: "65%", left: "95%" },
+    { top: "30%", left: "20%" }, { top: "50%", left: "20%" }, { top: "70%", left: "20%" }, { top: "90%", left: "20%" }, { top: "90%", left: "40%" }, { top: "90%", left: "60%" }
   ],
   "Hall E": [
-    { top: "20%", left: "20%" }, { top: "20%", left: "65%" }, { top: "45%", left: "42%" }, { top: "70%", left: "20%" }, { top: "70%", left: "65%" }
+    { top: "20%", left: "20%" }, { top: "20%", left: "80%" }, { top: "20%", left: "50%" }, { top: "80%", left: "20%" }, { top: "80%", left: "80%" }
   ],
   "Hall F": [
     { top: "15%", left: "10%" }, { top: "15%", left: "30%" }, { top: "15%", left: "50%" }, { top: "15%", left: "70%" }, { top: "15%", left: "90%" },
@@ -117,13 +119,13 @@ const StallMap = () => {
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
     // 1. Get full objects of selected IDs
-    const selectedStallObjects = stalls.filter(stall => 
+    const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)
     );
 
     // 2. Navigate to Summary Page
-    navigate("/booking-summary", { 
-      state: { stalls: selectedStallObjects } 
+    navigate("/booking-summary", {
+      state: { stalls: selectedStallObjects }
     });
   };
 
@@ -172,15 +174,15 @@ const StallMap = () => {
                       key={stall.id}
                       onClick={() => toggleSelection(stall)}
                       style={
-                        currentLayout 
-                          ? { 
-                              position: "absolute", 
-                              top: pos.top, 
-                              left: pos.left, 
-                              width: stall.size === 'LARGE' ? "14%" : "10%", 
-                              height: stall.size === 'LARGE' ? "14%" : "10%",
-                              transform: "translate(-50%, -50%)" 
-                            } 
+                        currentLayout
+                          ? {
+                            position: "absolute",
+                            top: pos.top,
+                            left: pos.left,
+                            width: stall.size === 'LARGE' ? "14%" : stall.size === 'MEDIUM' ? "12%" : "10%",
+                            height: stall.size === 'LARGE' ? "14%" : stall.size === 'MEDIUM' ? "12%" : "10%",
+                            transform: "translate(-50%, -50%)"
+                          }
                           : {}
                       }
                       className={`
@@ -205,15 +207,15 @@ const StallMap = () => {
           </HallShapeWrapper>
 
           {selectedStalls.length > 0 && (
-             <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
-                 <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
-                 <button 
-                    onClick={handleConfirmReservation}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
-                 >
-                    Confirm
-                 </button>
-             </div>
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
+              <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
+              <button
+                onClick={handleConfirmReservation}
+                className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
+              >
+                Confirm
+              </button>
+            </div>
           )}
         </div>
       )}
