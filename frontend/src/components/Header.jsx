@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import {
-  ShoppingCartIcon,
+
   UserCircleIcon,
   Bars3Icon,
   ArrowLeftOnRectangleIcon,
@@ -17,16 +17,13 @@ import {
 
 const Header = ({ user }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
     AuthService.logout();
     navigate("/login");
-  };
-
-  const handleCartClick = () => {
-    alert("Opening Cart... Items selected: 0");
   };
 
   return (
@@ -59,18 +56,7 @@ const Header = ({ user }) => {
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
 
-          <button
-            onClick={handleCartClick}
-            className="flex items-center gap-2 p-2 px-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition text-slate-700 active:scale-95 shadow-sm"
-          >
-            <div className="relative">
-              <ShoppingCartIcon className="w-6 h-6" />
-              <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
-                0
-              </span>
-            </div>
-            <span className="hidden md:block font-bold text-sm">Cart</span>
-          </button>
+
 
           <div className="relative">
             <button
@@ -90,9 +76,9 @@ const Header = ({ user }) => {
                     navigate("/profile");
                     setIsProfileOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 font-bold"
                 >
-                  <UserCircleIcon className="w-5 h-5 text-slate-400" /> Profile
+                  <UserCircleIcon className="w-5 h-5 " /> Profile
                 </button>
                 <button
                   onClick={handleLogout}
@@ -114,14 +100,29 @@ const Header = ({ user }) => {
 
           <div className="absolute top-full left-4 sm:left-8 mt-2 w-64 bg-white border border-slate-200 shadow-2xl rounded-2xl py-4 px-2 z-50 animate-in slide-in-from-top-2 duration-200">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Navigation</p>
-            <MenuLink icon={<HomeIcon className="w-5 h-5" />} label="Dashboard" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }} active />
-            <MenuLink icon={<UserCircleIcon className="w-5 h-5" />} label="My Profile" onClick={() => { navigate("/profile"); setIsMenuOpen(false); }} />
+            <MenuLink
+              icon={<HomeIcon className="w-5 h-5" />}
+              label="Dashboard"
+              onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}
+              active={location.pathname === "/dashboard"}
+            />
+            <MenuLink
+              icon={<UserCircleIcon className="w-5 h-5" />}
+              label="My Profile"
+              onClick={() => { navigate("/profile"); setIsMenuOpen(false); }}
+              active={location.pathname === "/profile"}
+            />
             <MenuLink icon={<TicketIcon className="w-5 h-5" />} label="My Reservations" />
 
             <hr className="my-3 border-slate-100" />
 
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Support</p>
-            <MenuLink icon={<QuestionMarkCircleIcon className="w-5 h-5" />} label="Help Center" />
+            <MenuLink
+              icon={<QuestionMarkCircleIcon className="w-5 h-5" />}
+              label="Help Center"
+              onClick={() => { navigate("/help"); setIsMenuOpen(false); }}
+              active={location.pathname === "/help"}
+            />
           </div>
         </>
       )}

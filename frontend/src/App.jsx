@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import BookingSummary from "./pages/BookingSummary";
 import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import HelpCenter from "./pages/HelpCenter";
 import { useEffect, useState } from "react";
 
 function AppContent() {
@@ -41,6 +42,7 @@ function AppContent() {
           <Route path="/booking-summary" element={<BookingSummary />} />
           <Route path="/payment-selection" element={<PaymentSelection />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+          <Route path="/help" element={<HelpCenter />} />
         </Routes>
       </div>
 
