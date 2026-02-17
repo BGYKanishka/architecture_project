@@ -2,7 +2,6 @@ import React from "react";
 
 const MapBlock = ({ name, height = "h-full", status, onClick }) => {
     const isAvailable = status === "available";
-    // UPDATED: status === "full" now uses gray colors
     const color = isAvailable ? "bg-green-50 border-green-500 text-green-900 hover:bg-green-100 hover:shadow-md cursor-pointer"
         : status === "full" ? "bg-gray-200 border-gray-400 text-gray-500 cursor-not-allowed opacity-80"
             : "bg-gray-50 border-gray-300 text-gray-400";
@@ -18,7 +17,6 @@ const MapBlock = ({ name, height = "h-full", status, onClick }) => {
 const Octagon = ({ name, status, onClick }) => {
     const isAvailable = status === "available";
 
-    //  gray for full
     const borderColor = isAvailable ? "bg-green-500" : status === "full" ? "bg-gray-400" : "bg-gray-300";
 
     const innerColor = isAvailable
@@ -62,35 +60,34 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
     return (
         <div className="w-full max-w-[95%] mx-auto">
 
-            {/* UPDATED LEGEND */}
+            {/*  LEGEND */}
             <div className="flex justify-center gap-6 mb-8 bg-white py-3 px-8 rounded-full shadow-md w-fit mx-auto border border-gray-200">
                 <div className="flex items-center gap-2">
                     <div className="w-5 h-5 bg-green-100 border-2 border-green-500 rounded"></div>
                     <span className="text-sm font-bold text-gray-700">Available</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    {/* Legend changed to Gray */}
                     <div className="w-5 h-5 bg-gray-200 border-2 border-gray-400 rounded"></div>
                     <span className="text-sm font-bold text-gray-700">Full</span>
                 </div>
             </div>
 
             <div className="bg-white p-6 rounded-3xl shadow-2xl border-4 border-gray-200 relative">
-                <div className="grid grid-cols-12 grid-rows-14 gap-4 w-full max-w-4xl aspect-[12/14] mx-auto bg-white rounded-2xl p-6">
+                <div className="grid grid-cols-12 grid-rows-10 gap-4 w-full max-w-4xl aspect-[12/10] mx-auto bg-white rounded-2xl p-6">
 
 
-                    <div className="col-start-5 col-span-4 row-start-1 row-span-3 z-10">
+                    <div className="col-start-5 col-span-4 row-start-1 row-span-4 z-10">
                         <Octagon name="Hall A" status={getHallStatus("Hall A")} onClick={() => onHallClick("Hall A")} />
                     </div>
-                    <div className="col-start-10 col-span-3 row-start-2 row-span-2 z-10">
+                    <div className="col-start-10 col-span-3 row-start-2 row-span-3 z-10">
                         <Octagon name="Hall B" status={getHallStatus("Hall B")} onClick={() => onHallClick("Hall B")} />
                     </div>
 
 
-                    <div className="col-start-1 col-span-2 row-start-5 row-span-5">
+                    <div className="col-start-1 col-span-2 row-start-1 row-span-5">
                         <MapBlock name="Hall G" height="h-full" status={getHallStatus("Hall G")} onClick={() => onHallClick("Hall G")} />
                     </div>
-                    <div className="col-start-3 col-span-2 row-start-5 row-span-5">
+                    <div className="col-start-3 col-span-2 row-start-1 row-span-5">
                         <MapBlock name="Hall F" height="h-full" status={getHallStatus("Hall F")} onClick={() => onHallClick("Hall F")} />
                     </div>
                     <div className="col-start-6 col-span-3 row-start-5 row-span-6">
@@ -100,7 +97,7 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
                         <Wing name="Hall D" type="right" status={getHallStatus("Hall D")} onClick={() => onHallClick("Hall D")} />
                     </div>
 
-                    <div className="col-start-1 col-span-4 row-start-11 row-span-3 z-0">
+                    <div className="col-start-1 col-span-3 row-start-7 row-span-3 z-0">
                         <div className="w-full h-full bg-slate-600 text-white flex flex-col items-center justify-center font-bold text-center shadow-2xl p-4 leading-tight"
                             style={{ clipPath: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)" }}>
                             <span className="text-xs md:text-xl">BMICH</span>
@@ -108,7 +105,7 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
                         </div>
                     </div>
 
-                    <div className="col-start-8 col-span-2 row-start-11 row-span-3">
+                    <div className="col-start-4 col-span-2 row-start-7 row-span-3">
                         <MapBlock name="Hall E" height="h-full" status={getHallStatus("Hall E")} onClick={() => onHallClick("Hall E")} />
                     </div>
                 </div>
