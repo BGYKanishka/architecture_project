@@ -6,16 +6,18 @@ import { useEffect, useState } from "react";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(AuthService.getCurrentUser());
 
   useEffect(() => {
-    const currentUser = AuthService.getCurrentUser();
-    if (!currentUser) {
+    if (!user) {
       navigate("/login");
-    } else {
-      setUser(currentUser);
     }
-  }, [navigate]);
+  }, [user, navigate]);
+
+  const handleLogout = () => {
+    AuthService.logout();
+    navigate("/login");
+  };
 
   if (!user) return (
     <div className="flex h-screen w-screen items-center justify-center bg-slate-50">

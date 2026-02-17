@@ -3,6 +3,8 @@ import Login from "./pages/login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Footer from "./components/footer";
+import EmployeePanel from "./pages/EmployeePanel";
+
 import Header from "./components/Header";
 import AuthService from "./services/auth.service";
 
