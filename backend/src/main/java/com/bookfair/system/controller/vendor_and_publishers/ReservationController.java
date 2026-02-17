@@ -1,6 +1,7 @@
 package com.bookfair.system.controller.vendor_and_publishers;
 
 import com.bookfair.system.dto.request.ReservationRequest;
+import com.bookfair.system.dto.response.ReservationResponse;
 import com.bookfair.system.service.ReservationService;
 import com.bookfair.system.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
@@ -20,10 +21,9 @@ public class ReservationController {
     public ResponseEntity<?> makeReservation(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
             @Valid @RequestBody ReservationRequest request) {
-
         try {
-            String result = reservationService.createReservation(currentUser.getId(), request);
-            return ResponseEntity.ok(result);
+            ReservationResponse response = reservationService.createReservation(currentUser.getId(), request);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

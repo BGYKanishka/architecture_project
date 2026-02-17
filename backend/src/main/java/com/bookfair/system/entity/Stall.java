@@ -13,7 +13,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Stall {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,12 +28,10 @@ public class Stall {
     @JoinColumn(name = "stall_type_id", nullable = false)
     private StallType stallType;
 
+    // This was causing your error before:
+    @Column(columnDefinition = "boolean default false")
+    private boolean reserved = false;
 
-    public String getSize() {
-        return stallType != null ? stallType.getSize() : "UNKNOWN";
-    }
-
-    public Double getPrice() {
-        return stallType != null ? stallType.getPrice() : 0.0;
-    }
+    public String getSize() { return stallType != null ? stallType.getSize() : "UNKNOWN"; }
+    public Double getPrice() { return stallType != null ? stallType.getPrice() : 0.0; }
 }
