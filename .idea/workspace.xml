@@ -6,13 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="60b20bfe-a4ab-4d5d-b4ea-aaeab10d06fc" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/QRScanner.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/QRScanner.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/StallMap.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/StallMap.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Register.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Register.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/services/employee/service.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/employee/service.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
