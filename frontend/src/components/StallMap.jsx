@@ -49,6 +49,37 @@ const hallLayouts = {
   ]
 };
 
+const hallDoors = {
+  "Hall A": [
+    { label: "Entrance", top: "92%", left: "50%" },
+    { label: "Exit", top: "15%", left: "23%" }
+  ],
+  "Hall B": [
+    { label: "Entrance", top: "50%", left: "5%" },
+    { label: "Exit", top: "50%", left: "95%" }
+  ],
+  "Hall C": [
+    { label: "Entrance", top: "83%", left: "15%" },
+    { label: "Exit", top: "5%", left: "50%" }
+  ],
+  "Hall D": [
+    { label: "Entrance", top: "80%", left: "80%" },
+    { label: "Exit", top: "5%", left: "50%" }
+  ],
+  "Hall E": [
+    { label: "Entrance", top: "90%", left: "50%" },
+    { label: "Exit", top: "50%", left: "95%" }
+  ],
+  "Hall F": [
+    { label: "Entrance", top: "5%", left: "50%" },
+    { label: "Exit", top: "95%", left: "50%" }
+  ],
+  "Hall G": [
+    { label: "Entrance", top: "5%", left: "50%" },
+    { label: "Exit", top: "95%", left: "50%" }
+  ]
+};
+
 const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
@@ -163,6 +194,21 @@ const StallMap = () => {
               </div>
             ) : (
               <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-10'}`}>
+
+                {/* Render Doors */}
+                {hallDoors[activeHall]?.map((door, idx) => (
+                  <div
+                    key={`door-${idx}`}
+                    className="absolute px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded shadow-md border border-white z-40 hover:scale-110 transition-transform cursor-default"
+                    style={{
+                      top: door.top,
+                      left: door.left,
+                      transform: "translate(-50%, -50%)"
+                    }}
+                  >
+                    {door.label}
+                  </div>
+                ))}
 
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
