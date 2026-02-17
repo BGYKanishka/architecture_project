@@ -18,16 +18,35 @@ const Reservations = () => {
   useEffect(() => {
     const fetchPaidDetails = async () => {
       try {
-        const savedIds = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-        if (savedIds.length === 0) {
+        const savedData = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+        if (savedData.length === 0) {
           setPaidReservations([]);
           setLoading(false);
           return;
         }
 
+        // Handle both old (ID only) and new (Object) formats
+        const idMap = new Map();
+        savedData.forEach(item => {
+          if (typeof item === 'object' && item !== null) {
+            idMap.set(item.id, item);
+          } else {
+            idMap.set(item, { id: item });
+          }
+        });
+
         const res = await StallService.getAllStalls();
         const allStalls = res.data;
-        const filtered = allStalls.filter(s => savedIds.includes(s.id));
+        const filtered = allStalls
+          .filter(s => idMap.has(s.id))
+          .map(s => {
+            const extra = idMap.get(s.id);
+            return {
+              ...s,
+              reservationId: extra.reservationId,
+              qrCodeImage: extra.qrCodeImage
+            };
+          });
         setPaidReservations(filtered);
       } catch (err) {
         console.error("Error loading paid reservations:", err);
@@ -46,9 +65,10 @@ const Reservations = () => {
       const updated = paidReservations.filter(s => s.id !== stall.id);
       setPaidReservations(updated);
 
-      // 1. Update paidReservations
-      const updatedIds = updated.map(s => s.id);
-      localStorage.setItem("paidReservations", JSON.stringify(updatedIds));
+      // 1. Update paidReservations (preserve objects)
+      const savedData = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+      const updatedSavedData = savedData.filter(item => (typeof item === 'object' && item !== null ? item.id : item) !== stall.id);
+      localStorage.setItem("paidReservations", JSON.stringify(updatedSavedData));
 
       // 2. Track as cancelled for session override
       const cancelledIds = JSON.parse(localStorage.getItem("cancelledReservations") || "[]");
@@ -106,27 +126,57 @@ const Reservations = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {paidReservations.map((stall) => (
-                <div key={stall.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex items-center justify-between group hover:border-blue-200 transition-colors">
-                  <div className="flex items-center gap-5">
-                    <div className="w-16 h-16 bg-blue-50 rounded-xl flex flex-col items-center justify-center border border-blue-100">
-                      <span className="text-[10px] font-black text-blue-400 uppercase leading-none mb-1">Hall</span>
-                      <span className="text-xl font-black text-blue-600 leading-none">{stall.floorName}</span>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-800">Stall {stall.stallCode}</h3>
-                      <div className="flex gap-2 mt-1">
-                        <span className="px-2 py-0.5 bg-green-50 text-[10px] font-bold text-green-600 rounded uppercase tracking-wider border border-green-100 italic">Confirmed</span>
-                        <span className="text-sm font-bold text-blue-600 font-mono">LKR {stall.price.toLocaleString()}</span>
+                <div key={stall.id} className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col group hover:border-blue-200 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-5">
+                      <div className="w-16 h-16 bg-blue-50 rounded-xl flex flex-col items-center justify-center border border-blue-100">
+                        <span className="text-[10px] font-black text-blue-400 uppercase leading-none mb-1">Hall</span>
+                        <span className="text-xl font-black text-blue-600 leading-none">{stall.floorName}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-800">Stall {stall.stallCode}</h3>
+                        <div className="flex gap-2 mt-1">
+                          <span className="px-2 py-0.5 bg-green-50 text-[10px] font-bold text-green-600 rounded uppercase tracking-wider border border-green-100 italic">Confirmed</span>
+                          <span className="text-sm font-bold text-blue-600 font-mono">LKR {stall.price?.toLocaleString()}</span>
+                        </div>
+                        {stall.reservationId && (
+                          <p className="text-[10px] text-slate-400 mt-1 font-mono uppercase tracking-tighter">ID: {stall.reservationId}</p>
+                        )}
                       </div>
                     </div>
+                    <button
+                      onClick={() => cancelReservation(stall)}
+                      className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
+                      title="Cancel Reservation"
+                    >
+                      <TrashIcon className="w-6 h-6" />
+                    </button>
                   </div>
-                  <button
-                    onClick={() => cancelReservation(stall)}
-                    className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
-                    title="Cancel Reservation"
-                  >
-                    <TrashIcon className="w-6 h-6" />
-                  </button>
+
+                  {/* QR Code Section */}
+                  {stall.reservationId && (
+                    <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-4">
+                      <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                        {stall.qrCodeImage ? (
+                          <img
+                            src={`data:image/png;base64,${stall.qrCodeImage}`}
+                            alt="QR Code"
+                            className="w-20 h-20 object-contain"
+                          />
+                        ) : (
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${stall.reservationId}`}
+                            alt="QR Code"
+                            className="w-20 h-20 object-contain"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs font-bold text-slate-700">Entrance QR Code</p>
+                        <p className="text-[10px] text-slate-400 mt-0.5">Show this at the gate for stall {stall.stallCode}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -141,7 +191,7 @@ const Reservations = () => {
                     <span className="font-bold text-slate-800">{paidReservations.length}</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
-                    <span className="font-medium">Total Paid</span>
+                    <span className="font-medium">Total Payment</span>
                     <span className="font-black text-slate-900">LKR {total.toLocaleString()}</span>
                   </div>
                 </div>

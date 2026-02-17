@@ -12,11 +12,19 @@ const BookingConfirmation = () => {
       // 1. Get current paid reservations
       const existingPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
 
-      // 2. Add new ones (IDs only)
-      const newPaidIds = stalls.map(s => s.id);
-      const updatedPaid = Array.from(new Set([...existingPaid, ...newPaidIds]));
+      // 2. Add new ones (Full objects)
+      const newPaidObjects = stalls.map(s => ({
+        id: s.id,
+        reservationId: reservationId,
+        qrCodeImage: qrCodeImage
+      }));
 
-      // 3. Save to localStorage
+      // Filter out any duplicates by ID
+      const existingIds = new Set(existingPaid.map(item => item.id || item));
+      const filteredNew = newPaidObjects.filter(item => !existingIds.has(item.id));
+
+      // Merge and save
+      const updatedPaid = [...existingPaid, ...filteredNew];
       localStorage.setItem("paidReservations", JSON.stringify(updatedPaid));
 
       // 4. Clear selected stalls

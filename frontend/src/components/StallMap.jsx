@@ -115,7 +115,8 @@ const StallMap = () => {
 
   const toggleSelection = (stall) => {
     const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
-    if (isActuallyReserved || paidReservations.includes(stall.id)) return;
+    const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
+    if (isActuallyReserved || isPaid) return;
 
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
@@ -197,7 +198,7 @@ const StallMap = () => {
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                   const isSelected = selectedStalls.includes(stall.id);
-                  const isPaid = paidReservations.includes(stall.id);
+                  const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
                   const isCancelled = cancelledReservations.includes(stall.id);
                   const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled);
 
