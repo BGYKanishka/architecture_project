@@ -4,58 +4,40 @@ import StallService from "../services/stall.service";
 import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
 
+// Coordinate Maps for Visual Layout
 const hallLayouts = {
-  "Hall A": [ // 20 Stalls (Octagon)
-    { top: "5%", left: "45%" }, // A-01 (Top)
-    { top: "15%", left: "70%" }, { top: "30%", left: "85%" }, { top: "55%", left: "85%" }, { top: "75%", left: "70%" }, // Right Side
-    { top: "85%", left: "45%" }, // Bottom
-    { top: "75%", left: "20%" }, { top: "55%", left: "5%" }, { top: "30%", left: "5%" }, { top: "15%", left: "20%" }, // Left Side
-    // Inner Ring
-    { top: "25%", left: "30%" }, { top: "25%", left: "60%" },
-    { top: "45%", left: "25%" }, { top: "45%", left: "65%" },
-    { top: "65%", left: "30%" }, { top: "65%", left: "60%" },
-    // Center Block
+  "Hall A": [ 
+    { top: "5%", left: "45%" }, { top: "15%", left: "70%" }, { top: "30%", left: "85%" }, { top: "55%", left: "85%" }, { top: "75%", left: "70%" },
+    { top: "85%", left: "45%" }, { top: "75%", left: "20%" }, { top: "55%", left: "5%" }, { top: "30%", left: "5%" }, { top: "15%", left: "20%" },
+    { top: "25%", left: "30%" }, { top: "25%", left: "60%" }, { top: "45%", left: "25%" }, { top: "45%", left: "65%" }, { top: "65%", left: "30%" }, { top: "65%", left: "60%" },
     { top: "35%", left: "45%" }, { top: "45%", left: "45%" }, { top: "55%", left: "45%" }, { top: "45%", left: "35%" } 
   ],
-  "Hall B": [ // 8 Stalls (Octagon - Simple Ring)
-    { top: "10%", left: "42%" }, // 1 (Top)
-    { top: "20%", left: "70%" }, // 2 (Top Right)
-    { top: "45%", left: "80%" }, // 3 (Right)
-    { top: "70%", left: "70%" }, // 4 (Bottom Right)
-    { top: "80%", left: "42%" }, // 5 (Bottom)
-    { top: "70%", left: "15%" }, // 6 (Bottom Left)
-    { top: "45%", left: "5%" },  // 7 (Left)
-    { top: "20%", left: "15%" }, // 8 (Top Left)
+  "Hall B": [
+    { top: "10%", left: "42%" }, { top: "20%", left: "70%" }, { top: "45%", left: "80%" }, { top: "70%", left: "70%" },
+    { top: "80%", left: "42%" }, { top: "70%", left: "15%" }, { top: "45%", left: "5%" },  { top: "20%", left: "15%" }
   ],
-  "Hall C": [ // 12 Stalls (Left Wing)
-    { top: "10%", left: "40%" }, // C-01 (Large - Top)
-    // Left Curve (Small Stalls)
+  "Hall C": [
+    { top: "10%", left: "40%" }, 
     { top: "25%", left: "15%" }, { top: "40%", left: "10%" }, { top: "55%", left: "10%" }, { top: "70%", left: "15%" }, { top: "85%", left: "25%" },
-    // Right Edge (Medium Stalls)
     { top: "25%", left: "65%" }, { top: "38%", left: "65%" }, { top: "51%", left: "65%" }, { top: "64%", left: "65%" }, { top: "77%", left: "65%" }, { top: "90%", left: "65%" }
   ],
-  "Hall D": [ // 12 Stalls (Right Wing - Mirror of C)
-    { top: "10%", left: "40%" }, // D-01 (Large - Top)
-    // Right Curve (Small Stalls)
+  "Hall D": [
+    { top: "10%", left: "40%" },
     { top: "25%", left: "70%" }, { top: "40%", left: "75%" }, { top: "55%", left: "75%" }, { top: "70%", left: "70%" }, { top: "85%", left: "60%" },
-    // Left Edge (Medium Stalls)
     { top: "25%", left: "20%" }, { top: "38%", left: "20%" }, { top: "51%", left: "20%" }, { top: "64%", left: "20%" }, { top: "77%", left: "20%" }, { top: "90%", left: "20%" }
   ],
-  "Hall E": [ // 5 Stalls (Large - Rectangle)
-    // A simple "X" or "Dice 5" pattern
-    { top: "20%", left: "20%" }, { top: "20%", left: "65%" },
-    { top: "45%", left: "42%" }, // Center
-    { top: "70%", left: "20%" }, { top: "70%", left: "65%" }
+  "Hall E": [
+    { top: "20%", left: "20%" }, { top: "20%", left: "65%" }, { top: "45%", left: "42%" }, { top: "70%", left: "20%" }, { top: "70%", left: "65%" }
   ],
-  "Hall F": [ // 15 Stalls (Rectangle - Grid 5x3)
+  "Hall F": [
     { top: "15%", left: "10%" }, { top: "15%", left: "30%" }, { top: "15%", left: "50%" }, { top: "15%", left: "70%" }, { top: "15%", left: "90%" },
     { top: "45%", left: "10%" }, { top: "45%", left: "30%" }, { top: "45%", left: "50%" }, { top: "45%", left: "70%" }, { top: "45%", left: "90%" },
-    { top: "75%", left: "10%" }, { top: "75%", left: "30%" }, { top: "75%", left: "50%" }, { top: "75%", left: "70%" }, { top: "75%", left: "90%" },
+    { top: "75%", left: "10%" }, { top: "75%", left: "30%" }, { top: "75%", left: "50%" }, { top: "75%", left: "70%" }, { top: "75%", left: "90%" }
   ],
-  "Hall G": [ // 15 Stalls (Same layout as F)
+  "Hall G": [
     { top: "15%", left: "10%" }, { top: "15%", left: "30%" }, { top: "15%", left: "50%" }, { top: "15%", left: "70%" }, { top: "15%", left: "90%" },
     { top: "45%", left: "10%" }, { top: "45%", left: "30%" }, { top: "45%", left: "50%" }, { top: "45%", left: "70%" }, { top: "45%", left: "90%" },
-    { top: "75%", left: "10%" }, { top: "75%", left: "30%" }, { top: "75%", left: "50%" }, { top: "75%", left: "70%" }, { top: "75%", left: "90%" },
+    { top: "75%", left: "10%" }, { top: "75%", left: "30%" }, { top: "75%", left: "50%" }, { top: "75%", left: "70%" }, { top: "75%", left: "90%" }
   ]
 };
 
@@ -69,9 +51,15 @@ const StallMap = () => {
   const activeHall = hallName || null;
 
   useEffect(() => {
-    StallService.getAllStalls().then((res) => {
-      setStalls(res.data);
-    });
+    StallService.getAllStalls()
+      .then((res) => {
+        setStalls(res.data);
+      })
+      .catch((err) => {
+        console.error("Error loading stalls:", err);
+        // Optional: Alert user if backend is down
+        // alert("Could not load stalls. Is the backend running?");
+      });
   }, []);
 
   const getHallStatus = (visualHallName) => {
@@ -112,7 +100,6 @@ const StallMap = () => {
     }
   };
 
- 
   const activeFloorStalls = activeHall
     ? stalls
         .filter((s) => s.floorName === activeHall.replace("Hall ", ""))
@@ -120,6 +107,19 @@ const StallMap = () => {
     : [];
 
   const currentLayout = hallLayouts[activeHall];
+
+  // --- CONFIRM HANDLER ---
+  const handleConfirmReservation = () => {
+    // 1. Get full objects of selected IDs
+    const selectedStallObjects = stalls.filter(stall => 
+      selectedStalls.includes(stall.id)
+    );
+
+    // 2. Navigate to Summary Page
+    navigate("/booking-summary", { 
+      state: { stalls: selectedStallObjects } 
+    });
+  };
 
   return (
     <div className="p-4 md:p-8 bg-gray-50 min-h-screen font-sans">
@@ -171,9 +171,9 @@ const StallMap = () => {
                               position: "absolute", 
                               top: pos.top, 
                               left: pos.left, 
-                              width: stall.size === 'LARGE' ? "14%" : "10%", // Make Large stalls bigger
+                              width: stall.size === 'LARGE' ? "14%" : "10%", 
                               height: stall.size === 'LARGE' ? "14%" : "10%",
-                              transform: "translate(-50%, -50%)" // Centers item on the coordinate
+                              transform: "translate(-50%, -50%)" 
                             } 
                           : {}
                       }
@@ -182,18 +182,14 @@ const StallMap = () => {
                         ${colorClass}
                       `}
                     >
-                      
                       <span className="font-bold text-sm md:text-lg leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-
-                      
                       {!stall.reserved && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      
                       {stall.reserved && <span className="text-[8px] font-bold mt-1">SOLD</span>}
                     </div>
                   );
@@ -205,7 +201,12 @@ const StallMap = () => {
           {selectedStalls.length > 0 && (
              <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
                  <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
-                 <button className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700">Confirm</button>
+                 <button 
+                    onClick={handleConfirmReservation}
+                    className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
+                 >
+                    Confirm
+                 </button>
              </div>
           )}
         </div>
