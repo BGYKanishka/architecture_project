@@ -36,6 +36,9 @@ public class UserService {
     if (request.getBusinessName() != null && !request.getBusinessName().isEmpty()) {
       user.setBusinessName(request.getBusinessName());
     }
+    if (request.getGenres() != null) {
+      user.setGenres(request.getGenres());
+    }
 
     userRepository.save(user);
 
@@ -61,6 +64,7 @@ public class UserService {
         .contactNumber(user.getContactNumber())
         .businessName(user.getBusinessName())
         .role(user.getRole())
+        .genres(user.getGenres())
         .build();
   }
 }

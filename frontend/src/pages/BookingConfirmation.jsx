@@ -81,10 +81,10 @@ const BookingConfirmation = () => {
           {/* Action */}
           <div className="p-4 bg-slate-50 border-t border-slate-100">
             <button
-              onClick={() => navigate("/dashboard")}
-              className="w-full py-3 bg-white border border-slate-300 rounded-xl text-slate-700 font-bold hover:bg-slate-100 hover:text-slate-900 transition flex items-center justify-center gap-2 shadow-sm"
+              onClick={() => navigate("/genres")}
+              className="w-full py-3 bg-blue-600 border border-transparent rounded-xl text-white font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm"
             >
-              <HomeIcon className="w-5 h-5" /> Return to Dashboard
+              <HomeIcon className="w-5 h-5" /> Continue
             </button>
           </div>
         </div>

@@ -34,7 +34,7 @@ public class User {
     private String businessName;
 
     @Column(nullable = false, length = 20)
-    private String role; 
+    private String role;
 
     @Builder.Default
     private Boolean enabled = true;
@@ -42,4 +42,9 @@ public class User {
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
+
+    @ElementCollection
+    @CollectionTable(name = "user_genres", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "genre")
+    private java.util.List<String> genres;
 }
