@@ -6,11 +6,17 @@ import HallShapeWrapper from "./HallShapeWrapper";
 
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
-  "Hall A": [ 
-    { top: "5%", left: "45%" }, { top: "15%", left: "70%" }, { top: "30%", left: "85%" }, { top: "55%", left: "85%" }, { top: "75%", left: "70%" },
-    { top: "85%", left: "45%" }, { top: "75%", left: "20%" }, { top: "55%", left: "5%" }, { top: "30%", left: "5%" }, { top: "15%", left: "20%" },
-    { top: "25%", left: "30%" }, { top: "25%", left: "60%" }, { top: "45%", left: "25%" }, { top: "45%", left: "65%" }, { top: "65%", left: "30%" }, { top: "65%", left: "60%" },
-    { top: "35%", left: "45%" }, { top: "45%", left: "45%" }, { top: "55%", left: "45%" }, { top: "45%", left: "35%" } 
+  "Hall A": [ // 20 Stalls (Octagon)
+    { top: "5%", left: "45%" }, // A-01 (Top)
+    { top: "15%", left: "70%" }, { top: "30%", left: "85%" }, { top: "55%", left: "85%" }, { top: "75%", left: "70%" }, // Right Side
+    { top: "85%", left: "45%" }, // Bottom
+    { top: "75%", left: "20%" }, { top: "55%", left: "5%" }, { top: "30%", left: "5%" }, { top: "15%", left: "20%" }, // Left Side
+    // Inner Ring
+    { top: "25%", left: "30%" }, { top: "25%", left: "60%" },
+    { top: "45%", left: "25%" }, { top: "45%", left: "65%" },
+    { top: "65%", left: "30%" }, { top: "65%", left: "60%" },
+    // Center Block
+    { top: "35%", left: "45%" }, { top: "45%", left: "45%" }, { top: "55%", left: "45%" }, { top: "45%", left: "35%" }
   ],
   "Hall B": [
     { top: "10%", left: "42%" }, { top: "20%", left: "70%" }, { top: "45%", left: "80%" }, { top: "70%", left: "70%" },
@@ -102,8 +108,8 @@ const StallMap = () => {
 
   const activeFloorStalls = activeHall
     ? stalls
-        .filter((s) => s.floorName === activeHall.replace("Hall ", ""))
-        .sort((a, b) => a.stallCode.localeCompare(b.stallCode)) 
+      .filter((s) => s.floorName === activeHall.replace("Hall ", ""))
+      .sort((a, b) => a.stallCode.localeCompare(b.stallCode))
     : [];
 
   const currentLayout = hallLayouts[activeHall];
@@ -138,12 +144,12 @@ const StallMap = () => {
             <div>
               <h2 className="text-2xl font-bold text-gray-800">{activeHall} Booking</h2>
               <div className="flex gap-3 text-xs mt-1">
-                 <span className="flex items-center gap-1"><div className="w-3 h-3 bg-emerald-100 border border-emerald-400"></div> Small</span>
-                 <span className="flex items-center gap-1"><div className="w-3 h-3 bg-cyan-100 border border-cyan-400"></div> Medium</span>
-                 <span className="flex items-center gap-1"><div className="w-3 h-3 bg-violet-100 border border-violet-400"></div> Large</span>
+                <span className="flex items-center gap-1"><div className="w-3 h-3 bg-emerald-100 border border-emerald-400"></div> Small</span>
+                <span className="flex items-center gap-1"><div className="w-3 h-3 bg-cyan-100 border border-cyan-400"></div> Medium</span>
+                <span className="flex items-center gap-1"><div className="w-3 h-3 bg-violet-100 border border-violet-400"></div> Large</span>
               </div>
             </div>
-            <button onClick={handleBackToMap} className="bg-white border px-4 py-2 rounded shadow-sm hover:bg-gray-50">
+            <button onClick={handleBackToMap} className="bg-blue-600 text-white font-bold rounded-full border px-4 py-2 rounded shadow-sm hover:bg-blue-800">
               Back to Map
             </button>
           </div>
@@ -155,7 +161,7 @@ const StallMap = () => {
               </div>
             ) : (
               <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-10'}`}>
-                
+
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                   const isSelected = selectedStalls.includes(stall.id);
@@ -197,7 +203,7 @@ const StallMap = () => {
               </div>
             )}
           </HallShapeWrapper>
-          
+
           {selectedStalls.length > 0 && (
              <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
                  <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>

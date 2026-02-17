@@ -115,7 +115,7 @@ const Header = ({ user }) => {
           <div className="absolute top-full left-4 sm:left-8 mt-2 w-64 bg-white border border-slate-200 shadow-2xl rounded-2xl py-4 px-2 z-50 animate-in slide-in-from-top-2 duration-200">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Navigation</p>
             <MenuLink icon={<HomeIcon className="w-5 h-5" />} label="Dashboard" onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }} active />
-            <MenuLink icon={<CalendarIcon className="w-5 h-5" />} label="Hall Schedule" />
+            <MenuLink icon={<UserCircleIcon className="w-5 h-5" />} label="My Profile" onClick={() => { navigate("/profile"); setIsMenuOpen(false); }} />
             <MenuLink icon={<TicketIcon className="w-5 h-5" />} label="My Reservations" />
 
             <hr className="my-3 border-slate-100" />
@@ -134,8 +134,8 @@ const MenuLink = ({ icon, label, onClick, active = false }) => (
   <button
     onClick={onClick}
     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${active
-        ? "bg-blue-50 text-blue-600"
-        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+      ? "bg-blue-50 text-blue-600"
+      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       }`}
   >
     {icon}
