@@ -107,8 +107,7 @@ public class ReservationService {
                     user.getEmail(),
                     user.getName(),
                     qrImageBase64,
-                    stallCodes
-            );
+                    stallCodes);
 
             return new ReservationResponse(qrToken, qrImageBase64, "Booking Successful!");
 
@@ -124,5 +123,17 @@ public class ReservationService {
         ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
         return Base64.getEncoder().encodeToString(pngOutputStream.toByteArray());
+    }
+
+    public java.util.List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
+    }
+
+    @Transactional
+    public Reservation updateReservationStatus(Long id, String status) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
+        reservation.setStatus(status);
+        return reservationRepository.save(reservation);
     }
 }
