@@ -96,7 +96,7 @@ export default function AdminStalls() {
                     </div>
 
                     <p className="text-xs text-slate-400 mt-3">
-                        Sinhala: code එක unique වෙන්න ඕනේ.
+
                     </p>
                 </div>
 
