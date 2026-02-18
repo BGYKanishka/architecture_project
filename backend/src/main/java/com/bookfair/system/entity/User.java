@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
@@ -34,7 +36,7 @@ public class User {
     private String businessName;
 
     @Column(nullable = false, length = 20)
-    private String role;
+    private String role; // "VENDOR", "EMPLOYEE", "ADMIN"
 
     @Builder.Default
     private Boolean enabled = true;
@@ -43,8 +45,12 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @ElementCollection
-    @CollectionTable(name = "user_genre_preferences", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "genre")
-    private java.util.List<String> genres;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_genres",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    @Builder.Default
+    private Set<Genre> genres = new HashSet<>();
 }
