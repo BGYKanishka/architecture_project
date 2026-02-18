@@ -44,7 +44,7 @@ public class User {
     private LocalDateTime createdAt;
 
     @ElementCollection
-    @CollectionTable(name = "user_genres", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "user_genre_preferences", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "genre")
     private java.util.List<String> genres;
 }
