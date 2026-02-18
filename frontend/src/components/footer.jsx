@@ -102,7 +102,7 @@ const Footer = () => {
         .footer-container {
           background-color: #1a202c; 
           color: white;
-          padding: 4rem 0 2rem 0;
+          padding: 2rem 0 1.5rem 0;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           width: 100%;
         }
@@ -144,7 +144,7 @@ const Footer = () => {
           font-size: 1.2rem; 
         }
         .footer-section h4 {
-          margin-bottom: 1.8rem;
+          margin-bottom: 1rem;
           font-size: 1.3rem;
           font-weight: 600;
           letter-spacing: 0.5px;
@@ -169,7 +169,7 @@ const Footer = () => {
         .contact-item {
           display: flex;
           gap: 15px;
-          margin-bottom: 1.5rem;
+          margin-bottom: 0.8rem;
           align-items: flex-start;
         }
         .contact-item p {
@@ -218,8 +218,7 @@ const Footer = () => {
 
         .footer-bottom {
           text-align: center;
-          padding-top: 2rem;
-          margin-top: 4rem;
+          padding-top: 1rem;
           border-top: 1px solid #2d3748;
           color: #a0aec0;
           font-size: 0.9rem;

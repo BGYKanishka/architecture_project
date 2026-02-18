@@ -84,7 +84,36 @@ const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState([]);
+  const [selectedStalls, setSelectedStalls] = useState(() => {
+    const saved = localStorage.getItem("selectedStalls");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [paidReservations, setPaidReservations] = useState(() => {
+    const saved = localStorage.getItem("paidReservations");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [cancelledReservations, setCancelledReservations] = useState(() => {
+    const saved = localStorage.getItem("cancelledReservations");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
+    window.dispatchEvent(new Event("selectedStallsUpdated"));
+  }, [selectedStalls]);
+
+  useEffect(() => {
+    const syncStates = () => {
+      setPaidReservations(JSON.parse(localStorage.getItem("paidReservations") || "[]"));
+      setCancelledReservations(JSON.parse(localStorage.getItem("cancelledReservations") || "[]"));
+    };
+    window.addEventListener("paidReservationsUpdated", syncStates);
+    window.addEventListener("cancelledReservationsUpdated", syncStates);
+    return () => {
+      window.removeEventListener("paidReservationsUpdated", syncStates);
+      window.removeEventListener("cancelledReservationsUpdated", syncStates);
+    };
+  }, []);
 
   const view = hallName ? "hall" : "map";
   const activeHall = hallName || null;
@@ -118,7 +147,10 @@ const StallMap = () => {
   const handleBackToMap = () => navigate("/dashboard");
 
   const toggleSelection = (stall) => {
-    if (stall.reserved) return;
+    const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
+    const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
+    if (isActuallyReserved || isPaid) return;
+
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
@@ -127,8 +159,9 @@ const StallMap = () => {
     }
   };
 
-  const getSizeColor = (size, isReserved, isSelected) => {
-    if (isReserved) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
+  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled) => {
+    const isActuallyReserved = isReserved && !isCancelled;
+    if (isActuallyReserved || isPaid) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
     if (isSelected) return "bg-blue-600 border-blue-800 text-white shadow-xl z-50 scale-110";
 
     switch (size) {
@@ -213,7 +246,9 @@ const StallMap = () => {
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                   const isSelected = selectedStalls.includes(stall.id);
-                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected);
+                  const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
+                  const isCancelled = cancelledReservations.includes(stall.id);
+                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled);
 
                   return (
                     <div
@@ -239,12 +274,17 @@ const StallMap = () => {
                       <span className="font-bold text-sm md:text-lg leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-                      {!stall.reserved && (
+                      {!stall.reserved && !isPaid && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {stall.reserved && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {stall.reserved && isCancelled && (
+                        <span className="text-[10px] font-mono font-medium mt-1">
+                          {stall.price / 1000}k
+                        </span>
+                      )}
+                      {(stall.reserved && !isCancelled || isPaid) && <span className="text-[8px] font-bold mt-1">SOLD</span>}
                     </div>
                   );
                 })}

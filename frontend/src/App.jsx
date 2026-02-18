@@ -9,6 +9,7 @@ import Header from "./components/Header";
 import AuthService from "./services/auth.service";
 
 import Profile from "./pages/Profile";
+import Reservations from "./pages/Reservations";
 import BookingSummary from "./pages/BookingSummary";
 import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
@@ -38,6 +39,7 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/reservations" element={<Reservations />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/:hallName" element={<Dashboard />} />
           <Route path="/booking-summary" element={<BookingSummary />} />

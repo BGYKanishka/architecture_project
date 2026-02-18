@@ -20,10 +20,28 @@ const Header = ({ user }) => {
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(() => {
+    const saved = localStorage.getItem("selectedStalls");
+    return saved ? JSON.parse(saved).length : 0;
+  });
+
+  const syncCartCount = () => {
+    const saved = localStorage.getItem("selectedStalls");
+    setCartCount(saved ? JSON.parse(saved).length : 0);
+  };
+
+  useState(() => {
+    window.addEventListener("selectedStallsUpdated", syncCartCount);
+    return () => window.removeEventListener("selectedStallsUpdated", syncCartCount);
+  }, []);
 
   const handleLogout = () => {
     AuthService.logout();
     navigate("/login");
+  };
+
+  const handleCartClick = () => {
+    navigate("/reservations");
   };
 
   return (
@@ -56,7 +74,20 @@ const Header = ({ user }) => {
             <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
 
-
+          <button
+            onClick={handleCartClick}
+            className="flex items-center gap-2 p-2 px-3 bg-slate-100 hover:bg-slate-200 rounded-xl transition text-slate-700 active:scale-95 shadow-sm"
+          >
+            <div className="relative">
+              <ShoppingCartIcon className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full border-2 border-white">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <span className="hidden md:block font-bold text-sm">Cart</span>
+          </button>
 
           <div className="relative">
             <button
