@@ -28,9 +28,10 @@ public class UserService {
   private final GenreRepository genreRepository;
   private final PasswordEncoder passwordEncoder;
 
+  @Transactional(readOnly = true)
   public UserProfileResponse getUserProfile(String email) {
     User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
     return toProfileResponse(user);
   }
@@ -38,7 +39,7 @@ public class UserService {
   @Transactional
   public UserProfileResponse updateProfile(String email, UserProfileUpdateRequest request) {
     User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
     // Update basic fields
     if (request.getName() != null && !request.getName().isEmpty()) {
@@ -58,10 +59,10 @@ public class UserService {
         String cleanName = rawGenreName.trim();
 
         Genre genre = genreRepository.findByNameIgnoreCase(cleanName)
-                .orElseThrow(() -> {
-                  log.error("Genre not found in database: '{}'", cleanName);
-                  return new IllegalArgumentException("Invalid genre: " + cleanName);
-                });
+            .orElseThrow(() -> {
+              log.error("Genre not found in database: '{}'", cleanName);
+              return new IllegalArgumentException("Invalid genre: " + cleanName);
+            });
 
         genreEntities.add(genre);
       }
@@ -74,7 +75,7 @@ public class UserService {
 
   public void changePassword(String email, ChangePasswordRequest request) {
     User user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
     if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
       throw new IllegalArgumentException("Incorrect current password");
@@ -85,18 +86,18 @@ public class UserService {
   }
 
   private UserProfileResponse toProfileResponse(User user) {
-    List<String> genreNames = (user.getGenres() == null) ? List.of() :
-            user.getGenres().stream()
-                    .map(Genre::getName)
-                    .collect(Collectors.toList());
+    List<String> genreNames = (user.getGenres() == null) ? List.of()
+        : user.getGenres().stream()
+            .map(Genre::getName)
+            .collect(Collectors.toList());
 
     return UserProfileResponse.builder()
-            .name(user.getName())
-            .email(user.getEmail())
-            .contactNumber(user.getContactNumber())
-            .businessName(user.getBusinessName())
-            .role(user.getRole())
-            .genres(genreNames)
-            .build();
+        .name(user.getName())
+        .email(user.getEmail())
+        .contactNumber(user.getContactNumber())
+        .businessName(user.getBusinessName())
+        .role(user.getRole())
+        .genres(genreNames)
+        .build();
   }
 }
