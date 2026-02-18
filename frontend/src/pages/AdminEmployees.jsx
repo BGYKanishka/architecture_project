@@ -7,7 +7,7 @@ import {
     deleteAdminEmployee,
 } from "../services/admin/admin.employee.service";
 
-const EMPTY_FORM = { name: "", employeeCode: "", designation: "" };
+const EMPTY_FORM = { name: "", employeeCode: "", designation: "", email: "", password: "" };
 
 export default function AdminEmployees() {
     const [employees, setEmployees] = useState([]);
@@ -22,6 +22,7 @@ export default function AdminEmployees() {
     const [editTarget, setEditTarget] = useState(null); // null = add, object = edit
     const [form, setForm] = useState(EMPTY_FORM);
     const [formErr, setFormErr] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [saving, setSaving] = useState(false);
 
     // Delete confirm
@@ -68,13 +69,15 @@ export default function AdminEmployees() {
         setEditTarget(null);
         setForm(EMPTY_FORM);
         setFormErr("");
+        setShowPassword(false);
         setShowModal(true);
     };
 
     const openEdit = (emp) => {
         setEditTarget(emp);
-        setForm({ name: emp.name, employeeCode: emp.employeeCode, designation: emp.designation });
+        setForm({ name: emp.name, employeeCode: emp.employeeCode, designation: emp.designation, email: emp.email, password: "" });
         setFormErr("");
+        setShowPassword(false);
         setShowModal(true);
     };
 
@@ -88,6 +91,10 @@ export default function AdminEmployees() {
         if (!form.name.trim()) return "Name is required.";
         if (!form.employeeCode.trim()) return "Employee Code is required.";
         if (!form.designation.trim()) return "Designation is required.";
+        if (!form.email.trim()) return "Email is required.";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) return "Enter a valid email address.";
+        if (!editTarget && !form.password) return "Password is required.";
+        if (form.password && form.password.length < 8) return "Password must be at least 8 characters.";
         return "";
     };
 
@@ -109,8 +116,9 @@ export default function AdminEmployees() {
             }
             closeModal();
             await load();
-        } catch {
-            setFormErr("Save failed. Please try again.");
+        } catch (err) {
+            const msg = err?.response?.data?.message || "Save failed. Please try again.";
+            setFormErr(msg);
         } finally {
             setSaving(false);
         }
@@ -264,6 +272,39 @@ export default function AdminEmployees() {
                                     onChange={(e) => setForm({ ...form, designation: e.target.value })}
                                     className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    placeholder="employee@example.com"
+                                    value={form.email}
+                                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                                    className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">
+                                    Password {editTarget && <span className="text-slate-400 font-normal">(leave blank to keep current)</span>}
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder={editTarget ? "New password (optional)" : "Min. 8 characters"}
+                                        value={form.password}
+                                        onChange={(e) => setForm({ ...form, password: e.target.value })}
+                                        className="w-full px-4 py-2 pr-12 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+                                    >
+                                        {showPassword ? "Hide" : "Show"}
+                                    </button>
+                                </div>
                             </div>
 
                             {formErr && (
