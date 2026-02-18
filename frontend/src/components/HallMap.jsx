@@ -72,7 +72,8 @@ const HallMap = ({ getHallStatus, onHallClick }) => {
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-3xl shadow-2xl border-4 border-gray-200 relative">
+            <div className="bg-white p-6 rounded-3xl shadow-2xl border-4 border-gray-200 relative min-h-[500px]">
+                {console.log("Rendering HallMap grid...")}
                 <div className="grid grid-cols-12 grid-rows-10 gap-4 w-full max-w-4xl aspect-[12/10] mx-auto bg-white rounded-2xl p-6">
 
 

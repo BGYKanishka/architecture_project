@@ -12,7 +12,8 @@ import {
   HomeIcon,
   CalendarIcon,
   TicketIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  ShoppingCartIcon
 } from "@heroicons/react/24/outline";
 
 const Header = ({ user }) => {

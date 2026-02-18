@@ -121,12 +121,39 @@ const StallMap = () => {
   useEffect(() => {
     StallService.getAllStalls()
       .then((res) => {
-        setStalls(res.data);
+        console.log("Stalls loaded:", res.data); // Debug log
+        if (Array.isArray(res.data)) {
+          setStalls(res.data);
+
+          // Sync Local Storage with Backend
+          const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+          const validatedPaid = localPaid.filter((paidItem) => {
+            const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
+            const stall = res.data.find((s) => s.id === paidId);
+            if (stall && !stall.reserved) {
+              return false;
+            }
+            return true; 
+          });
+
+          if (validatedPaid.length !== localPaid.length) {
+            console.warn("Found stale reservations in local storage. Cleaning up...", {
+              before: localPaid,
+              after: validatedPaid
+            });
+            localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
+            setPaidReservations(validatedPaid);
+            window.dispatchEvent(new Event("paidReservationsUpdated"));
+          }
+
+        } else {
+          console.error("API returned non-array for stalls:", res.data);
+          setStalls([]);
+        }
       })
       .catch((err) => {
         console.error("Error loading stalls:", err);
-        // Optional: Alert user if backend is down
-        // alert("Could not load stalls. Is the backend running?");
+        setStalls([]); 
       });
   }, []);
 
@@ -182,12 +209,11 @@ const StallMap = () => {
 
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
-    // 1. Get full objects of selected IDs
+
     const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)
     );
 
-    // 2. Navigate to Summary Page
     navigate("/booking-summary", {
       state: { stalls: selectedStallObjects }
     });
