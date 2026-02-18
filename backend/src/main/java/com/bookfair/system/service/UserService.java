@@ -57,8 +57,15 @@ public class UserService {
     userRepository.save(user);
   }
 
+  public java.util.List<UserProfileResponse> getEmployees() {
+    return userRepository.findByRole("EMPLOYEE").stream()
+        .map(this::toProfileResponse)
+        .collect(java.util.stream.Collectors.toList());
+  }
+
   private UserProfileResponse toProfileResponse(User user) {
     return UserProfileResponse.builder()
+        .id(user.getId())
         .name(user.getName())
         .email(user.getEmail())
         .contactNumber(user.getContactNumber())

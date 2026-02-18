@@ -12,7 +12,7 @@ const api = axios.create({
 // Automatically add the JWT Token to every request if we have one
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("admin_token") || localStorage.getItem("token");
     if (token) {
       config.headers["Authorization"] = "Bearer " + token;
     }

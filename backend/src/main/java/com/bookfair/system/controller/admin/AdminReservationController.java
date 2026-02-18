@@ -1,6 +1,6 @@
 package com.bookfair.system.controller.admin;
 
-import com.bookfair.system.entity.Reservation;
+import com.bookfair.system.dto.response.AdminReservationResponse;
 import com.bookfair.system.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +18,14 @@ public class AdminReservationController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<List<Reservation>> getAllReservations() {
+    public ResponseEntity<List<AdminReservationResponse>> getAllReservations() {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Reservation> updateReservationStatus(@PathVariable Long id, @RequestParam String status) {
+    public ResponseEntity<AdminReservationResponse> updateReservationStatus(@PathVariable Long id,
+            @RequestParam String status) {
         return ResponseEntity.ok(reservationService.updateReservationStatus(id, status));
     }
 }

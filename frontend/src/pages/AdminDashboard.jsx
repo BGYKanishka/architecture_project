@@ -48,6 +48,16 @@ export default function AdminDashboard() {
                         View reservations and details (QR + stalls).
                     </p>
                 </Link>
+
+                <Link
+                    to="/admin/duties"
+                    className="bg-white rounded-2xl shadow p-6 hover:shadow-md transition"
+                >
+                    <h2 className="text-lg font-semibold">Duty Management</h2>
+                    <p className="text-sm text-slate-500 mt-1">
+                        Assign and manage duties for employees.
+                    </p>
+                </Link>
             </div>
         </div>
     );

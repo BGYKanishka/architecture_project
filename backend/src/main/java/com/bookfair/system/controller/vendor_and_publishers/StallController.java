@@ -4,7 +4,7 @@ import com.bookfair.system.dto.response.StallResponse;
 import com.bookfair.system.entity.Floor;
 import com.bookfair.system.entity.Stall;
 import com.bookfair.system.repository.FloorRepository;
-import com.bookfair.system.repository.ReservationStallRepository;
+
 import com.bookfair.system.repository.StallRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class StallController {
 
     private final StallRepository stallRepository;
-    private final ReservationStallRepository reservationStallRepository;
+
     private final FloorRepository floorRepository;
 
     @GetMapping("/halls")
@@ -38,15 +38,16 @@ public class StallController {
         }
 
         List<StallResponse> response = stalls.stream().map(stall -> {
-            boolean isReserved = reservationStallRepository.isStallReserved(stall.getId());
+            // boolean isReserved =
+            // reservationStallRepository.isStallReserved(stall.getId()); // CAUSES N+1
+            // PROBLEM
             return new StallResponse(
                     stall.getId(),
                     stall.getStallCode(),
                     stall.getSize(),
                     stall.getPrice(),
-                    isReserved,
-                    stall.getFloor().getFloorName()
-            );
+                    stall.isReserved(), // Use the entity field (kept in sync by ReservationService)
+                    stall.getFloor().getFloorName());
         }).collect(Collectors.toList());
 
         return ResponseEntity.ok(response);

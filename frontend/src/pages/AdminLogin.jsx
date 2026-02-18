@@ -17,9 +17,17 @@ export default function AdminLogin() {
         try {
             const data = await adminLogin(username, password);
 
+            const role = data.roles && data.roles.length > 0 ? data.roles[0] : "";
+
+            if (role !== "ROLE_ADMIN" && role !== "ROLE_EMPLOYEE") {
+                setErr("Access denied. Admin or Employee privileges required.");
+                setLoading(false);
+                return;
+            }
+
             localStorage.setItem("admin_token", data.token);
-            localStorage.setItem("admin_role", data.role);
-            localStorage.setItem("admin_username", data.username);
+            localStorage.setItem("admin_role", role);
+            localStorage.setItem("admin_username", data.email);
 
             nav("/admin/dashboard");
         } catch (e2) {
@@ -34,7 +42,7 @@ export default function AdminLogin() {
             <div className="w-full max-w-md bg-white rounded-2xl shadow p-8">
                 <h1 className="text-2xl font-bold text-slate-900">Admin / Employee Login</h1>
                 <p className="text-sm text-slate-500 mt-1">
-                    Sinhala: Admin/Employee විතරයි login කරන්න පුළුවන්.
+                    Sinhala: Admin/Employee
                 </p>
 
                 {err && (

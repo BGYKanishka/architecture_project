@@ -1,5 +1,6 @@
 package com.bookfair.system.controller.admin;
 
+import com.bookfair.system.dto.response.StallResponse;
 import com.bookfair.system.entity.Stall;
 import com.bookfair.system.service.StallService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin/stalls")
@@ -18,8 +20,16 @@ public class AdminStallController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
-    public ResponseEntity<List<Stall>> getAllStalls() {
-        return ResponseEntity.ok(stallService.getAllStalls());
+    public ResponseEntity<List<StallResponse>> getAllStalls() {
+        List<Stall> stalls = stallService.getAllStalls();
+        List<StallResponse> response = stalls.stream().map(stall -> new StallResponse(
+                stall.getId(),
+                stall.getStallCode(),
+                stall.getSize(),
+                stall.getPrice(),
+                stall.isReserved(),
+                stall.getFloor().getFloorName())).collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
