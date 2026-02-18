@@ -15,7 +15,7 @@ import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import HelpCenter from "./pages/HelpCenter";
 import GenreSelection from "./pages/GenreSelection";
-import AdminDutyManagement from "./pages/AdminDutyManagement";
+import AdminEmployees from "./pages/AdminEmployees";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminStalls from "./pages/AdminStalls";
@@ -58,7 +58,7 @@ function AppContent() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/stalls" element={<AdminStalls />} />
             <Route path="/admin/reservations" element={<AdminReservations />} />
-            <Route path="/admin/duties" element={<AdminDutyManagement />} />
+            <Route path="/admin/employees" element={<AdminEmployees />} />
           </Route>
 
           <Route path="/genres" element={<GenreSelection />} />
