@@ -30,11 +30,11 @@ const Register = () => {
       formData.name,
       formData.email,
       formData.password,
-      formData.role, 
+      formData.role,
       formData.contactNumber,
       formData.businessName
     ).then(
-      (response) => {
+      () => {
         setMessage("Registration successful! Please login.");
         setSuccessful(true);
         setTimeout(() => {
@@ -64,74 +64,74 @@ const Register = () => {
             For Vendors & Publishers
           </p>
         </div>
-        
+
         <form className="mt-8 space-y-6" onSubmit={handleRegister}>
           <div className="rounded-md shadow-sm -space-y-px">
-            
+
             {/* Full Name */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                <input
-                  name="name"
-                  type="text"
-                  required
-                  className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.name}
-                  onChange={onChange}
-                />
+              <label className="block text-sm font-medium text-gray-700">Full Name</label>
+              <input
+                name="name"
+                type="text"
+                required
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={formData.name}
+                onChange={onChange}
+              />
             </div>
 
             {/* Email */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                <input
-                  name="email"
-                  type="email"
-                  required
-                  className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.email}
-                  onChange={onChange}
-                />
+              <label className="block text-sm font-medium text-gray-700">Email Address</label>
+              <input
+                name="email"
+                type="email"
+                required
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={formData.email}
+                onChange={onChange}
+              />
             </div>
 
             {/* Password */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  name="password"
-                  type="password"
-                  required
-                  minLength="6"
-                  className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.password}
-                  onChange={onChange}
-                />
+              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <input
+                name="password"
+                type="password"
+                required
+                minLength="6"
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={formData.password}
+                onChange={onChange}
+              />
             </div>
 
             {/* Contact Number */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Contact Number</label>
-                <input
-                  name="contactNumber"
-                  type="text"
-                  required
-                  className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.contactNumber}
-                  onChange={onChange}
-                />
+              <label className="block text-sm font-medium text-gray-700">Contact Number</label>
+              <input
+                name="contactNumber"
+                type="text"
+                required
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={formData.contactNumber}
+                onChange={onChange}
+              />
             </div>
 
             {/* Business Name (Always Visible Now) */}
             <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Business / Publisher Name</label>
-                <input
-                  name="businessName"
-                  type="text"
-                  required
-                  className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  value={formData.businessName}
-                  onChange={onChange}
-                />
+              <label className="block text-sm font-medium text-gray-700">Business / Publisher Name</label>
+              <input
+                name="businessName"
+                type="text"
+                required
+                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                value={formData.businessName}
+                onChange={onChange}
+              />
             </div>
           </div>
 

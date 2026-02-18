@@ -1,7 +1,9 @@
 package com.bookfair.system.controller.vendor_and_publishers;
 
 import com.bookfair.system.dto.response.StallResponse;
+import com.bookfair.system.entity.Floor;
 import com.bookfair.system.entity.Stall;
+import com.bookfair.system.repository.FloorRepository;
 import com.bookfair.system.repository.ReservationStallRepository;
 import com.bookfair.system.repository.StallRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,19 +20,32 @@ public class StallController {
 
     private final StallRepository stallRepository;
     private final ReservationStallRepository reservationStallRepository;
+    private final FloorRepository floorRepository;
+
+    @GetMapping("/halls")
+    public ResponseEntity<List<Floor>> getAllHalls() {
+        return ResponseEntity.ok(floorRepository.findAll());
+    }
 
     @GetMapping
-    public ResponseEntity<List<StallResponse>> getAllStalls() {
-        List<Stall> stalls = stallRepository.findAll();
+    public ResponseEntity<List<StallResponse>> getAllStalls(@RequestParam(required = false) Long floorId) {
+        List<Stall> stalls;
+
+        if (floorId != null) {
+            stalls = stallRepository.findByFloorId(floorId);
+        } else {
+            stalls = stallRepository.findAllWithFloors();
+        }
 
         List<StallResponse> response = stalls.stream().map(stall -> {
             boolean isReserved = reservationStallRepository.isStallReserved(stall.getId());
             return new StallResponse(
-                stall.getId(),
-                stall.getStallCode(),
-                stall.getSize(),
-                stall.getPrice(),
-                isReserved
+                    stall.getId(),
+                    stall.getStallCode(),
+                    stall.getSize(),
+                    stall.getPrice(),
+                    isReserved,
+                    stall.getFloor().getFloorName()
             );
         }).collect(Collectors.toList());
 
