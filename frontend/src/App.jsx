@@ -9,9 +9,12 @@ import Header from "./components/Header";
 import AuthService from "./services/auth.service";
 
 import Profile from "./pages/Profile";
+import Reservations from "./pages/Reservations";
 import BookingSummary from "./pages/BookingSummary";
 import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
+import HelpCenter from "./pages/HelpCenter";
+import GenreSelection from "./pages/GenreSelection";
 import { useEffect, useState } from "react";
 
 function AppContent() {
@@ -36,11 +39,14 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/reservations" element={<Reservations />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/dashboard/:hallName" element={<Dashboard />} />
           <Route path="/booking-summary" element={<BookingSummary />} />
           <Route path="/payment-selection" element={<PaymentSelection />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+          <Route path="/help" element={<HelpCenter />} />
+          <Route path="/genres" element={<GenreSelection />} />
         </Routes>
       </div>
 

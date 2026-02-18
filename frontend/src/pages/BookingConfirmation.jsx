@@ -7,6 +7,35 @@ const BookingConfirmation = () => {
   const navigate = useNavigate();
   const { reservationId, qrCodeImage, stalls, totalAmount } = location.state || {};
 
+  React.useEffect(() => {
+    if (reservationId && stalls && stalls.length > 0) {
+      // 1. Get current paid reservations
+      const existingPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+
+      // 2. Add new ones (Full objects)
+      const newPaidObjects = stalls.map(s => ({
+        id: s.id,
+        reservationId: reservationId,
+        qrCodeImage: qrCodeImage
+      }));
+
+      // Filter out any duplicates by ID
+      const existingIds = new Set(existingPaid.map(item => item.id || item));
+      const filteredNew = newPaidObjects.filter(item => !existingIds.has(item.id));
+
+      // Merge and save
+      const updatedPaid = [...existingPaid, ...filteredNew];
+      localStorage.setItem("paidReservations", JSON.stringify(updatedPaid));
+
+      // 4. Clear selected stalls
+      localStorage.setItem("selectedStalls", "[]");
+
+      // 5. Notify other components
+      window.dispatchEvent(new Event("selectedStallsUpdated"));
+      window.dispatchEvent(new Event("paidReservationsUpdated"));
+    }
+  }, [reservationId, stalls]);
+
   if (!reservationId) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center">
       <div className="text-center">
@@ -46,7 +75,17 @@ const BookingConfirmation = () => {
 
             <div className="bg-white p-4 rounded-2xl border-2 border-slate-100 shadow-sm">
               {qrCodeImage ? (
-                <img src={`data:image/png;base64,${qrCodeImage}`} alt="QR Code" className="w-48 h-48 object-contain" />
+                <img
+                  src={`data:image/png;base64,${qrCodeImage}`}
+                  alt="QR Code"
+                  className="w-48 h-48 object-contain"
+                />
+              ) : reservationId ? (
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${reservationId}`}
+                  alt="QR Code"
+                  className="w-48 h-48 object-contain"
+                />
               ) : (
                 <div className="w-48 h-48 flex items-center justify-center bg-slate-50 text-slate-400">
                   <QrCodeIcon className="w-12 h-12" />
@@ -81,10 +120,10 @@ const BookingConfirmation = () => {
           {/* Action */}
           <div className="p-4 bg-slate-50 border-t border-slate-100">
             <button
-              onClick={() => navigate("/dashboard")}
-              className="w-full py-3 bg-white border border-slate-300 rounded-xl text-slate-700 font-bold hover:bg-slate-100 hover:text-slate-900 transition flex items-center justify-center gap-2 shadow-sm"
+              onClick={() => navigate("/genres")}
+              className="w-full py-3 bg-blue-600 border border-transparent rounded-xl text-white font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2 shadow-sm"
             >
-              <HomeIcon className="w-5 h-5" /> Return to Dashboard
+              <HomeIcon className="w-5 h-5" /> Continue
             </button>
           </div>
         </div>

@@ -7,33 +7,35 @@ import HallShapeWrapper from "./HallShapeWrapper";
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
   "Hall A": [ // 20 Stalls (Octagon)
-    { top: "5%", left: "45%" }, // A-01 (Top)
-    { top: "15%", left: "70%" }, { top: "30%", left: "85%" }, { top: "55%", left: "85%" }, { top: "75%", left: "70%" }, // Right Side
-    { top: "85%", left: "45%" }, // Bottom
-    { top: "75%", left: "20%" }, { top: "55%", left: "5%" }, { top: "30%", left: "5%" }, { top: "15%", left: "20%" }, // Left Side
-    // Inner Ring
-    { top: "25%", left: "30%" }, { top: "25%", left: "60%" },
-    { top: "45%", left: "25%" }, { top: "45%", left: "65%" },
-    { top: "65%", left: "30%" }, { top: "65%", left: "60%" },
+    { top: "6%", left: "36%" }, // A-01 (Top)
+    { top: "6%", left: "50%" }, { top: "6%", left: "64%" }, { top: "15%", left: "75%" }, { top: "35%", left: "93%" }, // Right Side
+    { top: "50%", left: "93%" }, // A-06
+    { top: "65%", left: "93%" }, { top: "80%", left: "77%" },//7,8
+    { top: "80%", left: "23%" }, { top: "65%", left: "8%" }, // 9,10
+    { top: "50%", left: "8%" }, { top: "35%", left: "8%" }, //11,12
+
+
     // Center Block
-    { top: "35%", left: "45%" }, { top: "45%", left: "45%" }, { top: "55%", left: "45%" }, { top: "45%", left: "35%" }
+    { top: "35%", left: "36%" }, { top: "35%", left: "64%" },//13,14
+    { top: "63%", left: "64%" }, { top: "63%", left: "36%" }, { top: "35%", left: "50%" },
+    { top: "49%", left: "50%" }, { top: "49%", left: "64%" }, { top: "49%", left: "36%" }
   ],
   "Hall B": [
-    { top: "10%", left: "42%" }, { top: "20%", left: "70%" }, { top: "45%", left: "80%" }, { top: "70%", left: "70%" },
-    { top: "80%", left: "42%" }, { top: "70%", left: "15%" }, { top: "45%", left: "5%" },  { top: "20%", left: "15%" }
+    { top: "10%", left: "50%" }, { top: "20%", left: "75%" }, { top: "37%", left: "50%" }, { top: "73%", left: "75%" },
+    { top: "65%", left: "50%" }, { top: "90%", left: "50%" }, { top: "73%", left: "25%" }, { top: "20%", left: "25%" }
   ],
   "Hall C": [
-    { top: "10%", left: "40%" }, 
-    { top: "25%", left: "15%" }, { top: "40%", left: "10%" }, { top: "55%", left: "10%" }, { top: "70%", left: "15%" }, { top: "85%", left: "25%" },
-    { top: "25%", left: "65%" }, { top: "38%", left: "65%" }, { top: "51%", left: "65%" }, { top: "64%", left: "65%" }, { top: "77%", left: "65%" }, { top: "90%", left: "65%" }
+    { top: "10%", left: "80%" },
+    { top: "5%", left: "5%" }, { top: "20%", left: "5%" }, { top: "35%", left: "5%" }, { top: "50%", left: "5%" }, { top: "65%", left: "5%" },
+    { top: "30%", left: "80%" }, { top: "50%", left: "80%" }, { top: "70%", left: "80%" }, { top: "90%", left: "80%" }, { top: "90%", left: "60%" }, { top: "90%", left: "40%" }
   ],
   "Hall D": [
-    { top: "10%", left: "40%" },
-    { top: "25%", left: "70%" }, { top: "40%", left: "75%" }, { top: "55%", left: "75%" }, { top: "70%", left: "70%" }, { top: "85%", left: "60%" },
-    { top: "25%", left: "20%" }, { top: "38%", left: "20%" }, { top: "51%", left: "20%" }, { top: "64%", left: "20%" }, { top: "77%", left: "20%" }, { top: "90%", left: "20%" }
+    { top: "10%", left: "20%" },
+    { top: "5%", left: "95%" }, { top: "20%", left: "95%" }, { top: "35%", left: "95%" }, { top: "50%", left: "95%" }, { top: "65%", left: "95%" },
+    { top: "30%", left: "20%" }, { top: "50%", left: "20%" }, { top: "70%", left: "20%" }, { top: "90%", left: "20%" }, { top: "90%", left: "40%" }, { top: "90%", left: "60%" }
   ],
   "Hall E": [
-    { top: "20%", left: "20%" }, { top: "20%", left: "65%" }, { top: "45%", left: "42%" }, { top: "70%", left: "20%" }, { top: "70%", left: "65%" }
+    { top: "20%", left: "20%" }, { top: "20%", left: "80%" }, { top: "20%", left: "50%" }, { top: "80%", left: "20%" }, { top: "80%", left: "80%" }
   ],
   "Hall F": [
     { top: "15%", left: "10%" }, { top: "15%", left: "30%" }, { top: "15%", left: "50%" }, { top: "15%", left: "70%" }, { top: "15%", left: "90%" },
@@ -47,11 +49,71 @@ const hallLayouts = {
   ]
 };
 
+const hallDoors = {
+  "Hall A": [
+    { label: "Entrance", top: "92%", left: "50%" },
+    { label: "Exit", top: "15%", left: "23%" }
+  ],
+  "Hall B": [
+    { label: "Entrance", top: "50%", left: "5%" },
+    { label: "Exit", top: "50%", left: "95%" }
+  ],
+  "Hall C": [
+    { label: "Entrance", top: "83%", left: "15%" },
+    { label: "Exit", top: "5%", left: "50%" }
+  ],
+  "Hall D": [
+    { label: "Entrance", top: "80%", left: "80%" },
+    { label: "Exit", top: "5%", left: "50%" }
+  ],
+  "Hall E": [
+    { label: "Entrance", top: "90%", left: "50%" },
+    { label: "Exit", top: "50%", left: "95%" }
+  ],
+  "Hall F": [
+    { label: "Entrance", top: "5%", left: "50%" },
+    { label: "Exit", top: "95%", left: "50%" }
+  ],
+  "Hall G": [
+    { label: "Entrance", top: "5%", left: "50%" },
+    { label: "Exit", top: "95%", left: "50%" }
+  ]
+};
+
 const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState([]);
+  const [selectedStalls, setSelectedStalls] = useState(() => {
+    const saved = localStorage.getItem("selectedStalls");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [paidReservations, setPaidReservations] = useState(() => {
+    const saved = localStorage.getItem("paidReservations");
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [cancelledReservations, setCancelledReservations] = useState(() => {
+    const saved = localStorage.getItem("cancelledReservations");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
+    window.dispatchEvent(new Event("selectedStallsUpdated"));
+  }, [selectedStalls]);
+
+  useEffect(() => {
+    const syncStates = () => {
+      setPaidReservations(JSON.parse(localStorage.getItem("paidReservations") || "[]"));
+      setCancelledReservations(JSON.parse(localStorage.getItem("cancelledReservations") || "[]"));
+    };
+    window.addEventListener("paidReservationsUpdated", syncStates);
+    window.addEventListener("cancelledReservationsUpdated", syncStates);
+    return () => {
+      window.removeEventListener("paidReservationsUpdated", syncStates);
+      window.removeEventListener("cancelledReservationsUpdated", syncStates);
+    };
+  }, []);
 
   const view = hallName ? "hall" : "map";
   const activeHall = hallName || null;
@@ -59,12 +121,39 @@ const StallMap = () => {
   useEffect(() => {
     StallService.getAllStalls()
       .then((res) => {
-        setStalls(res.data);
+        console.log("Stalls loaded:", res.data); // Debug log
+        if (Array.isArray(res.data)) {
+          setStalls(res.data);
+
+          // Sync Local Storage with Backend
+          const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+          const validatedPaid = localPaid.filter((paidItem) => {
+            const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
+            const stall = res.data.find((s) => s.id === paidId);
+            if (stall && !stall.reserved) {
+              return false;
+            }
+            return true; 
+          });
+
+          if (validatedPaid.length !== localPaid.length) {
+            console.warn("Found stale reservations in local storage. Cleaning up...", {
+              before: localPaid,
+              after: validatedPaid
+            });
+            localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
+            setPaidReservations(validatedPaid);
+            window.dispatchEvent(new Event("paidReservationsUpdated"));
+          }
+
+        } else {
+          console.error("API returned non-array for stalls:", res.data);
+          setStalls([]);
+        }
       })
       .catch((err) => {
         console.error("Error loading stalls:", err);
-        // Optional: Alert user if backend is down
-        // alert("Could not load stalls. Is the backend running?");
+        setStalls([]); 
       });
   }, []);
 
@@ -85,7 +174,10 @@ const StallMap = () => {
   const handleBackToMap = () => navigate("/dashboard");
 
   const toggleSelection = (stall) => {
-    if (stall.reserved) return;
+    const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
+    const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
+    if (isActuallyReserved || isPaid) return;
+
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
@@ -94,8 +186,9 @@ const StallMap = () => {
     }
   };
 
-  const getSizeColor = (size, isReserved, isSelected) => {
-    if (isReserved) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
+  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled) => {
+    const isActuallyReserved = isReserved && !isCancelled;
+    if (isActuallyReserved || isPaid) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
     if (isSelected) return "bg-blue-600 border-blue-800 text-white shadow-xl z-50 scale-110";
 
     switch (size) {
@@ -116,14 +209,13 @@ const StallMap = () => {
 
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
-    // 1. Get full objects of selected IDs
-    const selectedStallObjects = stalls.filter(stall => 
+
+    const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)
     );
 
-    // 2. Navigate to Summary Page
-    navigate("/booking-summary", { 
-      state: { stalls: selectedStallObjects } 
+    navigate("/booking-summary", {
+      state: { stalls: selectedStallObjects }
     });
   };
 
@@ -162,25 +254,42 @@ const StallMap = () => {
             ) : (
               <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-10'}`}>
 
+                {/* Render Doors */}
+                {hallDoors[activeHall]?.map((door, idx) => (
+                  <div
+                    key={`door-${idx}`}
+                    className="absolute px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded shadow-md border border-white z-40 hover:scale-110 transition-transform cursor-default"
+                    style={{
+                      top: door.top,
+                      left: door.left,
+                      transform: "translate(-50%, -50%)"
+                    }}
+                  >
+                    {door.label}
+                  </div>
+                ))}
+
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                   const isSelected = selectedStalls.includes(stall.id);
-                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected);
+                  const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
+                  const isCancelled = cancelledReservations.includes(stall.id);
+                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled);
 
                   return (
                     <div
                       key={stall.id}
                       onClick={() => toggleSelection(stall)}
                       style={
-                        currentLayout 
-                          ? { 
-                              position: "absolute", 
-                              top: pos.top, 
-                              left: pos.left, 
-                              width: stall.size === 'LARGE' ? "14%" : "10%", 
-                              height: stall.size === 'LARGE' ? "14%" : "10%",
-                              transform: "translate(-50%, -50%)" 
-                            } 
+                        currentLayout
+                          ? {
+                            position: "absolute",
+                            top: pos.top,
+                            left: pos.left,
+                            width: stall.size === 'LARGE' ? "14%" : stall.size === 'MEDIUM' ? "12%" : "10%",
+                            height: stall.size === 'LARGE' ? "14%" : stall.size === 'MEDIUM' ? "12%" : "10%",
+                            transform: "translate(-50%, -50%)"
+                          }
                           : {}
                       }
                       className={`
@@ -191,12 +300,17 @@ const StallMap = () => {
                       <span className="font-bold text-sm md:text-lg leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-                      {!stall.reserved && (
+                      {!stall.reserved && !isPaid && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {stall.reserved && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {stall.reserved && isCancelled && (
+                        <span className="text-[10px] font-mono font-medium mt-1">
+                          {stall.price / 1000}k
+                        </span>
+                      )}
+                      {(stall.reserved && !isCancelled || isPaid) && <span className="text-[8px] font-bold mt-1">SOLD</span>}
                     </div>
                   );
                 })}
@@ -205,15 +319,15 @@ const StallMap = () => {
           </HallShapeWrapper>
 
           {selectedStalls.length > 0 && (
-             <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
-                 <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
-                 <button 
-                    onClick={handleConfirmReservation}
-                    className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
-                 >
-                    Confirm
-                 </button>
-             </div>
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
+              <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
+              <button
+                onClick={handleConfirmReservation}
+                className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
+              >
+                Confirm
+              </button>
+            </div>
           )}
         </div>
       )}

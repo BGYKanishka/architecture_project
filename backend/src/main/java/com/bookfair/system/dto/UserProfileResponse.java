@@ -15,4 +15,5 @@ public class UserProfileResponse {
   private String contactNumber;
   private String businessName;
   private String role;
+  private java.util.List<String> genres;
 }
