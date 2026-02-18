@@ -1,5 +1,5 @@
 
-import api from "./api";
+import api from "./axiosConfig";
 
 const register = (name, email, password, role, contactNumber, businessName) => {
   return api.post("/auth/signup", {

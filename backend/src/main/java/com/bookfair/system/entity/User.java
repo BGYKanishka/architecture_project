@@ -43,8 +43,7 @@ public class User {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @ElementCollection
-    @CollectionTable(name = "user_genre_preferences", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "genre")
-    private java.util.List<String> genres;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_genres", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "genre_id"))
+    private java.util.Set<Genre> genres;
 }

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import StallService from "../services/stall.service";
+import StallService from "../../api/stallApi";
 import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
+import useStallSelection from "../../hooks/useStallSelection";
 
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
@@ -84,10 +85,7 @@ const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState(() => {
-    const saved = localStorage.getItem("selectedStalls");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { selectedStalls, setSelectedStalls, toggleSelection } = useStallSelection();
   const [paidReservations, setPaidReservations] = useState(() => {
     const saved = localStorage.getItem("paidReservations");
     return saved ? JSON.parse(saved) : [];
@@ -97,10 +95,7 @@ const StallMap = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  useEffect(() => {
-    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
-    window.dispatchEvent(new Event("selectedStallsUpdated"));
-  }, [selectedStalls]);
+
 
   useEffect(() => {
     const syncStates = () => {
@@ -133,7 +128,7 @@ const StallMap = () => {
             if (stall && !stall.reserved) {
               return false;
             }
-            return true; 
+            return true;
           });
 
           if (validatedPaid.length !== localPaid.length) {
@@ -153,7 +148,7 @@ const StallMap = () => {
       })
       .catch((err) => {
         console.error("Error loading stalls:", err);
-        setStalls([]); 
+        setStalls([]);
       });
   }, []);
 
@@ -173,18 +168,7 @@ const StallMap = () => {
 
   const handleBackToMap = () => navigate("/dashboard");
 
-  const toggleSelection = (stall) => {
-    const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
-    const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
-    if (isActuallyReserved || isPaid) return;
 
-    if (selectedStalls.includes(stall.id)) {
-      setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
-    } else {
-      if (selectedStalls.length >= 3) return alert("Max 3 stalls!");
-      setSelectedStalls([...selectedStalls, stall.id]);
-    }
-  };
 
   const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled) => {
     const isActuallyReserved = isReserved && !isCancelled;
@@ -279,7 +263,7 @@ const StallMap = () => {
                   return (
                     <div
                       key={stall.id}
-                      onClick={() => toggleSelection(stall)}
+                      onClick={() => toggleSelection(stall, paidReservations, cancelledReservations)}
                       style={
                         currentLayout
                           ? {

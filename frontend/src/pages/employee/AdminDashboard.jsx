@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import QRScanner from '../components/QRScanner';
-import employeeService from '../services/employee/service';
+import QRScanner from '../../components/map/QRScanner';
+import EmployeeService from '../../api/employeeApi';
 
-const EmployeePanel = () => {
+const AdminDashboard = () => {
     const [employee, setEmployee] = useState(null);
 
     const handleScan = useCallback((decodedText) => {
-        employeeService.verifyQR(decodedText)
+        EmployeeService.verifyQR(decodedText)
             .then(res => setEmployee(res.data))
             .catch(() => alert("Employee not found!"));
     }, []);
@@ -27,4 +27,4 @@ const EmployeePanel = () => {
     );
 };
 
-export default EmployeePanel;
+export default AdminDashboard;

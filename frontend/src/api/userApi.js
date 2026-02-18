@@ -1,4 +1,4 @@
-import api from "./api";
+import api from "./axiosConfig";
 
 const getProfile = () => {
   return api.get("/user/profile");

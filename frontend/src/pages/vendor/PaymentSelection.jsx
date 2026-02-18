@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import AuthService from "../services/auth.service";
+import { useContext } from "react";
+import { AuthContext } from "../../context/AuthContext";
 import { CreditCardIcon, BanknotesIcon, LockClosedIcon, ArrowPathIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 const PaymentSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { stalls } = location.state || { stalls: [] };
+  const { user } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
 
   const handlePay = async () => {
     setLoading(true);
     try {
-      const user = AuthService.getCurrentUser();
       const payload = {
         stallIds: stalls.map(s => s.id),
         paymentMethod: "CASH_ON_DATE",

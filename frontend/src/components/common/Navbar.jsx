@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import AuthService from "../../api/authApi";
 import {
 
   UserCircleIcon,
@@ -15,7 +15,7 @@ import {
   QuestionMarkCircleIcon
 } from "@heroicons/react/24/outline";
 
-const Header = ({ user }) => {
+const Navbar = ({ user }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -168,4 +168,4 @@ const MenuLink = ({ icon, label, onClick, active = false }) => (
   </button>
 );
 
-export default Header;
+export default Navbar;

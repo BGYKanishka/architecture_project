@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import { AuthContext } from "../../context/AuthContext";
+import { ROLES } from "../../utils/constants";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useContext(AuthContext);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -11,7 +13,7 @@ const Register = () => {
     password: "",
     contactNumber: "",
     businessName: "",
-    role: "vendor", // HARDCODED: Everyone registering here is a Vendor
+    role: ROLES.VENDOR, // HARDCODED: Everyone registering here is a Vendor
   });
 
   const [message, setMessage] = useState("");
@@ -26,7 +28,7 @@ const Register = () => {
     setMessage("");
     setSuccessful(false);
 
-    AuthService.register(
+    register(
       formData.name,
       formData.email,
       formData.password,

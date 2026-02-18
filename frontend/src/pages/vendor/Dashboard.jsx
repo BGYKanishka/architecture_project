@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import StallService from "../services/stall.service";
+import StallService from "../../api/stallApi";
 import {
   TrashIcon,
   ArrowLeftIcon,
@@ -10,7 +10,7 @@ import {
   CheckCircleIcon
 } from "@heroicons/react/24/outline";
 
-const Reservations = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
   const [paidReservations, setPaidReservations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -225,4 +225,4 @@ const Reservations = () => {
   );
 };
 
-export default Reservations;
+export default Dashboard;

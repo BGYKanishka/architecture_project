@@ -11,7 +11,7 @@ import {
     RocketLaunchIcon,
     HeartIcon
 } from "@heroicons/react/24/outline";
-import UserService from "../services/user.service";
+import UserService from "../../api/userApi";
 
 const genres = [
     { id: "fiction", label: "Fiction", icon: <BookOpenIcon className="w-8 h-8" />, color: "bg-purple-100 border-purple-200 text-purple-600" },

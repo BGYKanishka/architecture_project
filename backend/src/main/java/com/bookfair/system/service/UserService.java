@@ -4,7 +4,11 @@ import com.bookfair.system.dto.request.UserProfileUpdateRequest;
 import com.bookfair.system.dto.UserProfileResponse;
 import com.bookfair.system.entity.User;
 import com.bookfair.system.repository.UserRepository;
+import com.bookfair.system.repository.GenreRepository;
+import com.bookfair.system.entity.Genre;
 import lombok.RequiredArgsConstructor;
+import java.util.stream.Collectors;
+import java.util.HashSet;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +18,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final GenreRepository genreRepository;
   private final PasswordEncoder passwordEncoder;
 
   public UserProfileResponse getUserProfile(String email) {
@@ -37,7 +42,15 @@ public class UserService {
       user.setBusinessName(request.getBusinessName());
     }
     if (request.getGenres() != null) {
-      user.setGenres(request.getGenres());
+      if (request.getGenres().isEmpty()) {
+        user.setGenres(new HashSet<>());
+      } else {
+        java.util.Set<Genre> genres = request.getGenres().stream()
+            .map(name -> genreRepository.findByName(name)
+                .orElseThrow(() -> new IllegalArgumentException("Genre not found: " + name)))
+            .collect(Collectors.toSet());
+        user.setGenres(genres);
+      }
     }
 
     userRepository.save(user);
@@ -64,7 +77,7 @@ public class UserService {
         .contactNumber(user.getContactNumber())
         .businessName(user.getBusinessName())
         .role(user.getRole())
-        .genres(user.getGenres())
+        .genres(user.getGenres().stream().map(Genre::getName).collect(Collectors.toList()))
         .build();
   }
 }
