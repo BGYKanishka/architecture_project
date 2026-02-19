@@ -9,11 +9,16 @@ import {
   ShoppingBagIcon,
   CheckCircleIcon
 } from "@heroicons/react/24/outline";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 const Reservations = () => {
   const navigate = useNavigate();
   const [paidReservations, setPaidReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [stallToCancel, setStallToCancel] = useState(null);
 
   useEffect(() => {
     const fetchPaidDetails = async () => {
@@ -32,22 +37,28 @@ const Reservations = () => {
     fetchPaidDetails();
   }, []);
 
-  const cancelReservation = async (stall) => {
-    const confirmCancel = window.confirm(`Are you sure you want to cancel the reservation for Stall ${stall.stallCode}?`);
+  const handleCancelClick = (stall) => {
+    setStallToCancel(stall);
+    setIsModalOpen(true);
+  };
 
-    if (confirmCancel) {
-      try {
-        await StallService.cancelReservation(stall.id);
-        const updated = paidReservations.filter(s => s.id !== stall.id);
-        setPaidReservations(updated);
+  const confirmCancelReservation = async () => {
+    if (!stallToCancel) return;
 
-        // Dispatch events to update other components if they listen
-        window.dispatchEvent(new Event("paidReservationsUpdated"));
-        window.dispatchEvent(new Event("cancelledReservationsUpdated"));
-      } catch (err) {
-        console.error("Error cancelling reservation:", err);
-        alert("Failed to cancel reservation. Please try again.");
-      }
+    try {
+      await StallService.cancelReservation(stallToCancel.id);
+      const updated = paidReservations.filter(s => s.id !== stallToCancel.id);
+      setPaidReservations(updated);
+
+      // Dispatch events to update other components if they listen
+      window.dispatchEvent(new Event("paidReservationsUpdated"));
+      window.dispatchEvent(new Event("cancelledReservationsUpdated"));
+    } catch (err) {
+      console.error("Error cancelling reservation:", err);
+      alert("Failed to cancel reservation. Please try again.");
+    } finally {
+      setIsModalOpen(false);
+      setStallToCancel(null);
     }
   };
 
@@ -114,7 +125,7 @@ const Reservations = () => {
                       </div>
                     </div>
                     <button
-                      onClick={() => cancelReservation(stall)}
+                      onClick={() => handleCancelClick(stall)}
                       className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
                       title="Cancel Reservation"
                     >
@@ -190,6 +201,16 @@ const Reservations = () => {
           </div>
         )}
       </div>
+
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={confirmCancelReservation}
+        title="Cancel Reservation"
+        message={`Are you sure you want to cancel the reservation for Stall ${stallToCancel?.stallCode}?`}
+        confirmText="Yes, Cancel"
+        cancelText="Keep Reservation"
+      />
     </div>
   );
 };
