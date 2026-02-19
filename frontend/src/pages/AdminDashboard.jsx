@@ -11,8 +11,30 @@ export default function AdminDashboard() {
         nav("/admin/login");
     };
 
+    const cards = [
+        {
+            to: "/admin/stalls",
+            title: "Stall Management",
+            desc: "Create stalls, update status and size.",
+            icon: "🏪",
+        },
+        {
+            to: "/admin/reservations",
+            title: "Reservation Monitoring",
+            desc: "View reservations, QR codes and details.",
+            icon: "📋",
+        },
+        {
+            to: "/admin/users",
+            title: "User Management",
+            desc: "Add, edit, delete and manage user accounts.",
+            icon: "👥",
+        },
+    ];
+
     return (
         <div className="min-h-screen bg-slate-50">
+            {/* Header */}
             <div className="bg-white border-b">
                 <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div>
@@ -28,36 +50,19 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-2 gap-4">
-                <Link
-                    to="/admin/stalls"
-                    className="bg-white rounded-2xl shadow p-6 hover:shadow-md transition"
-                >
-                    <h2 className="text-lg font-semibold">Stall Management</h2>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Create stalls, update status/size.
-                    </p>
-                </Link>
-
-                <Link
-                    to="/admin/reservations"
-                    className="bg-white rounded-2xl shadow p-6 hover:shadow-md transition"
-                >
-                    <h2 className="text-lg font-semibold">Reservation Monitoring</h2>
-                    <p className="text-sm text-slate-500 mt-1">
-                        View reservations and details (QR + stalls).
-                    </p>
-                </Link>
-
-                <Link
-                    to="/admin/employees"
-                    className="bg-white rounded-2xl shadow p-6 hover:shadow-md transition"
-                >
-                    <h2 className="text-lg font-semibold">Employee Management</h2>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Add, edit, and manage employee records.
-                    </p>
-                </Link>
+            {/* Cards */}
+            <div className="max-w-6xl mx-auto px-4 py-8 grid md:grid-cols-3 gap-4">
+                {cards.map((card) => (
+                    <Link
+                        key={card.to}
+                        to={card.to}
+                        className="bg-white rounded-2xl shadow p-6 hover:shadow-md transition flex flex-col gap-2"
+                    >
+                        <span className="text-3xl">{card.icon}</span>
+                        <h2 className="text-lg font-semibold text-slate-900">{card.title}</h2>
+                        <p className="text-sm text-slate-500">{card.desc}</p>
+                    </Link>
+                ))}
             </div>
         </div>
     );

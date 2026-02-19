@@ -15,11 +15,12 @@ import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import HelpCenter from "./pages/HelpCenter";
 import GenreSelection from "./pages/GenreSelection";
-import AdminEmployees from "./pages/AdminEmployees";
+import AdminDutyManagement from "./pages/AdminDutyManagement";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminStalls from "./pages/AdminStalls";
 import AdminReservations from "./pages/AdminReservations";
+import AdminUsers from "./pages/AdminUsers";
 import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
 import { useEffect, useState } from "react";
 
@@ -58,7 +59,8 @@ function AppContent() {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/stalls" element={<AdminStalls />} />
             <Route path="/admin/reservations" element={<AdminReservations />} />
-            <Route path="/admin/employees" element={<AdminEmployees />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route path="/admin/duties" element={<AdminDutyManagement />} />
           </Route>
 
           <Route path="/genres" element={<GenreSelection />} />
