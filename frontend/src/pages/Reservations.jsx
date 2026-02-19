@@ -20,6 +20,17 @@ const Reservations = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [stallToCancel, setStallToCancel] = useState(null);
 
+  // Alert Modal State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: ""
+  });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
+
   useEffect(() => {
     const fetchPaidDetails = async () => {
       try {
@@ -55,7 +66,7 @@ const Reservations = () => {
       window.dispatchEvent(new Event("cancelledReservationsUpdated"));
     } catch (err) {
       console.error("Error cancelling reservation:", err);
-      alert("Failed to cancel reservation. Please try again.");
+      showAlert("Cancellation Failed", "Failed to cancel reservation. Please try again.");
     } finally {
       setIsModalOpen(false);
       setStallToCancel(null);
@@ -210,6 +221,15 @@ const Reservations = () => {
         message={`Are you sure you want to cancel the reservation for Stall ${stallToCancel?.stallCode}?`}
         confirmText="Yes, Cancel"
         cancelText="Keep Reservation"
+      />
+
+      <ConfirmationModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        confirmText="Got it"
+        isAlert={true}
       />
     </div>
   );

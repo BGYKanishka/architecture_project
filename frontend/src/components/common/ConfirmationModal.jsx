@@ -1,7 +1,16 @@
 import React from "react";
 import { ExclamationTriangleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText }) => {
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText,
+  cancelText,
+  isAlert = false
+}) => {
   if (!isOpen) return null;
 
   return (
@@ -30,22 +39,21 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
           {/* Actions */}
           <div className="flex flex-col gap-2 mt-6">
             <button
-              onClick={onConfirm}
+              onClick={onConfirm || onClose}
               className="w-full py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-2xl font-bold transition-all shadow-lg shadow-blue-200 active:scale-[0.98] text-sm"
             >
-              {confirmText || "Confirm"}
+              {confirmText || (isAlert ? "Got it" : "Confirm")}
             </button>
-            <button
-              onClick={onClose}
-              className="w-full py-3 bg-slate-50 text-slate-500 rounded-2xl font-bold hover:bg-slate-100 transition-all active:scale-[0.98] text-sm"
-            >
-              {cancelText || "Cancel"}
-            </button>
+            {!isAlert && (
+              <button
+                onClick={onClose}
+                className="w-full py-3 bg-slate-50 text-slate-500 rounded-2xl font-bold hover:bg-slate-100 transition-all active:scale-[0.98] text-sm"
+              >
+                {cancelText || "Cancel"}
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Decorative footer element */}
-        <div className="h-1.5 w-full bg-blue-600"></div>
       </div>
     </div>
   );
