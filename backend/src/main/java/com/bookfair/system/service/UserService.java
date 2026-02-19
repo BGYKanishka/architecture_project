@@ -6,6 +6,7 @@ import com.bookfair.system.dto.request.AdminUpdateUserRequest;
 import com.bookfair.system.dto.request.ChangePasswordRequest;
 import com.bookfair.system.dto.request.UserProfileUpdateRequest;
 import com.bookfair.system.entity.User;
+import com.bookfair.system.repository.ReservationRepository;
 import com.bookfair.system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,6 +23,21 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ReservationRepository reservationRepository;
+
+  /** Thrown when a user cannot be deleted due to FK-linked reservations. */
+  public static class UserHasReservationsException extends RuntimeException {
+    private final long count;
+
+    public UserHasReservationsException(long count) {
+      super("User has " + count + " reservation(s)");
+      this.count = count;
+    }
+
+    public long getCount() {
+      return count;
+    }
+  }
 
   // ─── User self-service ─────────────────────────────────────
 
@@ -132,6 +148,11 @@ public class UserService {
   public void deleteUser(Long id) {
     if (!userRepository.existsById(id))
       throw new RuntimeException("User not found with id: " + id);
+
+    long reservationCount = reservationRepository.countByUserId(id);
+    if (reservationCount > 0)
+      throw new UserHasReservationsException(reservationCount);
+
     userRepository.deleteById(id);
   }
 

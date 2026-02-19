@@ -59,6 +59,17 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
   }
 
+  @ExceptionHandler(com.bookfair.system.service.UserService.UserHasReservationsException.class)
+  public ResponseEntity<Map<String, Object>> handleUserHasReservations(
+      com.bookfair.system.service.UserService.UserHasReservationsException ex) {
+    Map<String, Object> body = new HashMap<>();
+    body.put("error", "USER_HAS_RESERVATIONS");
+    body.put("message", "Cannot delete user because they have existing reservations. "
+        + "Please reassign or cancel reservations first.");
+    body.put("reservationCount", ex.getCount());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
     ex.printStackTrace(); // Log stack trace

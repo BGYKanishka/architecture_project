@@ -14,6 +14,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByUserId(Long userId);
 
+    long countByUserId(Long userId);
+
     /**
      * Eagerly fetches User via JOIN FETCH in a single SQL query.
      * Avoids LazyInitializationException when mapping to DTO outside a transaction.

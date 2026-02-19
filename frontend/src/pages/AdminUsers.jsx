@@ -58,6 +58,7 @@ export default function AdminUsers() {
     const [saving, setSaving] = useState(false);
 
     const [confirmDelete, setConfirmDelete] = useState(null); // user object
+    const [deleteErr, setDeleteErr] = useState("");            // inline error inside dialog
     const [toast, setToast] = useState({ msg: "", type: "success" });
 
     const showToast = (msg, type = "success") => setToast({ msg, type });
@@ -148,11 +149,23 @@ export default function AdminUsers() {
         if (!confirmDelete) return;
         try {
             await deleteAdminUser(confirmDelete.id);
-            showToast("User deleted.");
+            showToast("User deleted successfully.");
             setConfirmDelete(null);
+            setDeleteErr("");
             load();
-        } catch {
-            showToast("Delete failed.", "error");
+        } catch (err) {
+            const status = err?.response?.status;
+            const data = err?.response?.data;
+            if (status === 409 && data?.error === "USER_HAS_RESERVATIONS") {
+                // Show specific message inline inside the dialog — dialog stays open
+                const count = data.reservationCount ?? "some";
+                setDeleteErr(
+                    `This user has ${count} reservation${count === 1 ? "" : "s"}. ` +
+                    `Deleting is blocked until all reservations are reassigned or cancelled.`
+                );
+            } else {
+                setDeleteErr("Delete failed. Please try again or contact support.");
+            }
         }
     };
 
@@ -408,17 +421,47 @@ export default function AdminUsers() {
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 space-y-4">
                         <h2 className="font-semibold text-lg text-slate-900">Delete User?</h2>
                         <p className="text-sm text-slate-600">
-                            Are you sure you want to permanently delete <strong>{confirmDelete.name}</strong> ({confirmDelete.email})?
+                            Are you sure you want to permanently delete{" "}
+                            <strong>{confirmDelete.name}</strong> ({confirmDelete.email})?
                             This action cannot be undone.
                         </p>
+
+                        {/* Inline error — shown when backend blocks the delete */}
+                        {deleteErr && (
+                            <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
+                                <div className="flex items-start gap-2">
+                                    <span className="text-red-500 text-base leading-none mt-0.5">⚠️</span>
+                                    <p className="text-sm text-red-700 font-medium">{deleteErr}</p>
+                                </div>
+                                <p className="text-xs text-red-500 pl-6">
+                                    Suggestion: Reassign or cancel reservations before deleting this user.
+                                </p>
+                                <div className="pl-6">
+                                    <a
+                                        href="/admin/reservations"
+                                        className="text-xs text-blue-600 underline hover:text-blue-800"
+                                    >
+                                        View Reservations →
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="flex gap-3">
-                            <button onClick={handleDelete}
-                                className="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700">
-                                Yes, Delete
-                            </button>
-                            <button onClick={() => setConfirmDelete(null)}
-                                className="flex-1 border py-2 rounded-lg text-sm hover:bg-slate-50">
-                                Cancel
+                            {/* Hide destructive button when blocked by FK constraint */}
+                            {!deleteErr && (
+                                <button
+                                    onClick={handleDelete}
+                                    className="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm font-medium hover:bg-red-700"
+                                >
+                                    Yes, Delete
+                                </button>
+                            )}
+                            <button
+                                onClick={() => { setConfirmDelete(null); setDeleteErr(""); }}
+                                className="flex-1 border py-2 rounded-lg text-sm hover:bg-slate-50"
+                            >
+                                {deleteErr ? "Close" : "Cancel"}
                             </button>
                         </div>
                     </div>
