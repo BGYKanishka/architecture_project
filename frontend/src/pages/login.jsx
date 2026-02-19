@@ -16,9 +16,19 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await AuthService.login(email, password);
-      navigate("/dashboard");
-      window.location.reload();
+      const data = await AuthService.login(email, password);
+
+      const roles = data.roles || [];
+      const isAdmin = roles.includes("ROLE_ADMIN") || roles.includes("ROLE_EMPLOYEE");
+
+      if (isAdmin) {
+        localStorage.setItem("admin_token", data.token);
+        localStorage.setItem("admin_role", roles[0]);
+        localStorage.setItem("admin_username", data.email);
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       const resMessage =
         (err.response && err.response.data && err.response.data.message) ||
@@ -127,6 +137,7 @@ const Login = () => {
 
               {/* Submit Button */}
               <button
+                type="submit"
                 disabled={loading}
                 className={`w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
               >

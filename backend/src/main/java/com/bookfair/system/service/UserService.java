@@ -1,11 +1,14 @@
 package com.bookfair.system.service;
 
-import com.bookfair.system.dto.request.UserProfileUpdateRequest;
 import com.bookfair.system.dto.UserProfileResponse;
+import com.bookfair.system.dto.request.AdminCreateUserRequest;
+import com.bookfair.system.dto.request.AdminUpdateUserRequest;
 import com.bookfair.system.dto.request.ChangePasswordRequest;
+import com.bookfair.system.dto.request.UserProfileUpdateRequest;
 import com.bookfair.system.entity.Genre;
 import com.bookfair.system.entity.User;
 import com.bookfair.system.repository.GenreRepository;
+import com.bookfair.system.repository.ReservationRepository;
 import com.bookfair.system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +16,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,30 +29,44 @@ public class UserService {
   private final UserRepository userRepository;
   private final GenreRepository genreRepository;
   private final PasswordEncoder passwordEncoder;
+  private final ReservationRepository reservationRepository;
+
+  /** Thrown when a user cannot be deleted due to FK-linked reservations. */
+  public static class UserHasReservationsException extends RuntimeException {
+    private final long count;
+
+    public UserHasReservationsException(long count) {
+      super("User has " + count + " reservation(s)");
+      this.count = count;
+    }
+
+    public long getCount() {
+      return count;
+    }
+  }
+
+  // ─── User self-service ─────────────────────────────────────
 
   @Transactional(readOnly = true)
   public UserProfileResponse getUserProfile(String email) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     return toProfileResponse(user);
   }
 
   @Transactional
   public UserProfileResponse updateProfile(String email, UserProfileUpdateRequest request) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-    if (request.getName() != null && !request.getName().isEmpty()) {
+    if (request.getName() != null && !request.getName().isEmpty())
       user.setName(request.getName());
-    }
-    if (request.getContactNumber() != null && !request.getContactNumber().isEmpty()) {
+    if (request.getContactNumber() != null && !request.getContactNumber().isEmpty())
       user.setContactNumber(request.getContactNumber());
-    }
-    if (request.getBusinessName() != null && !request.getBusinessName().isEmpty()) {
+    if (request.getBusinessName() != null && !request.getBusinessName().isEmpty())
       user.setBusinessName(request.getBusinessName());
-    }
 
+    // Keeping MAIN's logic: safely parsing strings into Genre entities
     if (request.getGenres() != null) {
       Set<Genre> genreEntities = new HashSet<>();
 
@@ -74,28 +90,130 @@ public class UserService {
 
   public void changePassword(String email, ChangePasswordRequest request) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
       throw new IllegalArgumentException("Incorrect current password");
-    }
 
     user.setPassword(passwordEncoder.encode(request.getNewPassword()));
     userRepository.save(user);
   }
 
-  private UserProfileResponse toProfileResponse(User user) {
-    List<String> genreNames = (user.getGenres() == null) ? List.of()
-        : user.getGenres().stream()
-            .map(Genre::getName)
-            .collect(Collectors.toList());
+  public List<UserProfileResponse> getEmployees() {
+    return userRepository.findByRole("EMPLOYEE").stream()
+        .map(this::toAdminResponse)
+        .collect(Collectors.toList());
+  }
 
+  // ─── Admin CRUD ────────────────────────────────────────────
+
+  @Transactional(readOnly = true)
+  public List<UserProfileResponse> getAllUsers(String role) {
+    List<User> users = (role != null && !role.isBlank())
+        ? userRepository.findByRole(role.toUpperCase())
+        : userRepository.findAll();
+    return users.stream().map(this::toAdminResponse).collect(Collectors.toList());
+  }
+
+  @Transactional(readOnly = true)
+  public UserProfileResponse getUserById(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    return toAdminResponse(user);
+  }
+
+  @Transactional
+  public UserProfileResponse createUser(AdminCreateUserRequest request) {
+    if (userRepository.existsByEmail(request.getEmail()))
+      throw new IllegalArgumentException("Email already in use: " + request.getEmail());
+
+    User user = User.builder()
+        .name(request.getName())
+        .email(request.getEmail())
+        .password(passwordEncoder.encode(request.getPassword()))
+        .role(request.getRole().toUpperCase())
+        .contactNumber(request.getContactNumber())
+        .businessName(request.getBusinessName())
+        .enabled(true)
+        .build();
+
+    return toAdminResponse(userRepository.save(user));
+  }
+
+  @Transactional
+  public UserProfileResponse updateUser(Long id, AdminUpdateUserRequest request) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+
+    if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
+      if (userRepository.existsByEmail(request.getEmail()))
+        throw new IllegalArgumentException("Email already in use: " + request.getEmail());
+      user.setEmail(request.getEmail());
+    }
+    if (request.getName() != null && !request.getName().isBlank())
+      user.setName(request.getName());
+    if (request.getContactNumber() != null)
+      user.setContactNumber(request.getContactNumber());
+    if (request.getBusinessName() != null)
+      user.setBusinessName(request.getBusinessName());
+    if (request.getRole() != null && !request.getRole().isBlank())
+      user.setRole(request.getRole().toUpperCase());
+    if (request.getEnabled() != null)
+      user.setEnabled(request.getEnabled());
+    if (request.getPassword() != null && !request.getPassword().isBlank())
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+    return toAdminResponse(userRepository.save(user));
+  }
+
+  @Transactional
+  public void deleteUser(Long id) {
+    if (!userRepository.existsById(id))
+      throw new RuntimeException("User not found with id: " + id);
+
+    long reservationCount = reservationRepository.countByUserId(id);
+    if (reservationCount > 0)
+      throw new UserHasReservationsException(reservationCount);
+
+    userRepository.deleteById(id);
+  }
+
+  @Transactional
+  public UserProfileResponse toggleEnabled(Long id) {
+    User user = userRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+    user.setEnabled(!Boolean.TRUE.equals(user.getEnabled()));
+    return toAdminResponse(userRepository.save(user));
+  }
+
+  private UserProfileResponse toAdminResponse(User user) {
     return UserProfileResponse.builder()
+        .id(user.getId())
         .name(user.getName())
         .email(user.getEmail())
         .contactNumber(user.getContactNumber())
         .businessName(user.getBusinessName())
         .role(user.getRole())
+        .enabled(user.getEnabled())
+        .createdAt(user.getCreatedAt())
+        .build();
+  }
+
+  private UserProfileResponse toProfileResponse(User user) {
+    List<String> genreNames = (user.getGenres() == null) ? List.of()
+        : user.getGenres().stream()
+        .map(Genre::getName)
+        .collect(Collectors.toList());
+
+    return UserProfileResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .email(user.getEmail())
+        .contactNumber(user.getContactNumber())
+        .businessName(user.getBusinessName())
+        .role(user.getRole())
+        .enabled(user.getEnabled())
+        .createdAt(user.getCreatedAt())
         .genres(genreNames)
         .build();
   }

@@ -28,7 +28,7 @@ public class UserDetailsImpl implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public UserDetailsImpl(Long id, String email, String password,
-                           Collection<? extends GrantedAuthority> authorities) {
+            Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = email;
         this.email = email;
@@ -37,9 +37,12 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user) {
+        // Null-safe: users with no role assigned default to VENDOR
+        String role = (user.getRole() != null && !user.getRole().isBlank())
+                ? user.getRole().toUpperCase()
+                : "VENDOR";
         List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole())
-        );
+                new SimpleGrantedAuthority("ROLE_" + role));
 
         return new UserDetailsImpl(
                 user.getId(),
@@ -49,21 +52,31 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         UserDetailsImpl user = (UserDetailsImpl) o;
         return Objects.equals(id, user.id);
     }

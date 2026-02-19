@@ -9,10 +9,9 @@ const api = axios.create({
     },
 });
 
-// Automatically add the JWT Token to every request if we have one
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("admin_token") || localStorage.getItem("token");
         if (token) {
             config.headers["Authorization"] = "Bearer " + token;
         }
@@ -23,7 +22,6 @@ api.interceptors.request.use(
     }
 );
 
-// 2. Response Interceptor: Catch expired tokens (401 errors) and log the user out
 api.interceptors.response.use(
     (response) => {
         return response;
@@ -34,6 +32,9 @@ api.interceptors.response.use(
 
             localStorage.removeItem("user");
             localStorage.removeItem("token");
+            localStorage.removeItem("admin_token");
+            localStorage.removeItem("admin_role");
+            localStorage.removeItem("admin_username");
 
             window.location.href = "/login";
         }

@@ -1,6 +1,7 @@
 package com.bookfair.system.service;
 
 import com.bookfair.system.dto.request.ReservationRequest;
+import com.bookfair.system.dto.response.AdminReservationResponse;
 import com.bookfair.system.dto.response.ReservationResponse;
 import com.bookfair.system.entity.*;
 import com.bookfair.system.repository.*;
@@ -131,16 +132,34 @@ public class ReservationService {
         return Base64.getEncoder().encodeToString(pngOutputStream.toByteArray());
     }
 
-    public java.util.List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<AdminReservationResponse> getAllReservations() {
+        // JOIN FETCH loads User in a single SQL query — no LazyInitializationException
+        return reservationRepository.findAllWithUser().stream()
+                .map(r -> new AdminReservationResponse(
+                        r.getId(),
+                        r.getUser().getEmail(),
+                        r.getUser().getName(),
+                        r.getReservationDate(),
+                        r.getQrCodeToken(),
+                        r.getStatus()))
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public Reservation updateReservationStatus(Long id, String status) {
-        Reservation reservation = reservationRepository.findById(id)
+    public AdminReservationResponse updateReservationStatus(Long id, String status) {
+        // Use JOIN FETCH to load User eagerly before updating
+        Reservation reservation = reservationRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
         reservation.setStatus(status);
-        return reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+        return new AdminReservationResponse(
+                saved.getId(),
+                saved.getUser().getEmail(),
+                saved.getUser().getName(),
+                saved.getReservationDate(),
+                saved.getQrCodeToken(),
+                saved.getStatus());
     }
 
     public long getReservationCount(Long userId) {

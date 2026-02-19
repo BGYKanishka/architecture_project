@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "reservations")
 @Getter
 @Setter
-@ToString 
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,9 +19,10 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Keep LAZY — eager loading is handled via JOIN FETCH in repository when needed
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @ToString.Exclude 
+    @ToString.Exclude
     private User user;
 
     @CreationTimestamp

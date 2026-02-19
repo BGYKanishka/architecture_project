@@ -18,9 +18,9 @@ public interface StallRepository extends JpaRepository<Stall, Long> {
     @Query("SELECT s FROM Stall s WHERE s.id = :id")
     Optional<Stall> findByIdWithLock(@Param("id") Long id);
 
-    @Query("SELECT s FROM Stall s JOIN FETCH s.floor")
+    @Query("SELECT s FROM Stall s JOIN FETCH s.floor JOIN FETCH s.stallType")
     List<Stall> findAllWithFloors();
 
-    @Query("SELECT s FROM Stall s JOIN FETCH s.floor WHERE s.floor.id = :floorId")
+    @Query("SELECT s FROM Stall s JOIN FETCH s.floor JOIN FETCH s.stallType WHERE s.floor.id = :floorId")
     List<Stall> findByFloorId(@Param("floorId") Long floorId);
 }
