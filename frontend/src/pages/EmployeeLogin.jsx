@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AuthService from "../services/auth.service";
 
 const EmployeeLogin = () => {
@@ -18,12 +18,12 @@ const EmployeeLogin = () => {
             (data) => {
                 const roles = Array.isArray(data.roles) ? data.roles : [];
                 if (roles.includes("ROLE_EMPLOYEE")) {
-                    navigate("/employee/dashboard");
+                    navigate("/employee/floor-plan");
                 } else {
-                    setMessage("Access Denied: You are not an employee.");
+                    setMessage("Access Denied: This portal is for employees only.");
                     AuthService.logout();
+                    setLoading(false);
                 }
-                setLoading(false);
             },
             (error) => {
                 const resMessage =
@@ -31,8 +31,7 @@ const EmployeeLogin = () => {
                         error.response.data &&
                         error.response.data.message) ||
                     error.message ||
-                    error.toString();
-
+                    "Login failed. Invalid credentials.";
                 setLoading(false);
                 setMessage(resMessage);
             }
@@ -40,54 +39,80 @@ const EmployeeLogin = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold mb-6 text-center text-blue-900">Employee Login</h2>
-                <form onSubmit={handleLogin}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                            Email
-                        </label>
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-extrabold text-blue-800 tracking-tight">
+                        Colombo International
+                        <br />
+                        <span className="text-blue-600">Book Fair 2026</span>
+                    </h1>
+                    <div className="mt-4 w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleLogin} className="space-y-4">
+
+                    {/* Email */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Email Address</label>
                         <input
-                            type="text"
-                            name="email"
+                            type="email"
+                            placeholder="name@example.com"
+                            className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
 
-                    <div className="mb-6">
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-                            Password
-                        </label>
+                    {/* Password */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Password</label>
                         <input
                             type="password"
-                            name="password"
+                            placeholder="••••••••"
+                            className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
                             required
                         />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                        <button
-                            type="submit"
-                            className="bg-blue-600 hover:bg-blue-800 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                            disabled={loading}
-                        >
-                            {loading ? "Logging in..." : "Login"}
-                        </button>
-                    </div>
-
+                    {/* Error Message */}
                     {message && (
-                        <div className="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                            <span className="block sm:inline">{message}</span>
+                        <div className="p-3 text-sm text-red-700 bg-red-100 rounded border border-red-200">
+                            {message}
                         </div>
                     )}
+
+                    {/* Submit */}
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className={`w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+                    >
+                        {loading ? "Signing in..." : "Login"}
+                    </button>
                 </form>
+
+                {/* Divider */}
+                <div className="relative flex items-center justify-center w-full mt-6 border-t border-gray-200">
+                    <span className="absolute px-3 bg-white text-gray-500 text-sm">OR</span>
+                </div>
+
+                {/* Back to main site */}
+                <div className="text-center pt-4">
+                    <p className="text-sm text-gray-600">
+                        Not an employee?{" "}
+                        <Link to="/" className="font-medium text-blue-600 hover:text-blue-500 hover:underline">
+                            Go to main login
+                        </Link>
+                    </p>
+                </div>
+
             </div>
         </div>
     );

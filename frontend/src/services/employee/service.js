@@ -20,4 +20,13 @@ const getEmployeeStalls = () => {
     });
 };
 
-export default { verifyQR, getEmployeeStalls };
+const getStallDetails = (stallId) => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${EMPLOYEE_PANEL_API_URL}/stalls/${stallId}`, {
+        headers: {
+            Authorization: 'Bearer ' + token
+        }
+    });
+};
+
+export default { verifyQR, getEmployeeStalls, getStallDetails };

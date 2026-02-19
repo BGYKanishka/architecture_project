@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
@@ -17,6 +17,8 @@ import HelpCenter from "./pages/HelpCenter";
 import GenreSelection from "./pages/GenreSelection";
 import EmployeeLogin from "./pages/EmployeeLogin";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
+import EmployeeFloorPlan from "./pages/EmployeeFloorPlan";
+import EmployeeRoute from "./components/EmployeeRoute";
 import { useEffect, useState } from "react";
 
 function AppContent() {
@@ -28,8 +30,11 @@ function AppContent() {
     setUser(currentUser);
   }, []);
 
+  // Hide global Header & Footer on all employee pages (they have their own)
+  const isEmployeePage = location.pathname.startsWith("/employee");
   const hideHeaderRoutes = ["/login", "/register", "/"];
-  const showHeader = !hideHeaderRoutes.includes(location.pathname);
+  const showHeader = !hideHeaderRoutes.includes(location.pathname) && !isEmployeePage;
+  const showFooter = !isEmployeePage;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -37,6 +42,7 @@ function AppContent() {
 
       <div style={{ flex: 1 }}>
         <Routes>
+          {/* ── Public / Vendor routes ── */}
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -50,13 +56,35 @@ function AppContent() {
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/genres" element={<GenreSelection />} />
 
-          {/* Employee Routes */}
+          {/* ── Employee routes (protected) ── */}
           <Route path="/employee/login" element={<EmployeeLogin />} />
-          <Route path="/employee/dashboard" element={<EmployeeDashboard />} />
+
+          <Route
+            path="/employee/floor-plan"
+            element={
+              <EmployeeRoute>
+                <EmployeeFloorPlan />
+              </EmployeeRoute>
+            }
+          />
+          <Route
+            path="/employee/floor-plan/:hallName"
+            element={
+              <EmployeeRoute>
+                <EmployeeDashboard />
+              </EmployeeRoute>
+            }
+          />
+
+          {/* Legacy /employee/dashboard → redirect to floor plan */}
+          <Route
+            path="/employee/dashboard"
+            element={<Navigate to="/employee/floor-plan" replace />}
+          />
         </Routes>
       </div>
 
-      <Footer />
+      {showFooter && <Footer />}
     </div>
   );
 }

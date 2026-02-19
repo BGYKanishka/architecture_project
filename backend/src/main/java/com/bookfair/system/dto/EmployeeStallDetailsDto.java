@@ -26,6 +26,9 @@ public class EmployeeStallDetailsDto {
     private String vendorContact;
     private String businessName;
 
+    // QR Code Data
+    private String qrCodeData;
+
     // Payment Details
     private String paymentStatus; // PENDING, PAID, FAILED
     private Double paymentAmount;
