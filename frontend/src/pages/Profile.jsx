@@ -82,6 +82,16 @@ const Profile = () => {
     UserService.updateProfile(editForm)
       .then((response) => {
         setProfile(response.data);
+
+        // Update localStorage to sync header
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user) {
+          user.name = response.data.name;
+          localStorage.setItem("user", JSON.stringify(user));
+
+          window.dispatchEvent(new Event("user-updated"));
+        }
+
         setIsEditing(false);
         setSaveMessage("Profile updated successfully!");
         setTimeout(() => setSaveMessage(""), 3000);
