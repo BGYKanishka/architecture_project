@@ -139,4 +139,45 @@ public class ReservationService {
     public long getReservationCount(Long userId) {
         return reservationStallRepository.countStallsByUserId(userId);
     }
+
+    @Transactional(readOnly = true)
+    public List<com.bookfair.system.dto.response.UserReservationResponse> getUserReservations(Long userId) {
+        List<ReservationStall> reservationStalls = reservationStallRepository.findAllByReservationUserId(userId);
+
+        return reservationStalls.stream().map(rs -> {
+            Stall stall = rs.getStall();
+            Reservation reservation = rs.getReservation();
+            String qrCodeImage = null;
+            try {
+                qrCodeImage = generateQRCodeImage(reservation.getQrCodeToken());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return com.bookfair.system.dto.response.UserReservationResponse.builder()
+                    .id(stall.getId())
+                    .stallCode(stall.getStallCode())
+                    .size(stall.getSize())
+                    .price(stall.getPrice())
+                    .floorName(stall.getFloor().getFloorName())
+                    .reservationId(reservation.getQrCodeToken())
+                    .qrCodeImage(qrCodeImage)
+                    .status(reservation.getStatus())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void cancelStallReservation(Long userId, Long stallId) {
+        ReservationStall reservationStall = reservationStallRepository.findByUserIdAndStallId(userId, stallId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found for this stall"));
+
+        Stall stall = reservationStall.getStall();
+        if (stall.isReserved()) {
+            stall.setReserved(false);
+            stallRepository.save(stall);
+        }
+
+        reservationStallRepository.delete(reservationStall);
+    }
 }

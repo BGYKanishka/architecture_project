@@ -18,36 +18,10 @@ const Reservations = () => {
   useEffect(() => {
     const fetchPaidDetails = async () => {
       try {
-        const savedData = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-        if (savedData.length === 0) {
-          setPaidReservations([]);
-          setLoading(false);
-          return;
-        }
-
-        // Handle both old (ID only) and new (Object) formats
-        const idMap = new Map();
-        savedData.forEach(item => {
-          if (typeof item === 'object' && item !== null) {
-            idMap.set(item.id, item);
-          } else {
-            idMap.set(item, { id: item });
-          }
-        });
-
-        const res = await StallService.getAllStalls();
-        const allStalls = res.data;
-        const filtered = allStalls
-          .filter(s => idMap.has(s.id))
-          .map(s => {
-            const extra = idMap.get(s.id);
-            return {
-              ...s,
-              reservationId: extra.reservationId,
-              qrCodeImage: extra.qrCodeImage
-            };
-          });
-        setPaidReservations(filtered);
+        setLoading(true);
+        const res = await StallService.getMyReservations();
+        console.log("API Response for My Reservations:", res.data);
+        setPaidReservations(res.data);
       } catch (err) {
         console.error("Error loading paid reservations:", err);
       } finally {
@@ -58,27 +32,22 @@ const Reservations = () => {
     fetchPaidDetails();
   }, []);
 
-  const cancelReservation = (stall) => {
+  const cancelReservation = async (stall) => {
     const confirmCancel = window.confirm(`Are you sure you want to cancel the reservation for Stall ${stall.stallCode}?`);
 
     if (confirmCancel) {
-      const updated = paidReservations.filter(s => s.id !== stall.id);
-      setPaidReservations(updated);
+      try {
+        await StallService.cancelReservation(stall.id);
+        const updated = paidReservations.filter(s => s.id !== stall.id);
+        setPaidReservations(updated);
 
-      // 1. Update paidReservations (preserve objects)
-      const savedData = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-      const updatedSavedData = savedData.filter(item => (typeof item === 'object' && item !== null ? item.id : item) !== stall.id);
-      localStorage.setItem("paidReservations", JSON.stringify(updatedSavedData));
-
-      // 2. Track as cancelled for session override
-      const cancelledIds = JSON.parse(localStorage.getItem("cancelledReservations") || "[]");
-      if (!cancelledIds.includes(stall.id)) {
-        cancelledIds.push(stall.id);
-        localStorage.setItem("cancelledReservations", JSON.stringify(cancelledIds));
+        // Dispatch events to update other components if they listen
+        window.dispatchEvent(new Event("paidReservationsUpdated"));
+        window.dispatchEvent(new Event("cancelledReservationsUpdated"));
+      } catch (err) {
+        console.error("Error cancelling reservation:", err);
+        alert("Failed to cancel reservation. Please try again.");
       }
-
-      window.dispatchEvent(new Event("paidReservationsUpdated"));
-      window.dispatchEvent(new Event("cancelledReservationsUpdated"));
     }
   };
 
