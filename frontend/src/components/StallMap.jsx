@@ -84,10 +84,7 @@ const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState(() => {
-    const saved = localStorage.getItem("selectedStalls");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [selectedStalls, setSelectedStalls] = useState([]);
   const [paidReservations, setPaidReservations] = useState(() => {
     const saved = localStorage.getItem("paidReservations");
     return saved ? JSON.parse(saved) : [];
@@ -114,10 +111,7 @@ const StallMap = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
-    window.dispatchEvent(new Event("selectedStallsUpdated"));
-  }, [selectedStalls]);
+
 
   useEffect(() => {
     const syncStates = () => {
