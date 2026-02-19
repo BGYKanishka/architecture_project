@@ -12,21 +12,33 @@ import {
     HeartIcon
 } from "@heroicons/react/24/outline";
 import UserService from "../services/user.service";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 const genres = [
-    { id: "fiction", label: "Fiction", icon: <BookOpenIcon className="w-8 h-8" />, color: "bg-purple-100 border-purple-200 text-purple-600" },
-    { id: "non-fiction", label: "Non-Fiction", icon: <GlobeAltIcon className="w-8 h-8" />, color: "bg-blue-100 border-blue-200 text-blue-600" },
-    { id: "academic", label: "Academic & Education", icon: <AcademicCapIcon className="w-8 h-8" />, color: "bg-emerald-100 border-emerald-200 text-emerald-600" },
-    { id: "children", label: "Children's Books", icon: <SparklesIcon className="w-8 h-8" />, color: "bg-yellow-100 border-yellow-200 text-yellow-600" },
-    { id: "art", label: "Art & Photography", icon: <PaintBrushIcon className="w-8 h-8" />, color: "bg-pink-100 border-pink-200 text-pink-600" },
-    { id: "romance", label: "Romance", icon: <HeartIcon className="w-8 h-8" />, color: "bg-rose-100 border-rose-200 text-rose-600" },
-    { id: "scifi", label: "Sci-Fi & Fantasy", icon: <RocketLaunchIcon className="w-8 h-8" />, color: "bg-indigo-100 border-indigo-200 text-indigo-600" },
-    { id: "biography", label: "Biography", icon: <MicrophoneIcon className="w-8 h-8" />, color: "bg-orange-100 border-orange-200 text-orange-600" }
+    { id: "Fiction", label: "Fiction", icon: <BookOpenIcon className="w-8 h-8" />, color: "bg-purple-100 border-purple-200 text-purple-600" },
+    { id: "Non-Fiction", label: "Non-Fiction", icon: <GlobeAltIcon className="w-8 h-8" />, color: "bg-blue-100 border-blue-200 text-blue-600" },
+    { id: "Academic & Education", label: "Academic & Education", icon: <AcademicCapIcon className="w-8 h-8" />, color: "bg-emerald-100 border-emerald-200 text-emerald-600" },
+    { id: "Children's Books", label: "Children's Books", icon: <SparklesIcon className="w-8 h-8" />, color: "bg-yellow-100 border-yellow-200 text-yellow-600" },
+    { id: "Art & Photography", label: "Art & Photography", icon: <PaintBrushIcon className="w-8 h-8" />, color: "bg-pink-100 border-pink-200 text-pink-600" },
+    { id: "Romance", label: "Romance", icon: <HeartIcon className="w-8 h-8" />, color: "bg-rose-100 border-rose-200 text-rose-600" },
+    { id: "Sci-Fi & Fantasy", label: "Sci-Fi & Fantasy", icon: <RocketLaunchIcon className="w-8 h-8" />, color: "bg-indigo-100 border-indigo-200 text-indigo-600" },
+    { id: "Biography", label: "Biography", icon: <MicrophoneIcon className="w-8 h-8" />, color: "bg-orange-100 border-orange-200 text-orange-600" }
 ];
 
 const GenreSelection = () => {
     const navigate = useNavigate();
     const [selectedGenres, setSelectedGenres] = useState([]);
+
+    // Alert Modal State
+    const [alertConfig, setAlertConfig] = useState({
+        isOpen: false,
+        title: "",
+        message: ""
+    });
+
+    const showAlert = (title, message) => {
+        setAlertConfig({ isOpen: true, title, message });
+    };
 
     const toggleGenre = (id) => {
         if (selectedGenres.includes(id)) {
@@ -37,7 +49,10 @@ const GenreSelection = () => {
     };
 
     const handleContinue = () => {
-        if (selectedGenres.length === 0) return alert("Please select at least one genre.");
+        if (selectedGenres.length === 0) {
+            return showAlert("Selection Required", "Please select at least one genre.");
+        }
+
 
         UserService.updateProfile({ genres: selectedGenres })
             .then(() => {
@@ -45,7 +60,7 @@ const GenreSelection = () => {
             })
             .catch((err) => {
                 console.error("Error saving genres:", err);
-                alert("Failed to save genres. Please try again.");
+                showAlert("Save Failed", "Failed to save genres. Please try again.");
             });
     };
 
@@ -53,7 +68,6 @@ const GenreSelection = () => {
         <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
 
-                {/* Header */}
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-black text-slate-800 tracking-tight mb-4">
                         What do you publish?
@@ -63,7 +77,6 @@ const GenreSelection = () => {
                     </p>
                 </div>
 
-                {/* Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
                     {genres.map((genre) => {
                         const isSelected = selectedGenres.includes(genre.id);
@@ -79,7 +92,6 @@ const GenreSelection = () => {
                                     }
                 `}
                             >
-                                {/* Check Icon */}
                                 {isSelected && (
                                     <div className="absolute top-3 right-3 text-blue-600 animate-in zoom-in duration-200">
                                         <CheckCircleIcon className="w-6 h-6" />
@@ -119,6 +131,15 @@ const GenreSelection = () => {
                 </div>
 
             </div>
+
+            <ConfirmationModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                confirmText="Got it"
+                isAlert={true}
+            />
         </div>
     );
 };

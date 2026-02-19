@@ -154,3 +154,17 @@ FROM generate_series(5, 6) AS seq;
 INSERT INTO stalls (floor_id, stall_code, stall_type_id) 
 SELECT (SELECT id FROM floors WHERE floor_name='G'), 'G-' || LPAD(seq::text, 2, '0'), (SELECT id FROM stall_types WHERE size='MEDIUM')
 FROM generate_series(7, 15) AS seq;
+
+# add genre values
+
+INSERT INTO genres (name) 
+VALUES 
+    ('Fiction'),
+    ('Non-Fiction'),
+    ('Academic & Education'),
+    ('Children''s Books'),
+    ('Art & Photography'),
+    ('Romance'),
+    ('Sci-Fi & Fantasy'),
+    ('Biography')
+ON CONFLICT (name) DO NOTHING;

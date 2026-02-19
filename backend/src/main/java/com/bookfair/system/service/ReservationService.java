@@ -109,11 +109,18 @@ public class ReservationService {
                     qrImageBase64,
                     stallCodes);
 
-            return new ReservationResponse(qrToken, qrImageBase64, "Booking Successful!");
+            return ReservationResponse.builder()
+                    .reservationCode(qrToken)
+                    .qrCodeImage(qrImageBase64)
+                    .message("Booking Successful!")
+                    .build();
 
         } catch (Exception e) {
             System.err.println("QR/Email Error: " + e.getMessage());
-            return new ReservationResponse(qrToken, null, "Booking Success (Email Failed)");
+            return ReservationResponse.builder()
+                    .reservationCode(qrToken)
+                    .message("Booking Success (Email Failed)")
+                    .build();
         }
     }
 
@@ -153,5 +160,50 @@ public class ReservationService {
                 saved.getReservationDate(),
                 saved.getQrCodeToken(),
                 saved.getStatus());
+    }
+
+    public long getReservationCount(Long userId) {
+        return reservationStallRepository.countStallsByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getUserReservations(Long userId) {
+        List<ReservationStall> reservationStalls = reservationStallRepository.findAllByReservationUserId(userId);
+
+        return reservationStalls.stream().map(rs -> {
+            Stall stall = rs.getStall();
+            Reservation reservation = rs.getReservation();
+            String qrCodeImage = null;
+            try {
+                qrCodeImage = generateQRCodeImage(reservation.getQrCodeToken());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return ReservationResponse.builder()
+                    .id(stall.getId())
+                    .stallCode(stall.getStallCode())
+                    .size(stall.getSize())
+                    .price(stall.getPrice())
+                    .floorName(stall.getFloor().getFloorName())
+                    .reservationCode(reservation.getQrCodeToken()) // Mapped from reservationId -> reservationCode
+                    .qrCodeImage(qrCodeImage)
+                    .status(reservation.getStatus())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void cancelStallReservation(Long userId, Long stallId) {
+        ReservationStall reservationStall = reservationStallRepository.findByUserIdAndStallId(userId, stallId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found for this stall"));
+
+        Stall stall = reservationStall.getStall();
+        if (stall.isReserved()) {
+            stall.setReserved(false);
+            stallRepository.save(stall);
+        }
+
+        reservationStallRepository.delete(reservationStall);
     }
 }

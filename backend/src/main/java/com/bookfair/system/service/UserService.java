@@ -5,23 +5,29 @@ import com.bookfair.system.dto.request.AdminCreateUserRequest;
 import com.bookfair.system.dto.request.AdminUpdateUserRequest;
 import com.bookfair.system.dto.request.ChangePasswordRequest;
 import com.bookfair.system.dto.request.UserProfileUpdateRequest;
+import com.bookfair.system.entity.Genre;
 import com.bookfair.system.entity.User;
+import com.bookfair.system.repository.GenreRepository;
 import com.bookfair.system.repository.ReservationRepository;
 import com.bookfair.system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
   private final UserRepository userRepository;
+  private final GenreRepository genreRepository;
   private final PasswordEncoder passwordEncoder;
   private final ReservationRepository reservationRepository;
 
@@ -41,12 +47,14 @@ public class UserService {
 
   // ─── User self-service ─────────────────────────────────────
 
+  @Transactional(readOnly = true)
   public UserProfileResponse getUserProfile(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
     return toProfileResponse(user);
   }
 
+  @Transactional
   public UserProfileResponse updateProfile(String email, UserProfileUpdateRequest request) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
@@ -57,8 +65,24 @@ public class UserService {
       user.setContactNumber(request.getContactNumber());
     if (request.getBusinessName() != null && !request.getBusinessName().isEmpty())
       user.setBusinessName(request.getBusinessName());
-    if (request.getGenres() != null)
-      user.setGenres(request.getGenres());
+
+    // Keeping MAIN's logic: safely parsing strings into Genre entities
+    if (request.getGenres() != null) {
+      Set<Genre> genreEntities = new HashSet<>();
+
+      for (String rawGenreName : request.getGenres()) {
+        String cleanName = rawGenreName.trim();
+
+        Genre genre = genreRepository.findByNameIgnoreCase(cleanName)
+            .orElseThrow(() -> {
+              log.error("Genre not found in database: '{}'", cleanName);
+              return new IllegalArgumentException("Invalid genre: " + cleanName);
+            });
+
+        genreEntities.add(genre);
+      }
+      user.setGenres(genreEntities);
+    }
 
     userRepository.save(user);
     return toProfileResponse(user);
@@ -121,7 +145,6 @@ public class UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
-    // Check email uniqueness if email is being changed
     if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
       if (userRepository.existsByEmail(request.getEmail()))
         throw new IllegalArgumentException("Email already in use: " + request.getEmail());
@@ -137,7 +160,6 @@ public class UserService {
       user.setRole(request.getRole().toUpperCase());
     if (request.getEnabled() != null)
       user.setEnabled(request.getEnabled());
-    // Re-hash only if a new password is provided
     if (request.getPassword() != null && !request.getPassword().isBlank())
       user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -164,14 +186,6 @@ public class UserService {
     return toAdminResponse(userRepository.save(user));
   }
 
-  // ─── Mappers ───────────────────────────────────────────────
-
-  /**
-   * Admin-safe mapper — deliberately excludes the lazy 'genres'
-   * 
-   * @ElementCollection so no LazyInitializationException can occur.
-   *                    Used by all admin CRUD endpoints.
-   */
   private UserProfileResponse toAdminResponse(User user) {
     return UserProfileResponse.builder()
         .id(user.getId())
@@ -182,15 +196,15 @@ public class UserService {
         .role(user.getRole())
         .enabled(user.getEnabled())
         .createdAt(user.getCreatedAt())
-        // genres intentionally omitted — lazy collection, not needed for admin
         .build();
   }
 
-  /**
-   * Full mapper with genres — only used for the user's own profile
-   * endpoints where the Hibernate session is guaranteed to be open.
-   */
   private UserProfileResponse toProfileResponse(User user) {
+    List<String> genreNames = (user.getGenres() == null) ? List.of()
+        : user.getGenres().stream()
+        .map(Genre::getName)
+        .collect(Collectors.toList());
+
     return UserProfileResponse.builder()
         .id(user.getId())
         .name(user.getName())
@@ -200,7 +214,7 @@ public class UserService {
         .role(user.getRole())
         .enabled(user.getEnabled())
         .createdAt(user.getCreatedAt())
-        .genres(user.getGenres())
+        .genres(genreNames)
         .build();
   }
 }

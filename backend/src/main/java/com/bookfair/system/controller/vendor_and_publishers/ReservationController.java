@@ -28,4 +28,31 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getReservationCount(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+        long count = reservationService.getReservationCount(currentUser.getId());
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<java.util.List<ReservationResponse>> getMyReservations(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        System.out.println("Fetching reservations for user ID: " + currentUser.getId());
+        java.util.List<ReservationResponse> reservations = reservationService
+                .getUserReservations(currentUser.getId());
+        System.out.println("Found " + reservations.size() + " reservations for user ID: " + currentUser.getId());
+        return ResponseEntity.ok(reservations);
+    }
+
+    @DeleteMapping("/{stallId}")
+    public ResponseEntity<?> cancelReservation(@AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PathVariable Long stallId) {
+        try {
+            reservationService.cancelStallReservation(currentUser.getId(), stallId);
+            return ResponseEntity.ok("Reservation cancelled successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
