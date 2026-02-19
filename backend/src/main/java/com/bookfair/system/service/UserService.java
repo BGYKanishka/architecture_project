@@ -41,7 +41,6 @@ public class UserService {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-    // Update basic fields
     if (request.getName() != null && !request.getName().isEmpty()) {
       user.setName(request.getName());
     }

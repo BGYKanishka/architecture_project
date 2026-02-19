@@ -84,10 +84,7 @@ const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState(() => {
-    const saved = localStorage.getItem("selectedStalls");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [selectedStalls, setSelectedStalls] = useState([]);
   const [paidReservations, setPaidReservations] = useState(() => {
     const saved = localStorage.getItem("paidReservations");
     return saved ? JSON.parse(saved) : [];
@@ -96,11 +93,25 @@ const StallMap = () => {
     const saved = localStorage.getItem("cancelledReservations");
     return saved ? JSON.parse(saved) : [];
   });
+  const [reservationCount, setReservationCount] = useState(0);
 
   useEffect(() => {
-    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
-    window.dispatchEvent(new Event("selectedStallsUpdated"));
-  }, [selectedStalls]);
+    const fetchCount = () => {
+      StallService.getReservationCount()
+        .then((res) => {
+          // console.log("Reservation count loaded:", res.data);
+          setReservationCount(res.data);
+        })
+        .catch((err) => console.error("Error fetching reservation count:", err));
+    };
+
+    fetchCount();
+    const intervalId = setInterval(fetchCount, 3000); // Poll count as well
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+
 
   useEffect(() => {
     const syncStates = () => {
@@ -119,42 +130,54 @@ const StallMap = () => {
   const activeHall = hallName || null;
 
   useEffect(() => {
-    StallService.getAllStalls()
-      .then((res) => {
-        console.log("Stalls loaded:", res.data); // Debug log
-        if (Array.isArray(res.data)) {
-          setStalls(res.data);
+    const fetchStalls = () => {
+      StallService.getAllStalls()
+        .then((res) => {
+          // console.log("Stalls loaded:", res.data); // Debug log (Optional: remove to reduce noise)
+          if (Array.isArray(res.data)) {
+            setStalls(res.data);
 
-          // Sync Local Storage with Backend
-          const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-          const validatedPaid = localPaid.filter((paidItem) => {
-            const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
-            const stall = res.data.find((s) => s.id === paidId);
-            if (stall && !stall.reserved) {
-              return false;
-            }
-            return true; 
-          });
-
-          if (validatedPaid.length !== localPaid.length) {
-            console.warn("Found stale reservations in local storage. Cleaning up...", {
-              before: localPaid,
-              after: validatedPaid
+            // Sync Local Storage with Backend
+            const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+            const validatedPaid = localPaid.filter((paidItem) => {
+              const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
+              const stall = res.data.find((s) => s.id === paidId);
+              if (stall && !stall.reserved) {
+                return false;
+              }
+              return true;
             });
-            localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
-            setPaidReservations(validatedPaid);
-            window.dispatchEvent(new Event("paidReservationsUpdated"));
-          }
 
-        } else {
-          console.error("API returned non-array for stalls:", res.data);
-          setStalls([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error loading stalls:", err);
-        setStalls([]); 
-      });
+            if (validatedPaid.length !== localPaid.length) {
+              console.warn("Found stale reservations in local storage. Cleaning up...", {
+                before: localPaid,
+                after: validatedPaid
+              });
+              localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
+              setPaidReservations(validatedPaid);
+              window.dispatchEvent(new Event("paidReservationsUpdated"));
+            }
+
+          } else {
+            console.error("API returned non-array for stalls:", res.data);
+            setStalls([]);
+          }
+        })
+        .catch((err) => {
+          console.error("Error loading stalls:", err);
+          // Only clear stalls if it's a critical failure, otherwise keep old data
+          // setStalls([]); 
+        });
+    };
+
+    // Initial fetch
+    fetchStalls();
+
+    // Set up polling every 3 seconds
+    const intervalId = setInterval(fetchStalls, 3000);
+
+    // Cleanup on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const getHallStatus = (visualHallName) => {
@@ -181,7 +204,9 @@ const StallMap = () => {
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
-      if (selectedStalls.length >= 3) return alert("Max 3 stalls!");
+      if (selectedStalls.length + reservationCount >= 3) {
+        return alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+      }
       setSelectedStalls([...selectedStalls, stall.id]);
     }
   };
@@ -209,6 +234,10 @@ const StallMap = () => {
 
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
+    if (selectedStalls.length + reservationCount > 3) {
+      alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+      return;
+    }
 
     const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)

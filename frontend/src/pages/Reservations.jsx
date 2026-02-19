@@ -18,36 +18,10 @@ const Reservations = () => {
   useEffect(() => {
     const fetchPaidDetails = async () => {
       try {
-        const savedData = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-        if (savedData.length === 0) {
-          setPaidReservations([]);
-          setLoading(false);
-          return;
-        }
-
-        // Handle both old (ID only) and new (Object) formats
-        const idMap = new Map();
-        savedData.forEach(item => {
-          if (typeof item === 'object' && item !== null) {
-            idMap.set(item.id, item);
-          } else {
-            idMap.set(item, { id: item });
-          }
-        });
-
-        const res = await StallService.getAllStalls();
-        const allStalls = res.data;
-        const filtered = allStalls
-          .filter(s => idMap.has(s.id))
-          .map(s => {
-            const extra = idMap.get(s.id);
-            return {
-              ...s,
-              reservationId: extra.reservationId,
-              qrCodeImage: extra.qrCodeImage
-            };
-          });
-        setPaidReservations(filtered);
+        setLoading(true);
+        const res = await StallService.getMyReservations();
+        console.log("API Response for My Reservations:", res.data);
+        setPaidReservations(res.data);
       } catch (err) {
         console.error("Error loading paid reservations:", err);
       } finally {
@@ -58,27 +32,22 @@ const Reservations = () => {
     fetchPaidDetails();
   }, []);
 
-  const cancelReservation = (stall) => {
+  const cancelReservation = async (stall) => {
     const confirmCancel = window.confirm(`Are you sure you want to cancel the reservation for Stall ${stall.stallCode}?`);
 
     if (confirmCancel) {
-      const updated = paidReservations.filter(s => s.id !== stall.id);
-      setPaidReservations(updated);
+      try {
+        await StallService.cancelReservation(stall.id);
+        const updated = paidReservations.filter(s => s.id !== stall.id);
+        setPaidReservations(updated);
 
-      // 1. Update paidReservations (preserve objects)
-      const savedData = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-      const updatedSavedData = savedData.filter(item => (typeof item === 'object' && item !== null ? item.id : item) !== stall.id);
-      localStorage.setItem("paidReservations", JSON.stringify(updatedSavedData));
-
-      // 2. Track as cancelled for session override
-      const cancelledIds = JSON.parse(localStorage.getItem("cancelledReservations") || "[]");
-      if (!cancelledIds.includes(stall.id)) {
-        cancelledIds.push(stall.id);
-        localStorage.setItem("cancelledReservations", JSON.stringify(cancelledIds));
+        // Dispatch events to update other components if they listen
+        window.dispatchEvent(new Event("paidReservationsUpdated"));
+        window.dispatchEvent(new Event("cancelledReservationsUpdated"));
+      } catch (err) {
+        console.error("Error cancelling reservation:", err);
+        alert("Failed to cancel reservation. Please try again.");
       }
-
-      window.dispatchEvent(new Event("paidReservationsUpdated"));
-      window.dispatchEvent(new Event("cancelledReservationsUpdated"));
     }
   };
 
@@ -139,8 +108,8 @@ const Reservations = () => {
                           <span className="px-2 py-0.5 bg-green-50 text-[10px] font-bold text-green-600 rounded uppercase tracking-wider border border-green-100 italic">Confirmed</span>
                           <span className="text-sm font-bold text-blue-600 font-mono">LKR {stall.price?.toLocaleString()}</span>
                         </div>
-                        {stall.reservationId && (
-                          <p className="text-[10px] text-slate-400 mt-1 font-mono uppercase tracking-tighter">ID: {stall.reservationId}</p>
+                        {stall.reservationCode && (
+                          <p className="text-[10px] text-slate-400 mt-1 font-mono uppercase tracking-tighter">ID: {stall.reservationCode}</p>
                         )}
                       </div>
                     </div>
@@ -154,7 +123,7 @@ const Reservations = () => {
                   </div>
 
                   {/* QR Code Section */}
-                  {stall.reservationId && (
+                  {stall.reservationCode && (
                     <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-4">
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
                         {stall.qrCodeImage ? (
@@ -165,7 +134,7 @@ const Reservations = () => {
                           />
                         ) : (
                           <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${stall.reservationId}`}
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${stall.reservationCode}`}
                             alt="QR Code"
                             className="w-20 h-20 object-contain"
                           />
