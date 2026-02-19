@@ -6,16 +6,28 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface ReservationStallRepository extends JpaRepository<ReservationStall, Long> {
 
-    // Check reservation
-    @Query("SELECT COUNT(rs) > 0 FROM ReservationStall rs " +
-            "WHERE rs.stall.id = :stallId AND rs.reservation.status = 'CONFIRMED'")
-    boolean isStallReserved(@Param("stallId") Long stallId);
+        // Check reservation
+        @Query("SELECT COUNT(rs) > 0 FROM ReservationStall rs " +
+                        "WHERE rs.stall.id = :stallId AND rs.reservation.status = 'CONFIRMED'")
+        boolean isStallReserved(@Param("stallId") Long stallId);
 
-    // Count stalls
-    @Query("SELECT COUNT(rs) FROM ReservationStall rs " +
-            "WHERE rs.reservation.user.id = :userId AND rs.reservation.status = 'CONFIRMED'")
-    long countStallsByUserId(@Param("userId") Long userId);
+        // Count stalls
+        @Query("SELECT COUNT(rs) FROM ReservationStall rs " +
+                        "WHERE rs.reservation.user.id = :userId AND rs.reservation.status = 'CONFIRMED'")
+        long countStallsByUserId(@Param("userId") Long userId);
+
+        /**
+         * Finds the active (CONFIRMED) reservation-stall link for a given stall,
+         * eagerly fetching reservation and user for vendor detail display.
+         */
+        @Query("SELECT rs FROM ReservationStall rs " +
+                        "JOIN FETCH rs.reservation r " +
+                        "JOIN FETCH r.user u " +
+                        "WHERE rs.stall.id = :stallId AND r.status = 'CONFIRMED'")
+        Optional<ReservationStall> findActiveByStallId(@Param("stallId") Long stallId);
 }

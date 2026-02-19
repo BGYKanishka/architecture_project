@@ -28,9 +28,14 @@ public class Stall {
     @JoinColumn(name = "stall_type_id", nullable = false)
     private StallType stallType;
 
-    // This was causing your error before:
+    @Builder.Default
     @Column(columnDefinition = "boolean default false")
     private boolean reserved = false;
+
+    /** Admin can disable a stall to prevent new reservations. */
+    @Builder.Default
+    @Column(columnDefinition = "boolean default false")
+    private boolean disabled = false;
 
     public String getSize() {
         return stallType != null ? stallType.getSize() : "UNKNOWN";

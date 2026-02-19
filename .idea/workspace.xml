@@ -6,10 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="8ec89d2a-c9d5-4150-bb4f-1ae587f27007" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/exception/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/exception/GlobalExceptionHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/repository/ReservationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/repository/ReservationRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/service/UserService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/service/UserService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/admin/AdminStallController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/admin/AdminStallController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/entity/Stall.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/entity/Stall.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/repository/ReservationStallRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/repository/ReservationStallRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/service/StallService.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/service/StallService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/services/admin/admin.stall.service.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/services/admin/admin.stall.service.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
