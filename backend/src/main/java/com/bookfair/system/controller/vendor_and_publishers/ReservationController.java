@@ -36,10 +36,10 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<java.util.List<com.bookfair.system.dto.response.UserReservationResponse>> getMyReservations(
+    public ResponseEntity<java.util.List<ReservationResponse>> getMyReservations(
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
         System.out.println("Fetching reservations for user ID: " + currentUser.getId());
-        java.util.List<com.bookfair.system.dto.response.UserReservationResponse> reservations = reservationService
+        java.util.List<ReservationResponse> reservations = reservationService
                 .getUserReservations(currentUser.getId());
         System.out.println("Found " + reservations.size() + " reservations for user ID: " + currentUser.getId());
         return ResponseEntity.ok(reservations);

@@ -108,11 +108,18 @@ public class ReservationService {
                     qrImageBase64,
                     stallCodes);
 
-            return new ReservationResponse(qrToken, qrImageBase64, "Booking Successful!");
+            return ReservationResponse.builder()
+                    .reservationCode(qrToken)
+                    .qrCodeImage(qrImageBase64)
+                    .message("Booking Successful!")
+                    .build();
 
         } catch (Exception e) {
             System.err.println("QR/Email Error: " + e.getMessage());
-            return new ReservationResponse(qrToken, null, "Booking Success (Email Failed)");
+            return ReservationResponse.builder()
+                    .reservationCode(qrToken)
+                    .message("Booking Success (Email Failed)")
+                    .build();
         }
     }
 
@@ -141,7 +148,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<com.bookfair.system.dto.response.UserReservationResponse> getUserReservations(Long userId) {
+    public List<ReservationResponse> getUserReservations(Long userId) {
         List<ReservationStall> reservationStalls = reservationStallRepository.findAllByReservationUserId(userId);
 
         return reservationStalls.stream().map(rs -> {
@@ -154,13 +161,13 @@ public class ReservationService {
                 e.printStackTrace();
             }
 
-            return com.bookfair.system.dto.response.UserReservationResponse.builder()
+            return ReservationResponse.builder()
                     .id(stall.getId())
                     .stallCode(stall.getStallCode())
                     .size(stall.getSize())
                     .price(stall.getPrice())
                     .floorName(stall.getFloor().getFloorName())
-                    .reservationId(reservation.getQrCodeToken())
+                    .reservationCode(reservation.getQrCodeToken()) // Mapped from reservationId -> reservationCode
                     .qrCodeImage(qrCodeImage)
                     .status(reservation.getStatus())
                     .build();

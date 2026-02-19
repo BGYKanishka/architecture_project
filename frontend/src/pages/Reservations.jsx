@@ -108,8 +108,8 @@ const Reservations = () => {
                           <span className="px-2 py-0.5 bg-green-50 text-[10px] font-bold text-green-600 rounded uppercase tracking-wider border border-green-100 italic">Confirmed</span>
                           <span className="text-sm font-bold text-blue-600 font-mono">LKR {stall.price?.toLocaleString()}</span>
                         </div>
-                        {stall.reservationId && (
-                          <p className="text-[10px] text-slate-400 mt-1 font-mono uppercase tracking-tighter">ID: {stall.reservationId}</p>
+                        {stall.reservationCode && (
+                          <p className="text-[10px] text-slate-400 mt-1 font-mono uppercase tracking-tighter">ID: {stall.reservationCode}</p>
                         )}
                       </div>
                     </div>
@@ -123,7 +123,7 @@ const Reservations = () => {
                   </div>
 
                   {/* QR Code Section */}
-                  {stall.reservationId && (
+                  {stall.reservationCode && (
                     <div className="mt-4 pt-4 border-t border-slate-50 flex items-center gap-4">
                       <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
                         {stall.qrCodeImage ? (
@@ -134,7 +134,7 @@ const Reservations = () => {
                           />
                         ) : (
                           <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${stall.reservationId}`}
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${stall.reservationCode}`}
                             alt="QR Code"
                             className="w-20 h-20 object-contain"
                           />
