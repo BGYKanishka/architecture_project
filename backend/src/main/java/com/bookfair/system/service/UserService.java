@@ -61,7 +61,7 @@ public class UserService {
 
   public List<UserProfileResponse> getEmployees() {
     return userRepository.findByRole("EMPLOYEE").stream()
-        .map(this::toProfileResponse)
+        .map(this::toAdminResponse)
         .collect(Collectors.toList());
   }
 
@@ -72,14 +72,14 @@ public class UserService {
     List<User> users = (role != null && !role.isBlank())
         ? userRepository.findByRole(role.toUpperCase())
         : userRepository.findAll();
-    return users.stream().map(this::toProfileResponse).collect(Collectors.toList());
+    return users.stream().map(this::toAdminResponse).collect(Collectors.toList());
   }
 
   @Transactional(readOnly = true)
   public UserProfileResponse getUserById(Long id) {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
-    return toProfileResponse(user);
+    return toAdminResponse(user);
   }
 
   @Transactional
@@ -97,7 +97,7 @@ public class UserService {
         .enabled(true)
         .build();
 
-    return toProfileResponse(userRepository.save(user));
+    return toAdminResponse(userRepository.save(user));
   }
 
   @Transactional
@@ -125,7 +125,7 @@ public class UserService {
     if (request.getPassword() != null && !request.getPassword().isBlank())
       user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-    return toProfileResponse(userRepository.save(user));
+    return toAdminResponse(userRepository.save(user));
   }
 
   @Transactional
@@ -140,11 +140,35 @@ public class UserService {
     User user = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     user.setEnabled(!Boolean.TRUE.equals(user.getEnabled()));
-    return toProfileResponse(userRepository.save(user));
+    return toAdminResponse(userRepository.save(user));
   }
 
-  // ─── Mapper ────────────────────────────────────────────────
+  // ─── Mappers ───────────────────────────────────────────────
 
+  /**
+   * Admin-safe mapper — deliberately excludes the lazy 'genres'
+   * 
+   * @ElementCollection so no LazyInitializationException can occur.
+   *                    Used by all admin CRUD endpoints.
+   */
+  private UserProfileResponse toAdminResponse(User user) {
+    return UserProfileResponse.builder()
+        .id(user.getId())
+        .name(user.getName())
+        .email(user.getEmail())
+        .contactNumber(user.getContactNumber())
+        .businessName(user.getBusinessName())
+        .role(user.getRole())
+        .enabled(user.getEnabled())
+        .createdAt(user.getCreatedAt())
+        // genres intentionally omitted — lazy collection, not needed for admin
+        .build();
+  }
+
+  /**
+   * Full mapper with genres — only used for the user's own profile
+   * endpoints where the Hibernate session is guaranteed to be open.
+   */
   private UserProfileResponse toProfileResponse(User user) {
     return UserProfileResponse.builder()
         .id(user.getId())

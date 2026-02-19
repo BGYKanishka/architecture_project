@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8ec89d2a-c9d5-4150-bb4f-1ae587f27007" name="Changes" comment="" />
+    <list default="true" id="8ec89d2a-c9d5-4150-bb4f-1ae587f27007" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/EmployeeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/controller/EmployeeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/repository/EmployeeRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/repository/EmployeeRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/security/services/UserDetailsImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/bookfair/system/security/services/UserDetailsImpl.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

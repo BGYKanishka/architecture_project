@@ -1,6 +1,5 @@
 package com.bookfair.system.controller;
 
-import com.bookfair.system.entity.User;
 import com.bookfair.system.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
