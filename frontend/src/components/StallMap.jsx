@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import StallService from "../services/stall.service";
 import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
@@ -94,6 +95,17 @@ const StallMap = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [reservationCount, setReservationCount] = useState(0);
+
+  // Alert Modal State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: ""
+  });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
 
   useEffect(() => {
     const fetchCount = () => {
@@ -205,7 +217,10 @@ const StallMap = () => {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
       if (selectedStalls.length + reservationCount >= 3) {
-        return alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+        return showAlert(
+          "Limit Reached",
+          `You already have ${reservationCount} active reservations. Max allowed is 3.`
+        );
       }
       setSelectedStalls([...selectedStalls, stall.id]);
     }
@@ -235,7 +250,10 @@ const StallMap = () => {
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
     if (selectedStalls.length + reservationCount > 3) {
-      alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+      showAlert(
+        "Limit Reached",
+        `You already have ${reservationCount} active reservations. Max allowed is 3.`
+      );
       return;
     }
 
@@ -360,6 +378,15 @@ const StallMap = () => {
           )}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        confirmText="Got it"
+        isAlert={true}
+      />
     </div>
   );
 };
