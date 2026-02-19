@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getStallAvailability, toggleStallDisabled } from "../services/admin/admin.stall.service";
+import AdminHeader from "../components/AdminHeader";
 
 // ── Constants ────────────────────────────────────────────────
 const STATUS_FILTERS = ["ALL", "AVAILABLE", "RESERVED", "DISABLED"];
@@ -310,27 +311,24 @@ export default function AdminStalls() {
     return (
         <div className="min-h-screen bg-slate-50">
             <Toast msg={toast.msg} type={toast.type} onClose={clearToast} />
+            <AdminHeader />
 
-            {/* Header */}
-            <div className="bg-white border-b sticky top-0 z-30">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            {/* Page Title Bar */}
+            <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Link to="/admin/dashboard" className="p-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition text-sm font-medium">← Back</Link>
                     <div>
                         <h1 className="text-xl font-bold text-slate-900">Stall Availability</h1>
                         <p className="text-xs text-slate-400 mt-0.5">Click any stall to view details and vendor information</p>
                     </div>
-                    <div className="flex gap-2 items-center">
-                        <button
-                            onClick={load}
-                            disabled={loading}
-                            className="border border-slate-200 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-100 disabled:opacity-50"
-                        >
-                            {loading ? "Loading…" : "↻ Refresh"}
-                        </button>
-                        <Link to="/admin/dashboard" className="border border-slate-200 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-100">
-                            ← Back
-                        </Link>
-                    </div>
                 </div>
+                <button
+                    onClick={load}
+                    disabled={loading}
+                    className="border border-slate-200 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-100 disabled:opacity-50"
+                >
+                    {loading ? "Loading…" : "↻ Refresh"}
+                </button>
             </div>
 
             <div className="max-w-7xl mx-auto px-4 py-6 space-y-5">

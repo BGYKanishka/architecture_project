@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAdminReservations } from "../services/admin/admin.reservation.service";
+import AdminHeader from "../components/AdminHeader";
 
 export default function AdminReservations() {
     const [list, setList] = useState([]);
@@ -39,11 +40,12 @@ export default function AdminReservations() {
 
     return (
         <div className="min-h-screen bg-slate-50">
-            <div className="bg-white border-b">
-                <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <h1 className="text-xl font-bold">Admin - Reservations</h1>
-                    <Link className="text-blue-600 text-sm" to="/admin/dashboard">← Back</Link>
-                </div>
+            <AdminHeader />
+
+            {/* Page Title Bar */}
+            <div className="max-w-6xl mx-auto px-4 pt-6 pb-2 flex items-center gap-3">
+                <Link to="/admin/dashboard" className="p-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition text-sm font-medium">← Back</Link>
+                <h1 className="text-xl font-bold text-slate-900">Reservation Monitoring</h1>
             </div>
 
             <div className="max-w-6xl mx-auto px-4 py-6 grid lg:grid-cols-2 gap-6">

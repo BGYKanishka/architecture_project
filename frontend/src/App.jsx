@@ -34,7 +34,7 @@ function AppContent() {
   }, []);
 
   const hideHeaderRoutes = ["/login", "/register", "/"];
-  const showHeader = !hideHeaderRoutes.includes(location.pathname);
+  const showHeader = !hideHeaderRoutes.includes(location.pathname) && !location.pathname.startsWith("/admin");
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>

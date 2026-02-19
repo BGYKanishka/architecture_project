@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import AdminHeader from "../components/AdminHeader";
 import {
     getAdminUsers,
     createAdminUser,
@@ -184,26 +185,23 @@ export default function AdminUsers() {
     return (
         <div className="min-h-screen bg-slate-50">
             <Toast msg={toast.msg} type={toast.type} onClose={clearToast} />
+            <AdminHeader />
 
-            {/* Header */}
-            <div className="bg-white border-b">
-                <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            {/* Page Title Bar */}
+            <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <Link to="/admin/dashboard" className="p-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition text-sm font-medium">← Back</Link>
                     <h1 className="text-xl font-bold text-slate-900">User Management</h1>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={openAdd}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
-                        >
-                            + Add User
-                        </button>
-                        <Link to="/admin/dashboard" className="border border-slate-200 px-3 py-2 rounded-lg text-sm hover:bg-slate-100">
-                            ← Back
-                        </Link>
-                    </div>
                 </div>
+                <button
+                    onClick={openAdd}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                >
+                    + Add User
+                </button>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+            <div className="max-w-7xl mx-auto px-4 pb-6 space-y-4">
 
                 {/* Filters Row */}
                 <div className="flex flex-wrap gap-3 items-center justify-between">
