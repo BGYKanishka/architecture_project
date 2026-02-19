@@ -6,7 +6,6 @@ import {
   UserCircleIcon,
   Bars3Icon,
   ArrowLeftOnRectangleIcon,
-  BellIcon,
   XMarkIcon,
   BookOpenIcon,
   HomeIcon,
@@ -64,10 +63,7 @@ const Header = ({ user }) => {
             <HomeIcon className="w-6 h-6" />
           </button>
 
-          <button className="p-2 text-slate-500 hover:bg-slate-100 rounded-full relative">
-            <BellIcon className="w-6 h-6" />
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
+
 
           <button
             onClick={handleReservationsClick}
@@ -147,6 +143,13 @@ const Header = ({ user }) => {
               onClick={() => { navigate("/help"); setIsMenuOpen(false); }}
               active={location.pathname === "/help"}
             />
+            <MenuLink
+              icon={<ArrowLeftOnRectangleIcon className="w-5 h-5" />}
+              label="Logout"
+              onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+              active={false}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition text-red-600 hover:bg-red-50 hover:text-red-700"
+            />
           </div>
         </>
       )}
@@ -155,10 +158,10 @@ const Header = ({ user }) => {
 };
 
 // Helper component for menu items
-const MenuLink = ({ icon, label, onClick, active = false }) => (
+const MenuLink = ({ icon, label, onClick, active = false, className }) => (
   <button
     onClick={onClick}
-    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${active
+    className={className || `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${active
       ? "bg-blue-50 text-blue-600"
       : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
       }`}
