@@ -16,7 +16,8 @@ const EmployeeLogin = () => {
 
         AuthService.login(email, password).then(
             (data) => {
-                if (data.role === "EMPLOYEE") {
+                const roles = Array.isArray(data.roles) ? data.roles : [];
+                if (roles.includes("ROLE_EMPLOYEE")) {
                     navigate("/employee/dashboard");
                 } else {
                     setMessage("Access Denied: You are not an employee.");
