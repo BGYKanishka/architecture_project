@@ -12,6 +12,7 @@ import {
     HeartIcon
 } from "@heroicons/react/24/outline";
 import UserService from "../services/user.service";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 const genres = [
     { id: "Fiction", label: "Fiction", icon: <BookOpenIcon className="w-8 h-8" />, color: "bg-purple-100 border-purple-200 text-purple-600" },
@@ -28,6 +29,17 @@ const GenreSelection = () => {
     const navigate = useNavigate();
     const [selectedGenres, setSelectedGenres] = useState([]);
 
+    // Alert Modal State
+    const [alertConfig, setAlertConfig] = useState({
+        isOpen: false,
+        title: "",
+        message: ""
+    });
+
+    const showAlert = (title, message) => {
+        setAlertConfig({ isOpen: true, title, message });
+    };
+
     const toggleGenre = (id) => {
         if (selectedGenres.includes(id)) {
             setSelectedGenres(selectedGenres.filter((d) => d !== id));
@@ -37,16 +49,18 @@ const GenreSelection = () => {
     };
 
     const handleContinue = () => {
-        if (selectedGenres.length === 0) return alert("Please select at least one genre.");
+        if (selectedGenres.length === 0) {
+            return showAlert("Selection Required", "Please select at least one genre.");
+        }
 
-   
+
         UserService.updateProfile({ genres: selectedGenres })
             .then(() => {
                 navigate("/dashboard");
             })
             .catch((err) => {
                 console.error("Error saving genres:", err);
-                alert("Failed to save genres. Please try again.");
+                showAlert("Save Failed", "Failed to save genres. Please try again.");
             });
     };
 
@@ -117,6 +131,15 @@ const GenreSelection = () => {
                 </div>
 
             </div>
+
+            <ConfirmationModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                confirmText="Got it"
+                isAlert={true}
+            />
         </div>
     );
 };
