@@ -96,6 +96,16 @@ const StallMap = () => {
     const saved = localStorage.getItem("cancelledReservations");
     return saved ? JSON.parse(saved) : [];
   });
+  const [reservationCount, setReservationCount] = useState(0);
+
+  useEffect(() => {
+    StallService.getReservationCount()
+      .then((res) => {
+        console.log("Reservation count loaded:", res.data);
+        setReservationCount(res.data);
+      })
+      .catch((err) => console.error("Error fetching reservation count:", err));
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
@@ -133,7 +143,7 @@ const StallMap = () => {
             if (stall && !stall.reserved) {
               return false;
             }
-            return true; 
+            return true;
           });
 
           if (validatedPaid.length !== localPaid.length) {
@@ -153,7 +163,7 @@ const StallMap = () => {
       })
       .catch((err) => {
         console.error("Error loading stalls:", err);
-        setStalls([]); 
+        setStalls([]);
       });
   }, []);
 
@@ -181,7 +191,9 @@ const StallMap = () => {
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
-      if (selectedStalls.length >= 3) return alert("Max 3 stalls!");
+      if (selectedStalls.length + reservationCount >= 3) {
+        return alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+      }
       setSelectedStalls([...selectedStalls, stall.id]);
     }
   };
@@ -209,6 +221,10 @@ const StallMap = () => {
 
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
+    if (selectedStalls.length + reservationCount > 3) {
+      alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+      return;
+    }
 
     const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)

@@ -28,4 +28,10 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> getReservationCount(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+        long count = reservationService.getReservationCount(currentUser.getId());
+        return ResponseEntity.ok(count);
+    }
 }

@@ -77,8 +77,7 @@ public class ReservationService {
                     ReservationStall.builder()
                             .reservation(savedReservation)
                             .stall(stall)
-                            .build()
-            );
+                            .build());
 
             // LOCK THE STALL
             stall.setReserved(true);
@@ -135,5 +134,9 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
         reservation.setStatus(status);
         return reservationRepository.save(reservation);
+    }
+
+    public long getReservationCount(Long userId) {
+        return reservationStallRepository.countStallsByUserId(userId);
     }
 }

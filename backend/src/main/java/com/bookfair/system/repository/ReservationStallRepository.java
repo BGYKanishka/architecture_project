@@ -9,13 +9,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReservationStallRepository extends JpaRepository<ReservationStall, Long> {
 
-    // Check reservation
-    @Query("SELECT COUNT(rs) > 0 FROM ReservationStall rs " +
-            "WHERE rs.stall.id = :stallId AND rs.reservation.status = 'CONFIRMED'")
-    boolean isStallReserved(@Param("stallId") Long stallId);
+        // Check reservation
+        @Query("SELECT COUNT(rs) > 0 FROM ReservationStall rs " +
+                        "WHERE rs.stall.id = :stallId AND rs.reservation.status = 'CONFIRMED'")
+        boolean isStallReserved(@Param("stallId") Long stallId);
 
-    // Count stalls
-    @Query("SELECT COUNT(rs) FROM ReservationStall rs " +
-            "WHERE rs.reservation.user.id = :userId AND rs.reservation.status = 'CONFIRMED'")
-    long countStallsByUserId(@Param("userId") Long userId);
+        // Count stalls
+        @Query("SELECT COUNT(rs) FROM ReservationStall rs " +
+                        "WHERE rs.reservation.user.id = :userId AND (rs.reservation.status = 'CONFIRMED' OR rs.reservation.status = 'PENDING')")
+        long countStallsByUserId(@Param("userId") Long userId);
 }
