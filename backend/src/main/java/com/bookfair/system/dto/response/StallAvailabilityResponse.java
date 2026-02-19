@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Rich DTO returned by GET /api/admin/stalls/availability.
@@ -36,4 +37,5 @@ public class StallAvailabilityResponse {
     private String vendorEmail;
     private String vendorContact;
     private String vendorBusiness;
+    private List<String> vendorGenres;
 }

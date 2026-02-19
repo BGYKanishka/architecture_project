@@ -7,6 +7,7 @@ import com.bookfair.system.entity.Stall;
 import com.bookfair.system.entity.User;
 import com.bookfair.system.repository.ReservationStallRepository;
 import com.bookfair.system.repository.StallRepository;
+import com.bookfair.system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ public class StallService {
 
     private final StallRepository stallRepository;
     private final ReservationStallRepository reservationStallRepository;
+    private final UserRepository userRepository;
 
     // ─── Existing CRUD (kept for backward compatibility) ───────
 
@@ -116,7 +118,8 @@ public class StallService {
                         .vendorName(vendor.getName())
                         .vendorEmail(vendor.getEmail())
                         .vendorContact(vendor.getContactNumber())
-                        .vendorBusiness(vendor.getBusinessName());
+                        .vendorBusiness(vendor.getBusinessName())
+                        .vendorGenres(userRepository.findGenresByUserId(vendor.getId()));
             });
         }
 

@@ -119,15 +119,48 @@ function StallModal({ stall, onClose, onToggleDisabled, toggling }) {
                             {isReserved ? "Vendor Details" : "Occupancy"}
                         </h3>
                         {isReserved ? (
-                            <div className="bg-rose-50 border border-rose-100 rounded-xl px-4">
-                                <InfoRow label="Reservation ID" value={`#${stall.reservationId}`} />
-                                <InfoRow label="Reservation Date" value={formatDate(stall.reservationDate)} />
-                                <InfoRow label="Reservation Status" value={stall.reservationStatus} />
-                                <InfoRow label="Vendor ID" value={`#${stall.vendorId}`} />
-                                <InfoRow label="Vendor Name" value={stall.vendorName} />
-                                <InfoRow label="Email" value={stall.vendorEmail} />
-                                <InfoRow label="Contact" value={stall.vendorContact || "—"} />
-                                <InfoRow label="Business" value={stall.vendorBusiness || "—"} />
+                            <div className="space-y-4">
+                                <div className="bg-rose-50 border border-rose-100 rounded-xl px-4">
+                                    <InfoRow label="Reservation ID" value={`#${stall.reservationId}`} />
+                                    <InfoRow label="Reservation Date" value={formatDate(stall.reservationDate)} />
+                                    <InfoRow label="Reservation Status" value={stall.reservationStatus} />
+                                    <InfoRow label="Vendor ID" value={`#${stall.vendorId}`} />
+                                    <InfoRow label="Vendor Name" value={stall.vendorName} />
+                                    <InfoRow label="Email" value={stall.vendorEmail} />
+                                    <InfoRow label="Contact" value={stall.vendorContact || "—"} />
+                                    <InfoRow label="Business" value={stall.vendorBusiness || "—"} />
+                                </div>
+
+                                {/* Vendor Genres */}
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Vendor Genres</p>
+                                    {stall.vendorGenres && stall.vendorGenres.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {stall.vendorGenres.map((genre, i) => {
+                                                const palettes = [
+                                                    "bg-violet-100 text-violet-700 border-violet-200",
+                                                    "bg-sky-100    text-sky-700    border-sky-200",
+                                                    "bg-amber-100  text-amber-700  border-amber-200",
+                                                    "bg-pink-100   text-pink-700   border-pink-200",
+                                                    "bg-teal-100   text-teal-700   border-teal-200",
+                                                    "bg-orange-100 text-orange-700 border-orange-200",
+                                                    "bg-indigo-100 text-indigo-700 border-indigo-200",
+                                                    "bg-lime-100   text-lime-700   border-lime-200",
+                                                ];
+                                                return (
+                                                    <span
+                                                        key={genre}
+                                                        className={`text-xs font-medium px-2.5 py-1 rounded-full border ${palettes[i % palettes.length]}`}
+                                                    >
+                                                        {genre}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    ) : (
+                                        <p className="text-xs text-slate-400 italic">No genres specified</p>
+                                    )}
+                                </div>
                             </div>
                         ) : (
                             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
