@@ -76,12 +76,11 @@ const Header = ({ user }) => {
           <div className="relative">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 p-1 pr-3 hover:bg-slate-100 rounded-full transition border border-slate-200"
+              className="flex items-center gap-2 p-1 hover:bg-slate-100 rounded-full transition"
             >
               <div className="w-9 h-9 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold">
-                {user?.name?.charAt(0).toUpperCase() || "U"}
+                {(user?.name || user?.email)?.charAt(0).toUpperCase() || "U"}
               </div>
-              <span className="hidden sm:block text-xs font-bold text-slate-800">{user?.name}</span>
             </button>
 
             {isProfileOpen && (

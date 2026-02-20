@@ -29,8 +29,15 @@ function AppContent() {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
-    const currentUser = AuthService.getCurrentUser();
-    setUser(currentUser);
+    const fetchUser = () => {
+      const currentUser = AuthService.getCurrentUser();
+      setUser(currentUser);
+    };
+
+    fetchUser();
+
+    window.addEventListener("user-updated", fetchUser);
+    return () => window.removeEventListener("user-updated", fetchUser);
   }, []);
 
   const hideHeaderRoutes = ["/login", "/register", "/"];
