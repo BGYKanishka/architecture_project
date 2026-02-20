@@ -9,10 +9,7 @@ export default function AdminProtectedRoute() {
     const role = user?.roles ? user.roles[0] : null;
 
     if (!token || !user || role !== "ROLE_ADMIN") {
-        // Not authenticated or not an admin
         return <Navigate to="/login" replace />;
     }
-
-    // Authenticated
     return <Outlet />;
 }

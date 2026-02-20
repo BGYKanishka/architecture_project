@@ -19,6 +19,7 @@ public class EmployeeStallDetailsDto {
     private Double price;
     private String floorName;
     private boolean reserved;
+    private boolean disabled;
 
     // Reservation Details
     private String vendorName;

@@ -61,6 +61,7 @@ public class EmployeePanelController {
                 .price(stall.getPrice())
                 .floorName(stall.getFloor().getFloorName())
                 .reserved(stall.isReserved())
+                .disabled(stall.isDisabled())
                 .build();
 
         if (stall.isReserved()) {
