@@ -42,6 +42,7 @@ public class StallController {
                     stall.getSize(),
                     stall.getPrice(),
                     stall.isReserved(),
+                    stall.isDisabled(),
                     stall.getFloor().getFloorName());
         }).collect(Collectors.toList());
 

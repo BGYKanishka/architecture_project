@@ -3,12 +3,24 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import AuthService from "../services/auth.service";
 import { CreditCardIcon, BanknotesIcon, LockClosedIcon, ArrowPathIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
+import ConfirmationModal from "../components/common/ConfirmationModal";
 
 const PaymentSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { stalls } = location.state || { stalls: [] };
   const [loading, setLoading] = useState(false);
+
+  // Alert Modal State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: ""
+  });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
 
   const handlePay = async () => {
     setLoading(true);
@@ -57,7 +69,7 @@ const PaymentSelection = () => {
         }
       }
 
-      alert("Failed: " + errorMessage);
+      showAlert("Payment Error", typeof errorMessage === "string" ? errorMessage : "Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -117,6 +129,15 @@ const PaymentSelection = () => {
           </button>
         </div>
       </div>
+
+      <ConfirmationModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        confirmText="Got it"
+        isAlert={true}
+      />
     </div>
   );
 };

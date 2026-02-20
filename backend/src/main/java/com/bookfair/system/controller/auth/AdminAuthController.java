@@ -34,8 +34,12 @@ public class AdminAuthController {
             JwtResponse jwtResponse = authService.authenticateUser(loginRequest);
 
             List<String> roles = jwtResponse.getRoles();
-            if (roles.contains("ROLE_ADMIN") || roles.contains("ROLE_EMPLOYEE")) {
-                return ResponseEntity.ok(jwtResponse);
+            if (roles.contains("ROLE_ADMIN")) {
+                java.util.Map<String, Object> responseBody = new java.util.HashMap<>();
+                responseBody.put("token", jwtResponse.getToken());
+                responseBody.put("role", roles.isEmpty() ? "" : roles.get(0));
+                responseBody.put("username", jwtResponse.getEmail());
+                return ResponseEntity.ok(responseBody);
             } else {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body("Error: Unauthorized access. Admin privileges required.");

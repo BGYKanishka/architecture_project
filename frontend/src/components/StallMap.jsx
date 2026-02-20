@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import StallService from "../services/stall.service";
 import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
@@ -94,6 +95,17 @@ const StallMap = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [reservationCount, setReservationCount] = useState(0);
+
+  // Alert Modal State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: ""
+  });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
 
   useEffect(() => {
     const fetchCount = () => {
@@ -197,6 +209,10 @@ const StallMap = () => {
   const handleBackToMap = () => navigate("/dashboard");
 
   const toggleSelection = (stall) => {
+    if (stall.disabled) {
+      showAlert("Stall Unavailable", "This stall has been disabled by the administrator and cannot be booked.");
+      return;
+    }
     const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
     const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
     if (isActuallyReserved || isPaid) return;
@@ -205,13 +221,17 @@ const StallMap = () => {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
       if (selectedStalls.length + reservationCount >= 3) {
-        return alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+        return showAlert(
+          "Limit Reached",
+          `You already have ${reservationCount} active reservations. Max allowed is 3.`
+        );
       }
       setSelectedStalls([...selectedStalls, stall.id]);
     }
   };
 
-  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled) => {
+  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled, isDisabled) => {
+    if (isDisabled) return "bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed opacity-60";
     const isActuallyReserved = isReserved && !isCancelled;
     if (isActuallyReserved || isPaid) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
     if (isSelected) return "bg-blue-600 border-blue-800 text-white shadow-xl z-50 scale-110";
@@ -235,7 +255,10 @@ const StallMap = () => {
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
     if (selectedStalls.length + reservationCount > 3) {
-      alert(`Limit Reached! You already have ${reservationCount} active reservations. Max allowed is 3.`);
+      showAlert(
+        "Limit Reached",
+        `You already have ${reservationCount} active reservations. Max allowed is 3.`
+      );
       return;
     }
 
@@ -303,7 +326,7 @@ const StallMap = () => {
                   const isSelected = selectedStalls.includes(stall.id);
                   const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
                   const isCancelled = cancelledReservations.includes(stall.id);
-                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled);
+                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled, stall.disabled);
 
                   return (
                     <div
@@ -329,17 +352,18 @@ const StallMap = () => {
                       <span className="font-bold text-sm md:text-lg leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-                      {!stall.reserved && !isPaid && (
+                      {!stall.reserved && !isPaid && !stall.disabled && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {stall.reserved && isCancelled && (
+                      {stall.reserved && isCancelled && !stall.disabled && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {(stall.reserved && !isCancelled || isPaid) && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {(stall.reserved && !isCancelled || isPaid) && !stall.disabled && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {stall.disabled && <span className="text-[7px] font-bold mt-1 text-slate-500">DISABLED</span>}
                     </div>
                   );
                 })}
@@ -360,6 +384,15 @@ const StallMap = () => {
           )}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        confirmText="Got it"
+        isAlert={true}
+      />
     </div>
   );
 };

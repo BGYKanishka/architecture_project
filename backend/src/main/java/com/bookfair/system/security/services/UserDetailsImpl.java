@@ -39,6 +39,10 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     public static UserDetailsImpl build(User user) {
+        // Null-safe: users with no role assigned default to VENDOR
+        String role = (user.getRole() != null && !user.getRole().isBlank())
+                ? user.getRole().toUpperCase()
+                : "VENDOR";
         List<GrantedAuthority> authorities = List.of(
                 new SimpleGrantedAuthority("ROLE_" + user.getRole()));
 

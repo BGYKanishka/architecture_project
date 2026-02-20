@@ -5,9 +5,28 @@ import axios from "axios";
 
 
 const API_URL = "http://localhost:8080/api/employees";
+const EMPLOYEE_PANEL_API_URL = "http://localhost:8080/api/employee";
 
 const verifyQR = (qrData) => {
     return axios.post(`${API_URL}/verify-qr`, qrData);
 };
 
-export default { verifyQR };
+const getEmployeeStalls = () => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${EMPLOYEE_PANEL_API_URL}/stalls`, {
+        headers: {
+            Authorization: 'Bearer ' + token
+        }
+    });
+};
+
+const getStallDetails = (stallId) => {
+    const token = localStorage.getItem('token');
+    return axios.get(`${EMPLOYEE_PANEL_API_URL}/stalls/${stallId}`, {
+        headers: {
+            Authorization: 'Bearer ' + token
+        }
+    });
+};
+
+export default { verifyQR, getEmployeeStalls, getStallDetails };
