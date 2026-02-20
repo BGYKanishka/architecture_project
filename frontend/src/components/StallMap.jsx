@@ -267,8 +267,8 @@ const StallMap = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen font-sans">
-      <h1 className="text-3xl font-extrabold text-center text-blue-900 mb-2 uppercase">
+    <div className="p-4 md:p-8 bg-gray-50 dark:bg-slate-950 min-h-screen font-sans transition-colors duration-300">
+      <h1 className="text-3xl font-extrabold text-center text-blue-900 dark:text-white mb-2 uppercase">
         Book Fair Floor Plan
       </h1>
 
@@ -281,14 +281,14 @@ const StallMap = () => {
           {/* Header Bar */}
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">{activeHall} Booking</h2>
-              <div className="flex gap-3 text-xs mt-1">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{activeHall} Booking</h2>
+              <div className="flex gap-3 text-xs mt-1 text-slate-600 dark:text-slate-400">
                 <span className="flex items-center gap-1"><div className="w-3 h-3 bg-emerald-100 border border-emerald-400"></div> Small</span>
                 <span className="flex items-center gap-1"><div className="w-3 h-3 bg-cyan-100 border border-cyan-400"></div> Medium</span>
                 <span className="flex items-center gap-1"><div className="w-3 h-3 bg-violet-100 border border-violet-400"></div> Large</span>
               </div>
             </div>
-            <button onClick={handleBackToMap} className="bg-blue-600 text-white font-bold rounded-full border px-4 py-2 rounded shadow-sm hover:bg-blue-800">
+            <button onClick={handleBackToMap} className="bg-blue-600 text-white font-bold rounded-full border border-blue-700 px-4 py-2 shadow-sm hover:bg-blue-800 transition">
               Back to Map
             </button>
           </div>
@@ -296,7 +296,7 @@ const StallMap = () => {
           <HallShapeWrapper hallName={activeHall}>
             {activeFloorStalls.length === 0 ? (
               <div className="flex items-center justify-center h-full">
-                <p className="text-gray-400">No stalls found.</p>
+                <p className="text-gray-400 dark:text-slate-500">No stalls found.</p>
               </div>
             ) : (
               <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-10'}`}>
@@ -366,8 +366,8 @@ const StallMap = () => {
           </HallShapeWrapper>
 
           {selectedStalls.length > 0 && (
-            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
-              <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
+            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-900 px-8 py-3 rounded-full shadow-xl border border-slate-200 dark:border-slate-700 flex gap-4 items-center z-50">
+              <span className="font-bold text-blue-900 dark:text-blue-400">{selectedStalls.length} Selected</span>
               <button
                 onClick={handleConfirmReservation}
                 className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
