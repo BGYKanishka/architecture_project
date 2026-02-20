@@ -134,16 +134,28 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<AdminReservationResponse> getAllReservations() {
-        // JOIN FETCH loads User in a single SQL query — no LazyInitializationException
-        return reservationRepository.findAllWithUser().stream()
-                .map(r -> new AdminReservationResponse(
-                        r.getId(),
-                        r.getUser().getEmail(),
-                        r.getUser().getName(),
-                        r.getReservationDate(),
-                        r.getQrCodeToken(),
-                        r.getStatus()))
-                .collect(Collectors.toList());
+        List<Reservation> baseReservations = reservationRepository.findAllBaseReservationsWithUser();
+        List<ReservationStall> allStalls = reservationStallRepository.findAllWithStallsAndReservations();
+
+        return baseReservations.stream().map(r -> {
+            String baseToken = r.getQrCodeToken();
+            List<AdminReservationResponse.StallDetail> stallDetails = allStalls.stream()
+                    .filter(rs -> rs.getReservation().getQrCodeToken().startsWith(baseToken))
+                    .map(rs -> new AdminReservationResponse.StallDetail(
+                            rs.getStall().getId(),
+                            rs.getStall().getStallCode(),
+                            rs.getReservation().getStatus()))
+                    .collect(Collectors.toList());
+
+            return new AdminReservationResponse(
+                    r.getId(),
+                    r.getUser().getEmail(),
+                    r.getUser().getName(),
+                    r.getReservationDate(),
+                    baseToken,
+                    r.getStatus(),
+                    stallDetails);
+        }).collect(Collectors.toList());
     }
 
     @Transactional
@@ -159,7 +171,8 @@ public class ReservationService {
                 saved.getUser().getName(),
                 saved.getReservationDate(),
                 saved.getQrCodeToken(),
-                saved.getStatus());
+                saved.getStatus(),
+                java.util.Collections.emptyList());
     }
 
     public long getReservationCount(Long userId) {
@@ -173,9 +186,13 @@ public class ReservationService {
         return reservationStalls.stream().map(rs -> {
             Stall stall = rs.getStall();
             Reservation reservation = rs.getReservation();
+            String code = reservation.getQrCodeToken();
+            if (code.contains("-C-"))
+                code = code.substring(0, code.indexOf("-C-"));
+
             String qrCodeImage = null;
             try {
-                qrCodeImage = generateQRCodeImage(reservation.getQrCodeToken());
+                qrCodeImage = generateQRCodeImage(code);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -186,7 +203,7 @@ public class ReservationService {
                     .size(stall.getSize())
                     .price(stall.getPrice())
                     .floorName(stall.getFloor().getFloorName())
-                    .reservationCode(reservation.getQrCodeToken()) // Mapped from reservationId -> reservationCode
+                    .reservationCode(code)
                     .qrCodeImage(qrCodeImage)
                     .status(reservation.getStatus())
                     .build();
@@ -195,8 +212,8 @@ public class ReservationService {
 
     @Transactional
     public void cancelStallReservation(Long userId, Long stallId) {
-        ReservationStall reservationStall = reservationStallRepository.findByUserIdAndStallId(userId, stallId)
-                .orElseThrow(() -> new RuntimeException("Reservation not found for this stall"));
+        ReservationStall reservationStall = reservationStallRepository.findActiveByUserIdAndStallId(userId, stallId)
+                .orElseThrow(() -> new RuntimeException("Active reservation not found for this stall"));
 
         Stall stall = reservationStall.getStall();
         if (stall.isReserved()) {
@@ -204,19 +221,22 @@ public class ReservationService {
             stallRepository.save(stall);
         }
 
-        Reservation reservation = reservationStall.getReservation();
+        Reservation originalReservation = reservationStall.getReservation();
+        long remainingStalls = reservationStallRepository.countByReservationId(originalReservation.getId());
 
-        // Delete the stall from the reservation
-        reservationStallRepository.delete(reservationStall);
+        if (remainingStalls <= 1) {
+            originalReservation.setStatus("CANCELLED");
+            reservationRepository.save(originalReservation);
+        } else {
+            Reservation cancelledRes = new Reservation();
+            cancelledRes.setUser(originalReservation.getUser());
+            cancelledRes.setReservationDate(originalReservation.getReservationDate());
+            cancelledRes.setStatus("CANCELLED");
+            cancelledRes.setQrCodeToken(originalReservation.getQrCodeToken() + "-C-" + stall.getId());
+            reservationRepository.save(cancelledRes);
 
-        // Ensure the deletion is flushed to the database before counting
-        reservationStallRepository.flush();
-
-        // If no more stalls are associated with this reservation, mark it as CANCELLED
-        long remainingStalls = reservationStallRepository.countByReservationId(reservation.getId());
-        if (remainingStalls == 0) {
-            reservation.setStatus("CANCELLED");
-            reservationRepository.save(reservation);
+            reservationStall.setReservation(cancelledRes);
+            reservationStallRepository.save(reservationStall);
         }
     }
 }
