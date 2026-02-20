@@ -187,7 +187,7 @@ const EmployeeStallMap = ({ hallName }) => {
     };
 
     return (
-        <div className="flex h-screen bg-gray-50 font-sans overflow-hidden relative">
+        <div className="flex h-[calc(100vh-73px)] bg-gray-50 font-sans overflow-hidden relative">
 
             {/* ── Animation keyframes injected once ── */}
             <style>{`
