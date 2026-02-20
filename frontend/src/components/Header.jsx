@@ -9,7 +9,8 @@ import {
   BookOpenIcon,
   HomeIcon,
   TicketIcon,
-  QuestionMarkCircleIcon
+  QuestionMarkCircleIcon,
+  MapIcon
 } from "@heroicons/react/24/outline";
 
 const Header = ({ user }) => {
@@ -60,14 +61,18 @@ const Header = ({ user }) => {
             <HomeIcon className="w-6 h-6" />
           </button>
 
-
-
           <button
+            onClick={() => navigate("/map")}
+            className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition relative"
+            title="Map"
+          >
+            <MapIcon className="w-6 h-6" />
+          </button>          <button
             onClick={handleReservationsClick}
             className="hidden md:flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-full transition font-bold text-sm"
           >
             <TicketIcon className="w-5 h-5" />
-            <span>My Reservations</span>
+
           </button>
 
           {/* Mobile version of ticket button */}
@@ -127,6 +132,12 @@ const Header = ({ user }) => {
               label="Dashboard"
               onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}
               active={location.pathname === "/dashboard"}
+            />
+            <MenuLink
+              icon={<MapIcon className="w-5 h-5" />}
+              label="Book fair Map"
+              onClick={() => { navigate("/map"); setIsMenuOpen(false); }}
+              active={location.pathname === "/map" || location.pathname.startsWith("/map/")}
             />
             <MenuLink
               icon={<UserCircleIcon className="w-5 h-5" />}
