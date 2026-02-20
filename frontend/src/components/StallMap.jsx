@@ -203,10 +203,10 @@ const StallMap = () => {
 
   const handleHallClick = (name) => {
     if (name === "Main Building") return;
-    navigate(`/dashboard/${name}`);
+    navigate(`/map/${name}`);
   };
 
-  const handleBackToMap = () => navigate("/dashboard");
+  const handleBackToMap = () => navigate("/map");
 
   const toggleSelection = (stall) => {
     if (stall.disabled) {
@@ -345,7 +345,7 @@ const StallMap = () => {
                           : {}
                       }
                       className={`
-                        rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all duration-300 border-2 shadow-sm
+                        relative group rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all duration-300 border-2 shadow-sm
                         ${colorClass}
                       `}
                     >
@@ -364,6 +364,11 @@ const StallMap = () => {
                       )}
                       {(stall.reserved && !isCancelled || isPaid) && !stall.disabled && <span className="text-[8px] font-bold mt-1">SOLD</span>}
                       {stall.disabled && <span className="text-[7px] font-bold mt-1 text-slate-500">DISABLED</span>}
+
+                      {/* Tooltip */}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center bg-gray-200 text-black text-[8px] sm:text-[10px] font-medium rounded py-0.5 px-1 whitespace-nowrap z-[100] shadow-sm">
+                        {stall.size === "SMALL" ? "Small - 3m * 3m" : stall.size === "MEDIUM" ? "Medium- 5m* 5m" : "Large -7m * 7m"}
+                      </div>
                     </div>
                   );
                 })}

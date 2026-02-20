@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import AuthService from "../services/auth.service";
 import backgroundImg from "../assets/background.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -22,7 +24,7 @@ const Login = () => {
       if (roles.includes("ROLE_ADMIN")) {
         navigate("/admin/dashboard");
       } else if (roles.includes("ROLE_EMPLOYEE")) {
-        navigate("/employee/floor-plan"); 
+        navigate("/employee/floor-plan");
       } else {
         navigate("/dashboard");
       }
@@ -40,14 +42,14 @@ const Login = () => {
       className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden"
       style={{
         background:
-          "linear-gradient(to right, #0f1d45 0%, #0f1d45 50%, #eff6ff 50%, #eff6ff 100%)",
+          "linear-gradient(to right,      #eff6ff  0%, #eff6ff 50%, #0f1d45 50%, #0f1d45 100%)",
       }}
     >
-      <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40"></div>
-      <div className="absolute top-[15%] right-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30"></div>
-      <div className="absolute bottom-[-60px] left-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30"></div>
-      <div className="absolute bottom-[10%] right-[15%] w-[80px] h-[80px] rounded-full bg-blue-400/20"></div>
-      <div className="absolute top-[40%] left-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25"></div>
+      <div className="absolute top-[-80px] left-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40"></div>
+      <div className="absolute top-[15%] left-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30"></div>
+      <div className="absolute bottom-[-60px] right-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30"></div>
+      <div className="absolute bottom-[10%] left-[15%] w-[80px] h-[80px] rounded-full bg-blue-300/20"></div>
+      <div className="absolute top-[40%] right-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25"></div>
 
       <div className="relative z-10 flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
 
@@ -105,14 +107,23 @@ const Login = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 mt-1 text-gray-500 hover:text-blue-600 focus:outline-none"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                  </button>
+                </div>
               </div>
 
               {error && (

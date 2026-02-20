@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "r
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Map from "./pages/Map";
 import Footer from "./components/footer";
 import EmployeePanel from "./pages/EmployeePanel";
 import Header from "./components/Header";
@@ -13,6 +14,7 @@ import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import HelpCenter from "./pages/HelpCenter";
 import GenreSelection from "./pages/GenreSelection";
+import About from "./pages/About";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeFloorPlan from "./pages/EmployeeFloorPlan";
 import EmployeeRoute from "./components/EmployeeRoute";
@@ -41,6 +43,10 @@ function AppContent() {
     return () => window.removeEventListener("user-updated", fetchUser);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   const isEmployeePage = location.pathname.startsWith("/employee");
   const isAdminPage = location.pathname.startsWith("/admin");
   const hideHeaderRoutes = ["/login", "/register", "/"];
@@ -60,10 +66,12 @@ function AppContent() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/:hallName" element={<Dashboard />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/map/:hallName" element={<Map />} />
           <Route path="/booking-summary" element={<BookingSummary />} />
           <Route path="/payment-selection" element={<PaymentSelection />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
