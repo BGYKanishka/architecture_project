@@ -32,4 +32,11 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
      */
     @Query("SELECT r FROM Reservation r JOIN FETCH r.user WHERE r.id = :id")
     Optional<Reservation> findByIdWithUser(@Param("id") Long id);
+
+    /**
+     * Eagerly fetches User for a single Reservation by qrCodeToken.
+     * Used by QR scan verification to safely map to DTO.
+     */
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.user WHERE r.qrCodeToken = :token")
+    Optional<Reservation> findByQrCodeTokenWithUser(@Param("token") String token);
 }

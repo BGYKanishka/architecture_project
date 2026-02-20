@@ -99,15 +99,17 @@ public class ReservationService {
         // 7. Generate QR & Send Email
         try {
             String qrImageBase64 = generateQRCodeImage(qrToken);
-            String stallCodes = stalls.stream()
-                    .map(Stall::getStallCode)
+            String stallDetails = stalls.stream()
+                    .map(s -> s.getStallCode() + " (" + s.getSize() + ")")
                     .collect(Collectors.joining(", "));
 
             emailService.sendReservationEmail(
                     user.getEmail(),
                     user.getName(),
+                    user.getContactNumber() != null ? user.getContactNumber() : "N/A",
+                    paymentStatus,
                     qrImageBase64,
-                    stallCodes);
+                    stallDetails);
 
             return ReservationResponse.builder()
                     .reservationCode(qrToken)
