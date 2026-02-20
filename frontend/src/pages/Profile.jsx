@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import UserService from "../services/user.service";
-import { UserCircleIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon, PencilSquareIcon, CheckIcon, XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon, PencilSquareIcon, CheckIcon, XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon, MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { useTheme } from "../context/ThemeContext";
 
 const Profile = () => {
+  const { theme, toggleTheme } = useTheme();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -171,16 +173,16 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800"></div>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800 dark:border-blue-400"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg shadow border border-red-200">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+        <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-lg shadow border border-red-200 dark:border-red-800">
           {error}
         </div>
       </div>
@@ -188,9 +190,9 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 relative">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-xl overflow-hidden border border-slate-100 dark:border-slate-800 relative">
 
           {/* Header Section */}
           <div className="bg-blue-900 px-8 py-10 text-center relative overflow-hidden">
@@ -210,8 +212,8 @@ const Profile = () => {
 
           {/* Details Section */}
           <div className="px-8 py-10">
-            <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-2">
-              <h2 className="text-xl font-bold text-slate-800">
+            <div className="flex justify-between items-center mb-6 border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white">
                 Personal Information
               </h2>
               {saveMessage && (
@@ -260,12 +262,43 @@ const Profile = () => {
               />
             </div>
 
+            <div className="mt-10 pt-10 border-t border-slate-100 dark:border-slate-800">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-6">
+                Preferences
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 hover:border-slate-200 dark:hover:border-slate-600 transition">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 text-slate-400">
+                      {theme === 'dark' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
+                      <span className="text-xs font-bold uppercase tracking-wider">Appearance</span>
+                    </div>
+                    <button
+                      onClick={toggleTheme}
+                      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 bg-slate-200 dark:bg-blue-600"
+                    >
+                      <span className="sr-only">Toggle theme</span>
+                      <span
+                        className={`${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                          } inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
+                      />
+                    </button>
+                  </div>
+                  <div className="pl-8 mt-1">
+                    <div className="text-slate-800 dark:text-slate-200 font-semibold">
+                      {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="mt-10 flex flex-wrap justify-end gap-3">
               {/* Change Password Button */}
               {!isEditing && (
                 <button
                   onClick={() => setIsPasswordModalOpen(true)}
-                  className="mr-auto flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-bold transition"
+                  className="mr-auto flex items-center gap-2 px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition"
                 >
                   <KeyIcon className="w-5 h-5" /> Change Password
                 </button>
@@ -275,7 +308,7 @@ const Profile = () => {
                 <>
                   <button
                     onClick={handleEditToggle}
-                    className="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-bold transition"
+                    className="flex items-center gap-2 px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition"
                     disabled={saveLoading}
                   >
                     <XMarkIcon className="w-5 h-5" /> Cancel
@@ -291,7 +324,7 @@ const Profile = () => {
               ) : (
                 <button
                   onClick={handleEditToggle}
-                  className="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-bold transition"
+                  className="flex items-center gap-2 px-6 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 font-bold transition"
                 >
                   <PencilSquareIcon className="w-5 h-5" /> Edit Profile
                 </button>
@@ -304,23 +337,23 @@ const Profile = () => {
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200 border border-slate-100 dark:border-slate-800">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-800">Change Password</h3>
-              <button onClick={() => setIsPasswordModalOpen(false)} className="p-1 rounded-full hover:bg-slate-100">
-                <XMarkIcon className="w-6 h-6 text-slate-500" />
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Change Password</h3>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                <XMarkIcon className="w-6 h-6 text-slate-500 dark:text-slate-400" />
               </button>
             </div>
 
             <form onSubmit={submitPasswordChange} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Current Password</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Current Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords.current ? "text" : "password"}
                     name="currentPassword"
                     required
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     value={passwordForm.currentPassword}
                     onChange={handlePasswordChange}
                   />
@@ -338,14 +371,14 @@ const Profile = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">New Password</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">New Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords.new ? "text" : "password"}
                     name="newPassword"
                     required
                     minLength={6}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     value={passwordForm.newPassword}
                     onChange={handlePasswordChange}
                   />
@@ -363,14 +396,14 @@ const Profile = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Confirm New Password</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Confirm New Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords.confirm ? "text" : "password"}
                     name="confirmPassword"
                     required
                     minLength={6}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     value={passwordForm.confirmPassword}
                     onChange={handlePasswordChange}
                   />
@@ -398,7 +431,7 @@ const Profile = () => {
                 <button
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg transition"
+                  className="px-4 py-2 text-slate-600 dark:text-slate-400 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
                 >
                   Cancel
                 </button>
@@ -420,12 +453,12 @@ const Profile = () => {
 
 // Helper for read-only items
 const ProfileItem = ({ icon, label, value, readOnly, fullWidth }) => (
-  <div className={`p-4 rounded-xl bg-slate-50 border border-slate-100 ${readOnly ? "opacity-75" : ""} ${fullWidth ? "md:col-span-2" : ""}`}>
-    <div className="flex items-center gap-3 text-slate-400 mb-2">
+  <div className={`p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 ${readOnly ? "opacity-75" : ""} ${fullWidth ? "md:col-span-2" : ""}`}>
+    <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 mb-2">
       {icon}
       <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
     </div>
-    <div className="text-slate-800 font-semibold pl-8">
+    <div className="text-slate-800 dark:text-slate-200 font-semibold pl-8">
       {value}
     </div>
   </div>
@@ -433,8 +466,8 @@ const ProfileItem = ({ icon, label, value, readOnly, fullWidth }) => (
 
 // Helper for editable items
 const EditableProfileItem = ({ icon, label, name, value, isEditing, onChange, fullWidth }) => (
-  <div className={`p-4 rounded-xl bg-slate-50 border ${isEditing ? "border-blue-200 bg-blue-50/30" : "border-slate-100 hover:border-slate-200"} transition ${fullWidth ? "md:col-span-2" : ""}`}>
-    <div className="flex items-center gap-3 text-slate-400 mb-2">
+  <div className={`p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border ${isEditing ? "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10" : "border-slate-100 dark:border-slate-800 hover:border-slate-200 dark:hover:border-slate-700"} transition ${fullWidth ? "md:col-span-2" : ""}`}>
+    <div className="flex items-center gap-3 text-slate-400 dark:text-slate-500 mb-2">
       {icon}
       <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
     </div>
@@ -445,10 +478,10 @@ const EditableProfileItem = ({ icon, label, name, value, isEditing, onChange, fu
           name={name}
           value={value}
           onChange={onChange}
-          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-1.5 text-slate-800 dark:text-slate-200 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
         />
       ) : (
-        <div className="text-slate-800 font-semibold">{value}</div>
+        <div className="text-slate-800 dark:text-slate-200 font-semibold">{value}</div>
       )}
     </div>
   </div>
