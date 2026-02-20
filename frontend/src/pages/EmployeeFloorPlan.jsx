@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/auth.service";
 import employeeService from "../services/employee/service";
 import HallMap from "../components/HallMap";
 
@@ -9,8 +8,6 @@ const EmployeeFloorPlan = () => {
     const [stalls, setStalls] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const user = AuthService.getCurrentUser();
 
     useEffect(() => {
         employeeService.getEmployeeStalls()
@@ -25,17 +22,12 @@ const EmployeeFloorPlan = () => {
             });
     }, []);
 
-    /**
-     * Compute per-hall status for the HallMap component.
-     * "available"  → at least one stall is not reserved
-     * "full"       → all stalls are reserved
-     * "unknown"    → no stalls found for this hall
-     */
+
     const getHallStatus = useCallback((hallName) => {
         const letter = hallName.replace("Hall ", "");
         const hallStalls = stalls.filter(s => s.floorName === letter);
         if (hallStalls.length === 0) return "unknown";
-        const allFull = hallStalls.every(s => s.reserved);
+        const allFull = hallStalls.every(s => s.reserved || s.disabled);
         return allFull ? "full" : "available";
     }, [stalls]);
 
@@ -43,17 +35,15 @@ const EmployeeFloorPlan = () => {
         navigate(`/employee/floor-plan/${encodeURIComponent(hallName)}`);
     };
 
-    /* ---------- Summary counts ---------- */
     const totalStalls = stalls.length;
     const reservedCount = stalls.filter(s => s.reserved).length;
-    const availableCount = totalStalls - reservedCount;
+    const disabledCount = stalls.filter(s => s.disabled && !s.reserved).length;
+    const availableCount = totalStalls - reservedCount - disabledCount;
 
     return (
         <div style={{ minHeight: "100vh", background: "#EFF2F7", fontFamily: "'Inter', 'Helvetica Neue', 'Segoe UI', sans-serif" }}>
 
-            {/* ══════════════════════════════════════════════════════
-                 SUB-HEADER  — page title + indicators card
-            ══════════════════════════════════════════════════════ */}
+      
             <div style={{ padding: "1.5rem 2rem 0", maxWidth: "1100px", margin: "0 auto" }}>
                 <div style={{
                     background: "#ffffff",
@@ -131,6 +121,12 @@ const EmployeeFloorPlan = () => {
                             <span style={{ color: "#16A34A", fontWeight: 700 }}>Available: {availableCount}</span>
                             {" | "}
                             <span style={{ color: "#DC2626", fontWeight: 700 }}>Full: {reservedCount}</span>
+                            {disabledCount > 0 && (
+                                <>
+                                    {" | "}
+                                    <span style={{ color: "#64748B", fontWeight: 700 }}>Disabled: {disabledCount}</span>
+                                </>
+                            )}
                         </p>
                     )}
                 </div>
@@ -139,16 +135,7 @@ const EmployeeFloorPlan = () => {
             {/* ── Map Area ── */}
             <div style={{ padding: "2rem", maxWidth: "1100px", margin: "0 auto" }}>
 
-                {/* View-only notice */}
-                <div style={{
-                    display: "flex", alignItems: "center", gap: "8px",
-                    background: "#eff6ff", border: "1px solid #bfdbfe",
-                    borderRadius: "10px", padding: "10px 18px",
-                    marginBottom: "1.5rem", color: "#1e40af", fontSize: "13px"
-                }}>
-                    <span>🔍</span>
-                    <span><strong>View-only mode.</strong> Click any hall to see individual stall availability. Booking and purchasing are not available in this portal.</span>
-                </div>
+
 
                 {loading && (
                     <div style={{ textAlign: "center", padding: "5rem 0", color: "#64748b" }}>

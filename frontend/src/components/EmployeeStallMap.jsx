@@ -63,7 +63,8 @@ const hallDoors = {
 };
 
 /** Returns tailwind class for stall colour – same palette as StallMap but read-only */
-const getSizeColor = (size, isReserved) => {
+const getSizeColor = (size, isReserved, isDisabled) => {
+    if (isDisabled) return "bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed opacity-60";
     if (isReserved) return "bg-gray-300 border-gray-400 text-gray-500 cursor-default";
     switch (size) {
         case "SMALL": return "bg-emerald-100 border-emerald-400 text-emerald-800 cursor-default";
@@ -82,12 +83,12 @@ const EmployeeStallMap = ({ hallName }) => {
     // Hover state
     const [hoveredStall, setHoveredStall] = useState(null);
     const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
-    const [isHoverLoading, setIsHoverLoading] = useState(false);
+    const [, setIsHoverLoading] = useState(false);
 
     // QR Modal state
     const [qrModal, setQrModal] = useState(null); // { stallCode, price, floor }
     const closeQrModal = useCallback(() => setQrModal(null), []);
-    const openQrModal = useCallback((stall) => {
+    useCallback((stall) => {
         const num = stall.stallCode?.split("-")[1] || stall.stallCode;
         setQrModal({
             stallCode: stall.stallCode,
@@ -96,7 +97,6 @@ const EmployeeStallMap = ({ hallName }) => {
             floor: stall.floorName,
         });
     }, []);
-
     useEffect(() => {
         employeeService.getEmployeeStalls()
             .then(res => { setStalls(res.data); setLoading(false); })
@@ -177,6 +177,7 @@ const EmployeeStallMap = ({ hallName }) => {
     // Determine status label + colours for the new card
     const getStatusStyle = (stall) => {
         if (!stall) return {};
+        if (stall.disabled) return { label: "DISABLED", bg: "#E2E8F0", color: "#64748B", dot: "#94A3B8" };
         const ps = stall.paymentStatus;
         if (ps === "PAID" || stall.reserved) {
             if (ps === "PENDING") return { label: "PENDING", bg: "#FFF3CD", color: "#856404", dot: "#F59E0B" };
@@ -212,7 +213,7 @@ const EmployeeStallMap = ({ hallName }) => {
                         </div>
                     ) : (() => {
                         const status = getStatusStyle(hoveredStall);
-                        const stallNum = hoveredStall.stallCode?.split("-")[1] || hoveredStall.stallCode;
+                        hoveredStall.stallCode?.split("-")[1] || hoveredStall.stallCode;
                         const qrData = encodeURIComponent(
                             `STALL:${hoveredStall.stallCode}|PRICE:${hoveredStall.price}|FLOOR:${hoveredStall.floorName}`
                         );
@@ -434,23 +435,6 @@ const EmployeeStallMap = ({ hallName }) => {
                             </span>
                         </div>
                     </div>
-
-                    <button
-                        onClick={() => {
-                            // Logic to logout or go back to a main landing if one existed
-                            // For now, maybe refresh or just visual. 
-                            // Or navigates to home but authentication might kick in.
-                            // Let's keep it as "Exit" to login or similar if needed, 
-                            // But usually sidebar is enough. 
-                            // Keeping "Back to Map" might be redundant with sidebar, 
-                            // so let's remove or change to a "Logout / Exit" visual if requested? 
-                            // The user didn't explicitly ask for a specific button here, 
-                            // but requested "Hall navigation sidebar".
-                            // I will leave this area clean or maybe add a user profile snippet.
-                        }}
-                        className="hidden"
-                    >
-                    </button>
                 </div>
 
                 {/* ── Hall Map Container ── */}
@@ -484,7 +468,8 @@ const EmployeeStallMap = ({ hallName }) => {
                                 {activeFloorStalls.map((stall, index) => {
                                     const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                                     const isReserved = stall.reserved;
-                                    const colorClass = getSizeColor(stall.stallSize || stall.size, isReserved);
+                                    const isDisabled = stall.disabled;
+                                    const colorClass = getSizeColor(stall.stallSize || stall.size, isReserved, isDisabled);
 
                                     // For grid fallback if layout is missing (shouldn't happen for defined halls)
                                     // Using absolute positioning from layout
@@ -515,8 +500,10 @@ const EmployeeStallMap = ({ hallName }) => {
                                                 {String(stall.stallCode.split("-")[1]).padStart(2, "0")}
                                             </span>
 
-                                            {/* Price or SOLD */}
-                                            {isReserved ? (
+                                            {/* Price or SOLD or DISABLED */}
+                                            {isDisabled ? (
+                                                <span className="text-[7px] font-bold mt-1 text-slate-500 tracking-widest pointer-events-none">DISABLED</span>
+                                            ) : isReserved ? (
                                                 <span className="text-[9px] font-bold mt-0.5 text-gray-500 uppercase tracking-widest pointer-events-none">SOLD</span>
                                             ) : (
                                                 <span className="text-[9px] font-mono font-medium mt-0.5 text-gray-600 opacity-80 pointer-events-none">
