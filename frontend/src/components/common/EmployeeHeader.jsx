@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import AuthService from "../../services/auth.service";
 import axios from "axios";
 import {
   UserCircleIcon,
@@ -11,8 +11,8 @@ import {
   HomeIcon,
   QrCodeIcon
 } from "@heroicons/react/24/outline";
-import QRScannerModal from "./QRScannerModal";
-import VerificationResultModal from "./VerificationResultModal";
+import QRScannerModal from "../QRScannerModal";
+import VerificationResultModal from "../VerificationResultModal";
 
 const EmployeeHeader = ({ user }) => {
   const navigate = useNavigate();

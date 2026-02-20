@@ -1,11 +1,14 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Map from "./pages/Map";
-import Footer from "./components/footer";
+import Footer from "./components/common/footer";
 import EmployeePanel from "./pages/EmployeePanel";
-import Header from "./components/Header";
+import Header from "./components/common/Header";
+import MainLayout from "./layouts/MainLayout";
+import EmployeeLayout from "./layouts/EmployeeLayout";
+import AdminLayout from "./layouts/AdminLayout";
 import AuthService from "./services/auth.service";
 import Profile from "./pages/Profile";
 import Reservations from "./pages/Reservations";
@@ -17,18 +20,17 @@ import GenreSelection from "./pages/GenreSelection";
 import About from "./pages/About";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeFloorPlan from "./pages/EmployeeFloorPlan";
-import EmployeeRoute from "./components/EmployeeRoute";
+import EmployeeRoute from "./components/routing/EmployeeRoute";
 import AdminDutyManagement from "./pages/AdminDutyManagement";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminStalls from "./pages/AdminStalls";
 import AdminReservations from "./pages/AdminReservations";
 import AdminUsers from "./pages/AdminUsers";
-import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
-import EmployeeHeader from "./components/EmployeeHeader";
+import AdminProtectedRoute from "./components/routing/AdminProtectedRoute.jsx";
+import EmployeeHeader from "./components/common/EmployeeHeader";
 import { useEffect, useState } from "react";
 
 function AppContent() {
-  const location = useLocation();
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
@@ -43,25 +45,16 @@ function AppContent() {
     return () => window.removeEventListener("user-updated", fetchUser);
   }, []);
 
-  const isEmployeePage = location.pathname.startsWith("/employee");
-  const isAdminPage = location.pathname.startsWith("/admin");
-  const hideHeaderRoutes = ["/login", "/register", "/"];
-
-  const showNormalHeader = !hideHeaderRoutes.includes(location.pathname) && !isEmployeePage && !isAdminPage;
-  const showEmployeeHeader = isEmployeePage;
-  const showFooter = !hideHeaderRoutes.includes(location.pathname);
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {showNormalHeader && <Header user={user} />}
-      {showEmployeeHeader && <EmployeeHeader user={user} />}
+      <Routes>
+        {/* ── Public / Blank Layout routes ── */}
+        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      <div style={{ flex: 1 }}>
-        <Routes>
-          {/* ── Public / Vendor routes ── */}
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+        {/* ── Main Layout routes (User/Public with Header & Footer) ── */}
+        <Route element={<MainLayout user={user} />}>
           <Route path="/about" element={<About />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/reservations" element={<Reservations />} />
@@ -73,19 +66,22 @@ function AppContent() {
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/employee" element={<EmployeePanel />} />
+          <Route path="/genres" element={<GenreSelection />} />
+        </Route>
 
-          {/* ── Admin routes (from main) ── */}
-          <Route element={<AdminProtectedRoute />}>
+        {/* ── Admin routes ── */}
+        <Route element={<AdminProtectedRoute />}>
+          <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/stalls" element={<AdminStalls />} />
             <Route path="/admin/reservations" element={<AdminReservations />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/duties" element={<AdminDutyManagement />} />
           </Route>
+        </Route>
 
-          <Route path="/genres" element={<GenreSelection />} />
-
-          {/* ── Employee routes (from bandara) ── */}
+        {/* ── Employee routes ── */}
+        <Route element={<EmployeeLayout user={user} />}>
           <Route
             path="/employee/floor-plan"
             element={
@@ -102,16 +98,13 @@ function AppContent() {
               </EmployeeRoute>
             }
           />
-
           {/* Legacy /employee/dashboard → redirect to floor plan */}
           <Route
             path="/employee/dashboard"
             element={<Navigate to="/employee/floor-plan" replace />}
           />
-        </Routes>
-      </div>
-
-      {showFooter && <Footer />}
+        </Route>
+      </Routes>
     </div>
   );
 }
