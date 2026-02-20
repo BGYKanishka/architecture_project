@@ -13,7 +13,6 @@ import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import HelpCenter from "./pages/HelpCenter";
 import GenreSelection from "./pages/GenreSelection";
-import EmployeeLogin from "./pages/EmployeeLogin";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeFloorPlan from "./pages/EmployeeFloorPlan";
 import EmployeeRoute from "./components/EmployeeRoute";
@@ -23,6 +22,7 @@ import AdminStalls from "./pages/AdminStalls";
 import AdminReservations from "./pages/AdminReservations";
 import AdminUsers from "./pages/AdminUsers";
 import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
+import EmployeeHeader from "./components/EmployeeHeader";
 import { useEffect, useState } from "react";
 
 function AppContent() {
@@ -44,13 +44,15 @@ function AppContent() {
   const isEmployeePage = location.pathname.startsWith("/employee");
   const isAdminPage = location.pathname.startsWith("/admin");
   const hideHeaderRoutes = ["/login", "/register", "/"];
-  
-  const showHeader = !hideHeaderRoutes.includes(location.pathname) && !isEmployeePage && !isAdminPage;
-  const showFooter = !isEmployeePage && !isAdminPage;
+
+  const showNormalHeader = !hideHeaderRoutes.includes(location.pathname) && !isEmployeePage && !isAdminPage;
+  const showEmployeeHeader = isEmployeePage;
+  const showFooter = !hideHeaderRoutes.includes(location.pathname);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {showHeader && <Header user={user} />}
+      {showNormalHeader && <Header user={user} />}
+      {showEmployeeHeader && <EmployeeHeader user={user} />}
 
       <div style={{ flex: 1 }}>
         <Routes>
@@ -67,7 +69,7 @@ function AppContent() {
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/employee" element={<EmployeePanel />} />
-          
+
           {/* ── Admin routes (from main) ── */}
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
@@ -80,8 +82,6 @@ function AppContent() {
           <Route path="/genres" element={<GenreSelection />} />
 
           {/* ── Employee routes (from bandara) ── */}
-          <Route path="/employee/login" element={<EmployeeLogin />} />
-
           <Route
             path="/employee/floor-plan"
             element={
