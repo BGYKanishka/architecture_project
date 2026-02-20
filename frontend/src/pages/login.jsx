@@ -17,13 +17,12 @@ const Login = () => {
 
     try {
       const data = await AuthService.login(email, password);
-
-      const roles = data.roles || [];
+      const roles = Array.isArray(data.roles) ? data.roles : (data.roles || []);
 
       if (roles.includes("ROLE_ADMIN")) {
         navigate("/admin/dashboard");
       } else if (roles.includes("ROLE_EMPLOYEE")) {
-        navigate("/employee");
+        navigate("/employee/floor-plan"); 
       } else {
         navigate("/dashboard");
       }
@@ -44,24 +43,20 @@ const Login = () => {
           "linear-gradient(to right, #0f1d45 0%, #0f1d45 50%, #eff6ff 50%, #eff6ff 100%)",
       }}
     >
-      {/* Decorative Background Shapes */}
       <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40"></div>
       <div className="absolute top-[15%] right-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30"></div>
       <div className="absolute bottom-[-60px] left-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30"></div>
       <div className="absolute bottom-[10%] right-[15%] w-[80px] h-[80px] rounded-full bg-blue-400/20"></div>
       <div className="absolute top-[40%] left-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25"></div>
 
-      {/* Combined Card Container */}
       <div className="relative z-10 flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
 
-        {/* Left Side - Background Image Panel */}
         <div className="relative w-1/2 min-h-[600px] hidden md:block">
           <img
             src={backgroundImg}
             alt="Book Fair Background"
             className="absolute inset-0 w-full h-full object-cover"
           />
-          {/* Gradient Overlay */}
           <div
             className="absolute inset-0"
             style={{
@@ -70,7 +65,6 @@ const Login = () => {
             }}
           ></div>
 
-          {/* Overlay Content */}
           <div className="relative z-10 flex flex-col justify-center h-full p-10 text-white">
             <h2 className="text-4xl font-extrabold leading-tight mb-12 drop-shadow-lg">
               Welcome to the
@@ -83,11 +77,9 @@ const Login = () => {
           </div>
         </div>
 
-        {/* Right Side - Login Form */}
         <div className="flex items-center justify-center w-full md:w-1/2 p-8">
           <div className="w-full max-w-sm space-y-6">
 
-            {/* HEADER */}
             <div className="text-center mb-8">
               <h1 className="text-3xl font-extrabold text-blue-800 tracking-tight">
                 Colombo International
@@ -97,10 +89,8 @@ const Login = () => {
               <div className="mt-4 w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleLogin} className="space-y-4">
 
-              {/* Email Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email Address</label>
                 <input
@@ -113,7 +103,6 @@ const Login = () => {
                 />
               </div>
 
-              {/* Password Input */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">Password</label>
                 <input
@@ -126,14 +115,12 @@ const Login = () => {
                 />
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className="p-3 text-sm text-red-700 bg-red-100 rounded border border-red-200">
                   {error}
                 </div>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}

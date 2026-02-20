@@ -2,14 +2,12 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import {
-
   UserCircleIcon,
   Bars3Icon,
   ArrowLeftOnRectangleIcon,
   XMarkIcon,
   BookOpenIcon,
   HomeIcon,
-  CalendarIcon,
   TicketIcon,
   QuestionMarkCircleIcon
 } from "@heroicons/react/24/outline";
@@ -19,7 +17,6 @@ const Header = ({ user }) => {
   const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
 
   const handleLogout = () => {
     AuthService.logout();
@@ -67,10 +64,18 @@ const Header = ({ user }) => {
 
           <button
             onClick={handleReservationsClick}
-            className="p-2  text-slate-500 hover:bg-slate-100 rounded-full transition relative"
+            className="hidden md:flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-full transition font-bold text-sm"
+          >
+            <TicketIcon className="w-5 h-5" />
+            <span>My Reservations</span>
+          </button>
+
+          {/* Mobile version of ticket button */}
+          <button
+            onClick={handleReservationsClick}
+            className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-full transition relative"
           >
             <TicketIcon className="w-6 h-6" />
-            <span className="hidden md:block font-bold text-sm"></span>
           </button>
 
           <div className="relative">
@@ -84,23 +89,26 @@ const Header = ({ user }) => {
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in duration-150">
-                <button
-                  onClick={() => {
-                    navigate("/profile");
-                    setIsProfileOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 font-bold"
-                >
-                  <UserCircleIcon className="w-5 h-5 " /> Profile
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"
-                >
-                  <ArrowLeftOnRectangleIcon className="w-5 h-5" /> Logout
-                </button>
-              </div>
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in duration-150">
+                  <button
+                    onClick={() => {
+                      navigate("/profile");
+                      setIsProfileOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 font-bold"
+                  >
+                    <UserCircleIcon className="w-5 h-5 " /> Profile
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"
+                  >
+                    <ArrowLeftOnRectangleIcon className="w-5 h-5" /> Logout
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
