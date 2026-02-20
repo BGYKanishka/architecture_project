@@ -204,6 +204,19 @@ public class ReservationService {
             stallRepository.save(stall);
         }
 
+        Reservation reservation = reservationStall.getReservation();
+
+        // Delete the stall from the reservation
         reservationStallRepository.delete(reservationStall);
+
+        // Ensure the deletion is flushed to the database before counting
+        reservationStallRepository.flush();
+
+        // If no more stalls are associated with this reservation, mark it as CANCELLED
+        long remainingStalls = reservationStallRepository.countByReservationId(reservation.getId());
+        if (remainingStalls == 0) {
+            reservation.setStatus("CANCELLED");
+            reservationRepository.save(reservation);
+        }
     }
 }

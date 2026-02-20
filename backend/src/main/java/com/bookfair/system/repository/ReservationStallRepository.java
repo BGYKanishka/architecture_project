@@ -20,7 +20,6 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
                         "WHERE rs.reservation.user.id = :userId AND (rs.reservation.status = 'CONFIRMED' OR rs.reservation.status = 'PENDING')")
         long countStallsByUserId(@Param("userId") Long userId);
 
-     
         @Query("SELECT rs FROM ReservationStall rs " +
                         "JOIN FETCH rs.reservation r " +
                         "JOIN FETCH r.user u " +
@@ -39,4 +38,7 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
         @Query("SELECT rs FROM ReservationStall rs WHERE rs.reservation.user.id = :userId AND rs.stall.id = :stallId")
         Optional<ReservationStall> findByUserIdAndStallId(@Param("userId") Long userId,
                         @Param("stallId") Long stallId);
+
+        @Query("SELECT COUNT(rs) FROM ReservationStall rs WHERE rs.reservation.id = :reservationId")
+        long countByReservationId(@Param("reservationId") Long reservationId);
 }
