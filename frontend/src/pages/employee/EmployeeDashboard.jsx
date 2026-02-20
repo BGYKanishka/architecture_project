@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import EmployeeStallMap from "../components/EmployeeStallMap";
+import EmployeeStallMap from "../../components/EmployeeStallMap";
 
 /**
  * Hall drill-down view for employees.

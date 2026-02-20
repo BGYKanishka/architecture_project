@@ -7,23 +7,25 @@
     <list default="true" id="8ec89d2a-c9d5-4150-bb4f-1ae587f27007" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/AdminHeader.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/AdminProtectedRoute.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/EmployeeRoute.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/EmployeeStallMap.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/EmployeeStallMap.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/HallMap.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/HallShapeWrapper.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/QRScanner.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/StallMap.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/footer.jsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDutyManagement.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/BookingConfirmation.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/BookingSummary.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeeDashboard.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeeLogin.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/GenreSelection.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/HelpCenter.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/PaymentSelection.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Profile.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Register.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Reservations.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/login.jsx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,7 +104,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1771574026466</updated>
-      <workItem from="1771574029914" duration="5521000" />
+      <workItem from="1771574029914" duration="7362000" />
     </task>
     <servers />
   </component>

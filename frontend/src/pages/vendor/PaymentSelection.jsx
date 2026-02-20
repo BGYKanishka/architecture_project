@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import AuthService from "../services/auth.service";
+import AuthService from "../../services/auth.service";
 import { CreditCardIcon, BanknotesIcon, LockClosedIcon, ArrowPathIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
-import ConfirmationModal from "../components/common/ConfirmationModal";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const PaymentSelection = () => {
   const location = useLocation();

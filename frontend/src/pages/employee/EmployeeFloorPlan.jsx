@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/auth.service";
-import employeeService from "../services/employee/service";
-import HallMap from "../components/shared/HallMap";
+import AuthService from "../../services/auth.service";
+import employeeService from "../../services/employee/service";
+import HallMap from "../../components/shared/HallMap";
 
 const EmployeeFloorPlan = () => {
     const navigate = useNavigate();

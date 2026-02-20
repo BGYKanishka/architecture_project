@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import QRScanner from '../components/shared/QRScanner';
-import employeeService from '../services/employee/service';
-import ConfirmationModal from '../components/common/ConfirmationModal';
+import QRScanner from '../../components/shared/QRScanner';
+import employeeService from '../../services/employee/service';
+import ConfirmationModal from '../../components/common/ConfirmationModal';
 
 const EmployeePanel = () => {
     const [employee, setEmployee] = useState(null);

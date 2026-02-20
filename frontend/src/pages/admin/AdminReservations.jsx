@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAdminReservations } from "../services/admin/admin.reservation.service";
-import AdminHeader from "../components/admin/layout/AdminHeader";
+import { getAdminReservations } from "../../services/admin/admin.reservation.service";
+import AdminHeader from "../../components/admin/layout/AdminHeader";
 
 export default function AdminReservations() {
     const [list, setList] = useState([]);
