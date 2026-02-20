@@ -19,13 +19,11 @@ const Login = () => {
       const data = await AuthService.login(email, password);
 
       const roles = data.roles || [];
-      const isAdmin = roles.includes("ROLE_ADMIN") || roles.includes("ROLE_EMPLOYEE");
 
-      if (isAdmin) {
-        localStorage.setItem("admin_token", data.token);
-        localStorage.setItem("admin_role", roles[0]);
-        localStorage.setItem("admin_username", data.email);
+      if (roles.includes("ROLE_ADMIN")) {
         navigate("/admin/dashboard");
+      } else if (roles.includes("ROLE_EMPLOYEE")) {
+        navigate("/employee");
       } else {
         navigate("/dashboard");
       }
