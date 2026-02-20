@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="dataSourceStorageLocal" created-in="IU-253.30387.90">
-    <data-source name="postgres@localhost" uuid="9e981f44-4367-4671-a872-69a5e0e718cd">
+  <component name="dataSourceStorageLocal" created-in="IU-252.26199.169">
+    <data-source name="postgres@localhost" uuid="f5032c22-7772-45d2-bf76-b05cc8a8bd81">
       <database-info product="PostgreSQL" version="18.2" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.7.3" dbms="POSTGRES" exact-version="18.2" exact-driver-version="42.7">
         <identifier-quote-string>&quot;</identifier-quote-string>
       </database-info>
@@ -10,13 +10,8 @@
       <user-name>postgres</user-name>
       <schema-mapping>
         <introspection-scope>
-          <node negative="1">
-            <node kind="database" qname="@">
-              <node kind="schema" qname="@" />
-            </node>
-            <node kind="database" qname="bookfair_db">
-              <node kind="schema" negative="1" />
-            </node>
+          <node kind="database" qname="bookfair_db">
+            <node kind="schema" negative="1" />
           </node>
         </introspection-scope>
       </schema-mapping>

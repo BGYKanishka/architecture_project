@@ -1,14 +1,26 @@
 import React, { useState, useCallback } from 'react';
 import QRScanner from '../components/QRScanner';
 import employeeService from '../services/employee/service';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 
 const EmployeePanel = () => {
     const [employee, setEmployee] = useState(null);
 
+    // Alert Modal State
+    const [alertConfig, setAlertConfig] = useState({
+        isOpen: false,
+        title: "",
+        message: ""
+    });
+
+    const showAlert = (title, message) => {
+        setAlertConfig({ isOpen: true, title, message });
+    };
+
     const handleScan = useCallback((decodedText) => {
         employeeService.verifyQR(decodedText)
             .then(res => setEmployee(res.data))
-            .catch(() => alert("Employee not found!"));
+            .catch(() => showAlert("Not Found", "Employee not found!"));
     }, []);
 
     return (
@@ -23,6 +35,15 @@ const EmployeePanel = () => {
                     <button onClick={() => setEmployee(null)}>Scan Again</button>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                confirmText="Got it"
+                isAlert={true}
+            />
         </div>
     );
 };

@@ -1,6 +1,7 @@
 package com.bookfair.system.service;
 
 import com.bookfair.system.dto.request.ReservationRequest;
+import com.bookfair.system.dto.response.AdminReservationResponse;
 import com.bookfair.system.dto.response.ReservationResponse;
 import com.bookfair.system.entity.*;
 import com.bookfair.system.repository.*;
@@ -77,8 +78,7 @@ public class ReservationService {
                     ReservationStall.builder()
                             .reservation(savedReservation)
                             .stall(stall)
-                            .build()
-            );
+                            .build());
 
             // LOCK THE STALL
             stall.setReserved(true);
@@ -109,11 +109,18 @@ public class ReservationService {
                     qrImageBase64,
                     stallCodes);
 
-            return new ReservationResponse(qrToken, qrImageBase64, "Booking Successful!");
+            return ReservationResponse.builder()
+                    .reservationCode(qrToken)
+                    .qrCodeImage(qrImageBase64)
+                    .message("Booking Successful!")
+                    .build();
 
         } catch (Exception e) {
             System.err.println("QR/Email Error: " + e.getMessage());
-            return new ReservationResponse(qrToken, null, "Booking Success (Email Failed)");
+            return ReservationResponse.builder()
+                    .reservationCode(qrToken)
+                    .message("Booking Success (Email Failed)")
+                    .build();
         }
     }
 
@@ -125,15 +132,111 @@ public class ReservationService {
         return Base64.getEncoder().encodeToString(pngOutputStream.toByteArray());
     }
 
-    public java.util.List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<AdminReservationResponse> getAllReservations() {
+        List<Reservation> baseReservations = reservationRepository.findAllBaseReservationsWithUser();
+        List<ReservationStall> allStalls = reservationStallRepository.findAllWithStallsAndReservations();
+
+        return baseReservations.stream().map(r -> {
+            String baseToken = r.getQrCodeToken();
+            List<AdminReservationResponse.StallDetail> stallDetails = allStalls.stream()
+                    .filter(rs -> rs.getReservation().getQrCodeToken().startsWith(baseToken))
+                    .map(rs -> new AdminReservationResponse.StallDetail(
+                            rs.getStall().getId(),
+                            rs.getStall().getStallCode(),
+                            rs.getReservation().getStatus()))
+                    .collect(Collectors.toList());
+
+            return new AdminReservationResponse(
+                    r.getId(),
+                    r.getUser().getEmail(),
+                    r.getUser().getName(),
+                    r.getReservationDate(),
+                    baseToken,
+                    r.getStatus(),
+                    stallDetails);
+        }).collect(Collectors.toList());
     }
 
     @Transactional
-    public Reservation updateReservationStatus(Long id, String status) {
-        Reservation reservation = reservationRepository.findById(id)
+    public AdminReservationResponse updateReservationStatus(Long id, String status) {
+        // Use JOIN FETCH to load User eagerly before updating
+        Reservation reservation = reservationRepository.findByIdWithUser(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
         reservation.setStatus(status);
-        return reservationRepository.save(reservation);
+        Reservation saved = reservationRepository.save(reservation);
+        return new AdminReservationResponse(
+                saved.getId(),
+                saved.getUser().getEmail(),
+                saved.getUser().getName(),
+                saved.getReservationDate(),
+                saved.getQrCodeToken(),
+                saved.getStatus(),
+                java.util.Collections.emptyList());
+    }
+
+    public long getReservationCount(Long userId) {
+        return reservationStallRepository.countStallsByUserId(userId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getUserReservations(Long userId) {
+        List<ReservationStall> reservationStalls = reservationStallRepository.findAllByReservationUserId(userId);
+
+        return reservationStalls.stream().map(rs -> {
+            Stall stall = rs.getStall();
+            Reservation reservation = rs.getReservation();
+            String code = reservation.getQrCodeToken();
+            if (code.contains("-C-"))
+                code = code.substring(0, code.indexOf("-C-"));
+
+            String qrCodeImage = null;
+            try {
+                qrCodeImage = generateQRCodeImage(code);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return ReservationResponse.builder()
+                    .id(stall.getId())
+                    .stallCode(stall.getStallCode())
+                    .size(stall.getSize())
+                    .price(stall.getPrice())
+                    .floorName(stall.getFloor().getFloorName())
+                    .reservationCode(code)
+                    .qrCodeImage(qrCodeImage)
+                    .status(reservation.getStatus())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void cancelStallReservation(Long userId, Long stallId) {
+        ReservationStall reservationStall = reservationStallRepository.findActiveByUserIdAndStallId(userId, stallId)
+                .orElseThrow(() -> new RuntimeException("Active reservation not found for this stall"));
+
+        Stall stall = reservationStall.getStall();
+        if (stall.isReserved()) {
+            stall.setReserved(false);
+            stallRepository.save(stall);
+        }
+
+        Reservation originalReservation = reservationStall.getReservation();
+        long remainingStalls = reservationStallRepository.countByReservationId(originalReservation.getId());
+
+        if (remainingStalls <= 1) {
+            originalReservation.setStatus("CANCELLED");
+            reservationRepository.save(originalReservation);
+        } else {
+            Reservation cancelledRes = new Reservation();
+            cancelledRes.setUser(originalReservation.getUser());
+            cancelledRes.setReservationDate(originalReservation.getReservationDate());
+            cancelledRes.setStatus("CANCELLED");
+            cancelledRes.setQrCodeToken(originalReservation.getQrCodeToken() + "-C-" + stall.getId());
+            reservationRepository.save(cancelledRes);
+
+            reservationStall.setReservation(cancelledRes);
+            reservationStallRepository.save(reservationStall);
+        }
     }
 }

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import StallService from "../services/stall.service";
 import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
+import ConfirmationModal from "./common/ConfirmationModal";
 
 // Coordinate Maps for Visual Layout
 const hallLayouts = {
@@ -84,10 +85,7 @@ const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
-  const [selectedStalls, setSelectedStalls] = useState(() => {
-    const saved = localStorage.getItem("selectedStalls");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [selectedStalls, setSelectedStalls] = useState([]);
   const [paidReservations, setPaidReservations] = useState(() => {
     const saved = localStorage.getItem("paidReservations");
     return saved ? JSON.parse(saved) : [];
@@ -96,11 +94,36 @@ const StallMap = () => {
     const saved = localStorage.getItem("cancelledReservations");
     return saved ? JSON.parse(saved) : [];
   });
+  const [reservationCount, setReservationCount] = useState(0);
+
+  // Alert Modal State
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    title: "",
+    message: ""
+  });
+
+  const showAlert = (title, message) => {
+    setAlertConfig({ isOpen: true, title, message });
+  };
 
   useEffect(() => {
-    localStorage.setItem("selectedStalls", JSON.stringify(selectedStalls));
-    window.dispatchEvent(new Event("selectedStallsUpdated"));
-  }, [selectedStalls]);
+    const fetchCount = () => {
+      StallService.getReservationCount()
+        .then((res) => {
+          // console.log("Reservation count loaded:", res.data);
+          setReservationCount(res.data);
+        })
+        .catch((err) => console.error("Error fetching reservation count:", err));
+    };
+
+    fetchCount();
+    const intervalId = setInterval(fetchCount, 3000); // Poll count as well
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+
 
   useEffect(() => {
     const syncStates = () => {
@@ -119,42 +142,54 @@ const StallMap = () => {
   const activeHall = hallName || null;
 
   useEffect(() => {
-    StallService.getAllStalls()
-      .then((res) => {
-        console.log("Stalls loaded:", res.data); // Debug log
-        if (Array.isArray(res.data)) {
-          setStalls(res.data);
+    const fetchStalls = () => {
+      StallService.getAllStalls()
+        .then((res) => {
+          // console.log("Stalls loaded:", res.data); // Debug log (Optional: remove to reduce noise)
+          if (Array.isArray(res.data)) {
+            setStalls(res.data);
 
-          // Sync Local Storage with Backend
-          const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-          const validatedPaid = localPaid.filter((paidItem) => {
-            const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
-            const stall = res.data.find((s) => s.id === paidId);
-            if (stall && !stall.reserved) {
-              return false;
-            }
-            return true; 
-          });
-
-          if (validatedPaid.length !== localPaid.length) {
-            console.warn("Found stale reservations in local storage. Cleaning up...", {
-              before: localPaid,
-              after: validatedPaid
+            // Sync Local Storage with Backend
+            const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
+            const validatedPaid = localPaid.filter((paidItem) => {
+              const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
+              const stall = res.data.find((s) => s.id === paidId);
+              if (stall && !stall.reserved) {
+                return false;
+              }
+              return true;
             });
-            localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
-            setPaidReservations(validatedPaid);
-            window.dispatchEvent(new Event("paidReservationsUpdated"));
-          }
 
-        } else {
-          console.error("API returned non-array for stalls:", res.data);
-          setStalls([]);
-        }
-      })
-      .catch((err) => {
-        console.error("Error loading stalls:", err);
-        setStalls([]); 
-      });
+            if (validatedPaid.length !== localPaid.length) {
+              console.warn("Found stale reservations in local storage. Cleaning up...", {
+                before: localPaid,
+                after: validatedPaid
+              });
+              localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
+              setPaidReservations(validatedPaid);
+              window.dispatchEvent(new Event("paidReservationsUpdated"));
+            }
+
+          } else {
+            console.error("API returned non-array for stalls:", res.data);
+            setStalls([]);
+          }
+        })
+        .catch((err) => {
+          console.error("Error loading stalls:", err);
+          // Only clear stalls if it's a critical failure, otherwise keep old data
+          // setStalls([]); 
+        });
+    };
+
+    // Initial fetch
+    fetchStalls();
+
+    // Set up polling every 3 seconds
+    const intervalId = setInterval(fetchStalls, 3000);
+
+    // Cleanup on unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const getHallStatus = (visualHallName) => {
@@ -174,6 +209,10 @@ const StallMap = () => {
   const handleBackToMap = () => navigate("/dashboard");
 
   const toggleSelection = (stall) => {
+    if (stall.disabled) {
+      showAlert("Stall Unavailable", "This stall has been disabled by the administrator and cannot be booked.");
+      return;
+    }
     const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
     const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
     if (isActuallyReserved || isPaid) return;
@@ -181,12 +220,18 @@ const StallMap = () => {
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
     } else {
-      if (selectedStalls.length >= 3) return alert("Max 3 stalls!");
+      if (selectedStalls.length + reservationCount >= 3) {
+        return showAlert(
+          "Limit Reached",
+          `You already have ${reservationCount} active reservations. Max allowed is 3.`
+        );
+      }
       setSelectedStalls([...selectedStalls, stall.id]);
     }
   };
 
-  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled) => {
+  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled, isDisabled) => {
+    if (isDisabled) return "bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed opacity-60";
     const isActuallyReserved = isReserved && !isCancelled;
     if (isActuallyReserved || isPaid) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
     if (isSelected) return "bg-blue-600 border-blue-800 text-white shadow-xl z-50 scale-110";
@@ -209,6 +254,13 @@ const StallMap = () => {
 
   // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
+    if (selectedStalls.length + reservationCount > 3) {
+      showAlert(
+        "Limit Reached",
+        `You already have ${reservationCount} active reservations. Max allowed is 3.`
+      );
+      return;
+    }
 
     const selectedStallObjects = stalls.filter(stall =>
       selectedStalls.includes(stall.id)
@@ -274,7 +326,7 @@ const StallMap = () => {
                   const isSelected = selectedStalls.includes(stall.id);
                   const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
                   const isCancelled = cancelledReservations.includes(stall.id);
-                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled);
+                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled, stall.disabled);
 
                   return (
                     <div
@@ -300,17 +352,18 @@ const StallMap = () => {
                       <span className="font-bold text-sm md:text-lg leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-                      {!stall.reserved && !isPaid && (
+                      {!stall.reserved && !isPaid && !stall.disabled && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {stall.reserved && isCancelled && (
+                      {stall.reserved && isCancelled && !stall.disabled && (
                         <span className="text-[10px] font-mono font-medium mt-1">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {(stall.reserved && !isCancelled || isPaid) && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {(stall.reserved && !isCancelled || isPaid) && !stall.disabled && <span className="text-[8px] font-bold mt-1">SOLD</span>}
+                      {stall.disabled && <span className="text-[7px] font-bold mt-1 text-slate-500">DISABLED</span>}
                     </div>
                   );
                 })}
@@ -331,6 +384,15 @@ const StallMap = () => {
           )}
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={alertConfig.isOpen}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        confirmText="Got it"
+        isAlert={true}
+      />
     </div>
   );
 };
