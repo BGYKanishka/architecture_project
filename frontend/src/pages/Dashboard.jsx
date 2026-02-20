@@ -20,23 +20,23 @@ const Dashboard = () => {
   };
 
   if (!user) return (
-    <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+    <div className="flex h-screen w-screen items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 dark:border-blue-400"></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       <main className="py-6 sm:py-10 px-4 sm:px-8">
         <div className="max-w-[1600px] mx-auto">
-            <div className="mb-8">
-              
-      
-            </div>
+          <div className="mb-8">
 
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <StallMap />
-            </div>
+
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden transition-colors duration-300">
+            <StallMap />
+          </div>
         </div>
       </main>
     </div>
