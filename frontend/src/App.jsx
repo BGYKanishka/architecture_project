@@ -14,6 +14,7 @@ import PaymentSelection from "./pages/PaymentSelection";
 import BookingConfirmation from "./pages/BookingConfirmation";
 import HelpCenter from "./pages/HelpCenter";
 import GenreSelection from "./pages/GenreSelection";
+import About from "./pages/About";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeFloorPlan from "./pages/EmployeeFloorPlan";
 import EmployeeRoute from "./components/EmployeeRoute";
@@ -61,6 +62,7 @@ function AppContent() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/about" element={<About />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/dashboard" element={<Dashboard />} />
