@@ -57,6 +57,7 @@ public class AdminStallController {
                 stall.getSize(),
                 stall.getPrice(),
                 stall.isReserved(),
+                stall.isDisabled(),
                 stall.getFloor().getFloorName())).collect(Collectors.toList());
         return ResponseEntity.ok(response);
     }
