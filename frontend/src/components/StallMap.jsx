@@ -203,10 +203,10 @@ const StallMap = () => {
 
   const handleHallClick = (name) => {
     if (name === "Main Building") return;
-    navigate(`/dashboard/${name}`);
+    navigate(`/map/${name}`);
   };
 
-  const handleBackToMap = () => navigate("/dashboard");
+  const handleBackToMap = () => navigate("/map");
 
   const toggleSelection = (stall) => {
     if (stall.disabled) {

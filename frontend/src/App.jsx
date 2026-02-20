@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "r
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Map from "./pages/Map";
 import Footer from "./components/footer";
 import EmployeePanel from "./pages/EmployeePanel";
 import Header from "./components/Header";
@@ -63,7 +64,8 @@ function AppContent() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/:hallName" element={<Dashboard />} />
+          <Route path="/map" element={<Map />} />
+          <Route path="/map/:hallName" element={<Map />} />
           <Route path="/booking-summary" element={<BookingSummary />} />
           <Route path="/payment-selection" element={<PaymentSelection />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
