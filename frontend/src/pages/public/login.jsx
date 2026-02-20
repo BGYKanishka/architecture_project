@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import AuthService from "../services/auth.service";
-import backgroundImg from "../assets/background.jpg";
+import AuthService from "../../services/auth.service";
+import backgroundImg from "../../assets/background.jpg";
 
 const Login = () => {
   const [email, setEmail] = useState("");

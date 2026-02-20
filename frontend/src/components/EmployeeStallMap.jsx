@@ -54,11 +54,8 @@ const hallDoors = {
     "Hall E": [{ label: "Entrance", top: "90%", left: "50%" }, { label: "Exit", top: "50%", left: "95%" }],
     "Hall F": [{ label: "Entrance", top: "5%", left: "50%" }, { label: "Exit", top: "95%", left: "50%" }],
     "Hall G": [
-        { label: "01", top: "10%", left: "5%" },
-        { label: "02", top: "10%", left: "95%" },
-        { label: "03", top: "50%", left: "98%" },
-        { label: "04", top: "90%", left: "95%" },
-        { label: "05", top: "90%", left: "5%" }
+        { label: "Entrance", top: "5%", left: "50%" },
+        { label: "Exit", top: "95%", left: "50%" }
     ]
 };
 

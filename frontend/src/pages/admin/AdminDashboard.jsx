@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import AdminHeader from "../components/AdminHeader";
+import AdminHeader from "../../components/common/AdminHeader";
 import {
     BuildingStorefrontIcon,
     ClipboardDocumentListIcon,

@@ -11,8 +11,8 @@ import {
     RocketLaunchIcon,
     HeartIcon
 } from "@heroicons/react/24/outline";
-import UserService from "../services/user.service";
-import ConfirmationModal from "../components/common/ConfirmationModal";
+import UserService from "../../services/user.service";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const genres = [
     { id: "Fiction", label: "Fiction", icon: <BookOpenIcon className="w-8 h-8" />, color: "bg-purple-100 border-purple-200 text-purple-600" },
