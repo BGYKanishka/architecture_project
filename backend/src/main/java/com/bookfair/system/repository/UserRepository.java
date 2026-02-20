@@ -16,11 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     List<User> findByRole(String role);
 
-    /**
-     * Fetches the genres collection for a user as a plain List<String>.
-     * Avoids LazyInitializationException — the JOIN on user_genres is done
-     * eagerly as a fresh query, never touching a lazy proxy.
-     */
-    @Query("SELECT g FROM User u JOIN u.genres g WHERE u.id = :userId")
+    @Query("SELECT g.name FROM User u JOIN u.genres g WHERE u.id = :userId")
     List<String> findGenresByUserId(@Param("userId") Long userId);
 }

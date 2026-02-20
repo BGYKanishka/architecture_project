@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { adminLogout } from "../services/admin/admin.auth.service";
+import AuthService from "../services/auth.service";
 import {
     UserCircleIcon,
     Bars3Icon,
@@ -20,11 +20,12 @@ const AdminHeader = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const username = localStorage.getItem("admin_username") || "Admin";
-    const role = localStorage.getItem("admin_role") || "ADMIN";
+    const user = AuthService.getCurrentUser() || {};
+    const username = user.email || "Admin";
+    const role = (user.roles && user.roles.length > 0) ? user.roles[0] : "ADMIN";
 
     const handleLogout = () => {
-        adminLogout();
+        AuthService.logout();
         navigate("/login");
     };
 

@@ -11,5 +11,6 @@ public class StallResponse {
     private String size;
     private Double price;
     private boolean reserved;
+    private boolean disabled;
     private String floorName;
 }

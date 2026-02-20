@@ -23,6 +23,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r JOIN FETCH r.user")
     List<Reservation> findAllWithUser();
 
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.user WHERE r.qrCodeToken NOT LIKE '%-C-%' ORDER BY r.reservationDate DESC")
+    List<Reservation> findAllBaseReservationsWithUser();
+
     /**
      * Eagerly fetches User for a single Reservation by id.
      * Used by updateReservationStatus to safely map to DTO.

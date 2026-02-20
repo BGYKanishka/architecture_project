@@ -113,6 +113,25 @@ export default function AdminReservations() {
                             </div>
 
                             <div className="rounded-lg border border-slate-200 p-4">
+                                <p className="font-semibold mb-3">Booked Stalls</p>
+                                {selected.stalls?.length > 0 ? (
+                                    <ul className="space-y-2">
+                                        {selected.stalls.map(s => (
+                                            <li key={s.id} className="flex justify-between items-center bg-white p-2 rounded border border-slate-100 shadow-sm">
+                                                <span className="font-medium text-slate-700">Stall {s.stallCode}</span>
+                                                <span className={`text-[10px] px-2 py-1 rounded font-bold ${s.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                                    }`}>
+                                                    {s.status}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-slate-500 text-xs text-center py-2 italic flex justify-center w-full">No stall details available</p>
+                                )}
+                            </div>
+
+                            <div className="rounded-lg border border-slate-200 p-4 mt-2">
                                 <p className="text-slate-500 text-xs mb-1">QR Token</p>
                                 <p className="font-mono break-all text-xs">{selected.qrCodeToken}</p>
                             </div>

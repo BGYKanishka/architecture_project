@@ -17,10 +17,9 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
         boolean isStallReserved(@Param("stallId") Long stallId);
 
         @Query("SELECT COUNT(rs) FROM ReservationStall rs " +
-                        "WHERE rs.reservation.user.id = :userId AND (rs.reservation.status = 'CONFIRMED' OR rs.reservation.status = 'PENDING')")
+                        "WHERE rs.reservation.user.id = :userId AND rs.reservation.status != 'CANCELLED'")
         long countStallsByUserId(@Param("userId") Long userId);
 
-     
         @Query("SELECT rs FROM ReservationStall rs " +
                         "JOIN FETCH rs.reservation r " +
                         "JOIN FETCH r.user u " +
@@ -32,11 +31,17 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
                         "JOIN FETCH rs.reservation r " +
                         "JOIN FETCH rs.stall s " +
                         "JOIN FETCH s.floor " +
-                        "WHERE r.user.id = :userId")
+                        "WHERE r.user.id = :userId AND r.status = 'CONFIRMED'  AND r.qrCodeToken NOT LIKE '%-C-%'")
         List<ReservationStall> findAllByReservationUserId(@Param("userId") Long userId);
 
-        // Find specific stall by user and stall ID (From MAIN branch)
-        @Query("SELECT rs FROM ReservationStall rs WHERE rs.reservation.user.id = :userId AND rs.stall.id = :stallId")
-        Optional<ReservationStall> findByUserIdAndStallId(@Param("userId") Long userId,
+        // Find specific ACTIVE stall by user and stall ID
+        @Query("SELECT rs FROM ReservationStall rs WHERE rs.reservation.user.id = :userId AND rs.stall.id = :stallId AND rs.reservation.status != 'CANCELLED'")
+        Optional<ReservationStall> findActiveByUserIdAndStallId(@Param("userId") Long userId,
                         @Param("stallId") Long stallId);
+
+        @Query("SELECT COUNT(rs) FROM ReservationStall rs WHERE rs.reservation.id = :reservationId")
+        long countByReservationId(@Param("reservationId") Long reservationId);
+
+        @Query("SELECT rs FROM ReservationStall rs JOIN FETCH rs.stall JOIN FETCH rs.reservation")
+        List<ReservationStall> findAllWithStallsAndReservations();
 }

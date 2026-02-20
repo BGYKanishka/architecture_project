@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,4 +17,14 @@ public class AdminReservationResponse {
     private LocalDateTime reservationDate;
     private String qrCodeToken;
     private String status;
+    private List<StallDetail> stalls;
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class StallDetail {
+        private Long id;
+        private String stallCode;
+        private String status;
+    }
 }

@@ -1,12 +1,16 @@
 import { Navigate, Outlet } from "react-router-dom";
 
 export default function AdminProtectedRoute() {
-    const token = localStorage.getItem("admin_token");
-    const role = localStorage.getItem("admin_role");
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+    let user = null;
+    try { user = userStr ? JSON.parse(userStr) : null; } catch (e) { }
 
-    if (!token || (role !== "ROLE_ADMIN" && role !== "ROLE_EMPLOYEE")) {
-        // Not authenticated or not an admin/employee
-        return <Navigate to="/admin/login" replace />;
+    const role = user?.roles ? user.roles[0] : null;
+
+    if (!token || !user || role !== "ROLE_ADMIN") {
+        // Not authenticated or not an admin
+        return <Navigate to="/login" replace />;
     }
 
     // Authenticated
