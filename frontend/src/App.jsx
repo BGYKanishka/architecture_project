@@ -43,6 +43,10 @@ function AppContent() {
     return () => window.removeEventListener("user-updated", fetchUser);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   const isEmployeePage = location.pathname.startsWith("/employee");
   const isAdminPage = location.pathname.startsWith("/admin");
   const hideHeaderRoutes = ["/login", "/register", "/"];
