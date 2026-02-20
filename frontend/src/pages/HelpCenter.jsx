@@ -20,7 +20,7 @@ const HelpCenter = () => {
         general: [
             {
                 q: "How many stalls can I reserve?",
-                a: "Per the Sri Lanka Book Publishers’ Association rules, each registered business or vendor is allowed to reserve a maximum of 3 stalls to ensure fair distribution."
+                a: "Per the Sri Lanka Book Publishers' Association rules, each registered business or vendor is allowed to reserve a maximum of 3 stalls to ensure fair distribution."
             },
             {
                 q: "How do I get my entrance pass?",
@@ -40,17 +40,17 @@ const HelpCenter = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
 
 
             <main className="max-w-5xl mx-auto px-4 py-12">
                 {/* Header Section */}
                 <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center p-3 bg-blue-100 rounded-2xl text-blue-600 mb-4">
+                    <div className="inline-flex items-center justify-center p-3 bg-blue-100 dark:bg-blue-900/30 rounded-2xl text-blue-600 dark:text-blue-400 mb-4">
                         <QuestionMarkCircleIcon className="w-10 h-10" />
                     </div>
-                    <h1 className="text-4xl font-black text-slate-800 tracking-tight">How can we help?</h1>
-                    <p className="text-slate-500 mt-2 text-lg">Support for the Colombo International Book Fair Reservation System</p>
+                    <h1 className="text-4xl font-black text-slate-800 dark:text-white tracking-tight">How can we help?</h1>
+                    <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">Support for the Colombo International Book Fair Reservation System</p>
                 </div>
 
                 {/* Support Cards */}
@@ -73,8 +73,8 @@ const HelpCenter = () => {
                 </div>
 
                 {/* FAQ Section */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="flex border-b border-slate-100">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <div className="flex border-b border-slate-100 dark:border-slate-800">
                         <TabBtn active={activeTab === "general"} label="General" onClick={() => setActiveTab("general")} />
                         <TabBtn active={activeTab === "reservations"} label="Reservations" onClick={() => setActiveTab("reservations")} />
                     </div>
@@ -84,13 +84,13 @@ const HelpCenter = () => {
                             <div key={idx} className="mb-4 last:mb-0">
                                 <button
                                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                                    className="w-full flex items-center justify-between p-5 rounded-2xl bg-slate-50 hover:bg-slate-100 transition text-left"
+                                    className="w-full flex items-center justify-between p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition text-left"
                                 >
-                                    <span className="font-bold text-slate-700">{faq.q}</span>
+                                    <span className="font-bold text-slate-700 dark:text-slate-200">{faq.q}</span>
                                     <ChevronDownIcon className={`w-5 h-5 text-slate-400 transition ${openFaq === idx ? 'rotate-180' : ''}`} />
                                 </button>
                                 {openFaq === idx && (
-                                    <div className="p-5 text-slate-600 leading-relaxed animate-in slide-in-from-top-2">
+                                    <div className="p-5 text-slate-600 dark:text-slate-400 leading-relaxed animate-in slide-in-from-top-2">
                                         {faq.a}
                                     </div>
                                 )}
@@ -126,19 +126,19 @@ const HelpCenter = () => {
 };
 
 const SupportCard = ({ icon, title, desc }) => (
-    <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group">
-        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition mb-6">
+    <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition cursor-pointer group">
+        <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition mb-6">
             {icon}
         </div>
-        <h4 className="font-bold text-slate-800 mb-2">{title}</h4>
-        <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+        <h4 className="font-bold text-slate-800 dark:text-white mb-2">{title}</h4>
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
     </div>
 );
 
 const TabBtn = ({ active, label, onClick }) => (
     <button
         onClick={onClick}
-        className={`flex-1 py-4 font-bold text-sm transition ${active ? "text-blue-600 border-b-2 border-blue-600" : "text-slate-400 hover:text-slate-600"}`}
+        className={`flex-1 py-4 font-bold text-sm transition ${active ? "text-blue-600 border-b-2 border-blue-600" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"}`}
     >
         {label}
     </button>

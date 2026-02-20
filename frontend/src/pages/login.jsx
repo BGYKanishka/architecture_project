@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import AuthService from "../services/auth.service";
 import backgroundImg from "../assets/background.jpg";
+import { useTheme } from "../context/ThemeContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -9,6 +10,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -40,21 +43,22 @@ const Login = () => {
 
   return (
     <div
-      className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden"
+      className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden transition-colors duration-300"
       style={{
-        background:
-          "linear-gradient(to right, #0f1d45 0%, #0f1d45 50%, #eff6ff 50%, #eff6ff 100%)",
+        background: isDark
+          ? "linear-gradient(to right, #0a0f1e 0%, #0a0f1e 50%, #0f172a 50%, #0f172a 100%)"
+          : "linear-gradient(to right, #0f1d45 0%, #0f1d45 50%, #eff6ff 50%, #eff6ff 100%)",
       }}
     >
       {/* Decorative Background Shapes */}
-      <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40"></div>
-      <div className="absolute top-[15%] right-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30"></div>
-      <div className="absolute bottom-[-60px] left-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30"></div>
-      <div className="absolute bottom-[10%] right-[15%] w-[80px] h-[80px] rounded-full bg-blue-400/20"></div>
-      <div className="absolute top-[40%] left-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25"></div>
+      <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40 dark:border-blue-800/30"></div>
+      <div className="absolute top-[15%] right-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30 dark:bg-blue-800/20"></div>
+      <div className="absolute bottom-[-60px] left-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30 dark:border-indigo-800/20"></div>
+      <div className="absolute bottom-[10%] right-[15%] w-[80px] h-[80px] rounded-full bg-blue-400/20 dark:bg-blue-700/15"></div>
+      <div className="absolute top-[40%] left-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25 dark:bg-indigo-800/20"></div>
 
       {/* Combined Card Container */}
-      <div className="relative z-10 flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="relative z-10 flex w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden border border-transparent dark:border-slate-800 transition-colors duration-300">
 
         {/* Left Side - Background Image Panel */}
         <div className="relative w-1/2 min-h-[600px] hidden md:block">
@@ -91,10 +95,10 @@ const Login = () => {
 
             {/* HEADER */}
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-extrabold text-blue-800 tracking-tight">
+              <h1 className="text-3xl font-extrabold text-blue-800 dark:text-white tracking-tight">
                 Colombo International
                 <br />
-                <span className="text-blue-600">Book Fair 2026</span>
+                <span className="text-blue-600 dark:text-blue-400">Book Fair 2026</span>
               </h1>
               <div className="mt-4 w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
             </div>
@@ -104,11 +108,11 @@ const Login = () => {
 
               {/* Email Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Email Address</label>
                 <input
                   type="email"
                   placeholder="name@example.com"
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -117,11 +121,11 @@ const Login = () => {
 
               {/* Password Input */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300">Password</label>
                 <input
                   type="password"
                   placeholder="••••••••"
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-2 mt-1 border border-gray-300 dark:border-slate-700 rounded-md bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -130,7 +134,7 @@ const Login = () => {
 
               {/* Error Message */}
               {error && (
-                <div className="p-3 text-sm text-red-700 bg-red-100 rounded border border-red-200">
+                <div className="p-3 text-sm text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/30 rounded border border-red-200 dark:border-red-800">
                   {error}
                 </div>
               )}
@@ -146,19 +150,19 @@ const Login = () => {
             </form>
 
             {/* Divider */}
-            <div className="relative flex items-center justify-center w-full mt-6 border-t border-gray-200">
-              <span className="absolute px-3 bg-white text-gray-500 text-sm">
+            <div className="relative flex items-center justify-center w-full mt-6 border-t border-gray-200 dark:border-slate-700">
+              <span className="absolute px-3 bg-white dark:bg-slate-900 text-gray-500 dark:text-slate-400 text-sm">
                 OR
               </span>
             </div>
 
             {/* Signup Link Section */}
             <div className="text-center pt-4">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-slate-400">
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
+                  className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 hover:underline"
                 >
                   Create a new account
                 </Link>
