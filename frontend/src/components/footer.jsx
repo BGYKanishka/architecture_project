@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaFacebookF, FaWordpress, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { BookOpenIcon } from "@heroicons/react/24/outline";
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -27,11 +28,11 @@ const Footer = () => {
         <div>
           <h4 className="mb-4 text-xl font-semibold tracking-wide">Quick Links</h4>
           <ul className="list-none p-0">
-            <li className="mb-3.5"><a href="/" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Home</a></li>
-            <li className="mb-3.5"><a href="/about" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">About</a></li>
+            <li className="mb-3.5"><Link to="/" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Home</Link></li>
+            <li className="mb-3.5"><Link to="/about" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">About</Link></li>
             <li className="mb-3.5"><a href="/event" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Event</a></li>
             <li className="mb-3.5"><a href="/gallery" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Photo Gallery</a></li>
-            <li className="mb-3.5"><a href="/map" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Map</a></li>
+            <li className="mb-3.5"><Link to="/map" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Map</Link></li>
             <li className="mb-3.5"><a href="/contact" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Contact</a></li>
           </ul>
         </div>
