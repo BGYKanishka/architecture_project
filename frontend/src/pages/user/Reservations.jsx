@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import StallService from "../services/stall.service";
+import StallService from "../../services/stall.service";
 import {
   TrashIcon,
   ArrowLeftIcon,
@@ -9,7 +9,7 @@ import {
   ShoppingBagIcon,
   CheckCircleIcon
 } from "@heroicons/react/24/outline";
-import ConfirmationModal from "../components/common/ConfirmationModal";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const Reservations = () => {
   const navigate = useNavigate();

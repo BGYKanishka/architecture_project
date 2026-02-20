@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/auth.service";
-import StallMap from "../components/StallMap";
+import AuthService from "../../services/auth.service";
+import StallMap from "../../components/StallMap";
 import { useEffect, useState } from "react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 

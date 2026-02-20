@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import AuthService from "../../services/auth.service";
 import { useEffect, useState } from "react";
 import {
   MapIcon,

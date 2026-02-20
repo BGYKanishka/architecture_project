@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import UserService from "../services/user.service";
+import UserService from "../../services/user.service";
 import { UserCircleIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon, PencilSquareIcon, CheckIcon, XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Profile = () => {

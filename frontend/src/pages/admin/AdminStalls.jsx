@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { getStallAvailability, toggleStallDisabled } from "../services/admin/admin.stall.service";
-import AdminHeader from "../components/common/AdminHeader";
+import { getStallAvailability, toggleStallDisabled } from "../../services/admin/admin.stall.service";
+import AdminHeader from "../../components/common/AdminHeader";
 
 // ── Constants ────────────────────────────────────────────────
 const STATUS_FILTERS = ["ALL", "AVAILABLE", "RESERVED", "DISABLED"];

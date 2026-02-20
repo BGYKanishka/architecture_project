@@ -1,13 +1,13 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import AdminHeader from "../components/common/AdminHeader";
+import AdminHeader from "../../components/common/AdminHeader";
 import {
     getAdminUsers,
     createAdminUser,
     updateAdminUser,
     deleteAdminUser,
     toggleAdminUserEnabled,
-} from "../services/admin/admin.user.service";
+} from "../../services/admin/admin.user.service";
 
 const ROLES = ["ALL", "VENDOR", "EMPLOYEE", "ADMIN"];
 const PAGE_SIZE = 10;

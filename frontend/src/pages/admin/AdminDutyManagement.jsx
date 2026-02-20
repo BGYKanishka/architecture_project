@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllDuties, createDuty, updateDuty, deleteDuty, getAllEmployees } from "../services/admin/admin.duty.service";
+import { getAllDuties, createDuty, updateDuty, deleteDuty, getAllEmployees } from "../../services/admin/admin.duty.service";
 import { Link } from "react-router-dom";
 
 export default function AdminDutyManagement() {

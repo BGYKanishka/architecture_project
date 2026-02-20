@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import employeeService from "../services/employee/service";
-import HallMap from "../components/HallMap";
+import employeeService from "../../services/employee/service";
+import HallMap from "../../components/HallMap";
 
 const EmployeeFloorPlan = () => {
     const navigate = useNavigate();
