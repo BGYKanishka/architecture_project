@@ -2,9 +2,9 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "r
 import Login from "./pages/login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import Footer from "./components/footer";
+import Footer from "./components/common/Footer";
 import EmployeePanel from "./pages/EmployeePanel";
-import Header from "./components/Header";
+import Header from "./components/common/Header";
 import AuthService from "./services/auth.service";
 import Profile from "./pages/Profile";
 import Reservations from "./pages/Reservations";
@@ -16,13 +16,13 @@ import GenreSelection from "./pages/GenreSelection";
 import EmployeeLogin from "./pages/EmployeeLogin";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import EmployeeFloorPlan from "./pages/EmployeeFloorPlan";
-import EmployeeRoute from "./components/EmployeeRoute";
+import EmployeeRoute from "./routes/protected/EmployeeRoute";
 import AdminDutyManagement from "./pages/AdminDutyManagement";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminStalls from "./pages/AdminStalls";
 import AdminReservations from "./pages/AdminReservations";
 import AdminUsers from "./pages/AdminUsers";
-import AdminProtectedRoute from "./components/AdminProtectedRoute.jsx";
+import AdminProtectedRoute from "./routes/protected/AdminProtectedRoute.jsx";
 import { useEffect, useState } from "react";
 
 function AppContent() {
@@ -44,7 +44,7 @@ function AppContent() {
   const isEmployeePage = location.pathname.startsWith("/employee");
   const isAdminPage = location.pathname.startsWith("/admin");
   const hideHeaderRoutes = ["/login", "/register", "/"];
-  
+
   const showHeader = !hideHeaderRoutes.includes(location.pathname) && !isEmployeePage && !isAdminPage;
   const showFooter = !isEmployeePage && !isAdminPage;
 
@@ -67,7 +67,7 @@ function AppContent() {
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
           <Route path="/help" element={<HelpCenter />} />
           <Route path="/employee" element={<EmployeePanel />} />
-          
+
           {/* ── Admin routes (from main) ── */}
           <Route element={<AdminProtectedRoute />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />

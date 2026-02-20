@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import AuthService from "../services/auth.service";
+import AuthService from "../../../services/auth.service";
 import {
     UserCircleIcon,
     Bars3Icon,

@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import QRScanner from '../components/QRScanner';
+import QRScanner from '../components/shared/QRScanner';
 import employeeService from '../services/employee/service';
 import ConfirmationModal from '../components/common/ConfirmationModal';
 

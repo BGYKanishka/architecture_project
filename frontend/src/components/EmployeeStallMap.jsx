@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import employeeService from "../services/employee/service";
-import HallShapeWrapper from "./HallShapeWrapper";
+import HallShapeWrapper from "./shared/HallShapeWrapper";
 
 // Same coordinate layouts as StallMap (view-only)
 const hallLayouts = {

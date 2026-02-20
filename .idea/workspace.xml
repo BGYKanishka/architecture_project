@@ -7,10 +7,23 @@
     <list default="true" id="8ec89d2a-c9d5-4150-bb4f-1ae587f27007" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/AdminHeader.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/AdminProtectedRoute.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/EmployeeRoute.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/EmployeeStallMap.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/EmployeeStallMap.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/HallMap.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/HallShapeWrapper.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/QRScanner.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/StallMap.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/footer.jsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminDashboard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminReservations.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminStalls.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUsers.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EmployeePanel.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,23 +31,28 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "abenaya-se22003"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;abenaya-se22003&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/BGYKanishka/architecture_project.git",
-    "accountId": "49b2c212-dc30-4b84-ad49-e0a53dba2658"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/BGYKanishka/architecture_project.git&quot;,
+    &quot;accountId&quot;: &quot;49b2c212-dc30-4b84-ad49-e0a53dba2658&quot;
   }
-}]]></component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 1
-}]]></component>
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
   <component name="ProjectId" id="39sbdfY9oSHO939TLA6QwWRKS6G" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -47,8 +65,9 @@
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
     "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "Spring Boot.BackendApplication.executor": "Run",
-    "git-widget-placeholder": "akila",
+    "git-widget-placeholder": "akiii",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm"
   },
@@ -71,12 +90,20 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.30387.90" />
-        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-IU-253.30387.90" />
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.26199.169" />
+        <option value="bundled-js-predefined-d6986cc7102b-9c94529fcfe0-JavaScript-IU-252.26199.169" />
       </set>
     </attachedChunks>
   </component>
   <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8ec89d2a-c9d5-4150-bb4f-1ae587f27007" name="Changes" comment="" />
+      <created>1771574026466</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1771574026466</updated>
+      <workItem from="1771574029914" duration="5521000" />
+    </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
