@@ -54,166 +54,201 @@ const EmployeeFloorPlan = () => {
     const availableCount = totalStalls - reservedCount;
 
     return (
-        <div style={{ minHeight: "100vh", background: "#f0f4f8", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}>
+        <div style={{ minHeight: "100vh", background: "#EFF2F7", fontFamily: "'Inter', 'Helvetica Neue', 'Segoe UI', sans-serif" }}>
 
-            {/* ── Top Navbar ── */}
-            <header style={{
-                background: "linear-gradient(135deg, #0a1628 0%, #1a3a5c 100%)",
-                color: "white",
-                padding: "0 2rem",
+            {/* ══════════════════════════════════════════════════════
+                 TOP NAVBAR  — matches Header.jsx style
+            ══════════════════════════════════════════════════════ */}
+            <nav style={{
+                background: "#ffffff",
+                borderBottom: "1px solid #E5E7EB",
+                boxShadow: "0 1px 6px rgba(0,0,0,0.06)",
+                padding: "0 1.5rem",
+                height: "58px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
-                height: "68px",
-                boxShadow: "0 2px 12px rgba(0,0,0,0.3)"
+                position: "sticky",
+                top: 0,
+                zIndex: 50,
             }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                    <div style={{
-                        background: "rgba(255,255,255,0.15)",
-                        borderRadius: "8px",
-                        padding: "6px 12px",
-                        fontSize: "11px",
-                        letterSpacing: "2px",
-                        fontWeight: 700,
-                        color: "#90caf9"
-                    }}>
-                        EMPLOYEE PORTAL
-                    </div>
-                    <div>
-                        <div style={{ fontSize: "18px", fontWeight: 800, letterSpacing: "0.5px" }}>CIBF 2026</div>
-                        <div style={{ fontSize: "11px", color: "#90caf9", letterSpacing: "1px" }}>Colombo International Book Fair</div>
+
+                {/* LEFT — hamburger + logo */}
+                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                    {/* Hamburger */}
+                    <button style={{
+                        background: "none", border: "none", cursor: "pointer",
+                        padding: "6px", borderRadius: "8px", color: "#6B7280",
+                        display: "flex", alignItems: "center"
+                    }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"}
+                        onMouseLeave={e => e.currentTarget.style.background = "none"}
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                    </button>
+
+                    {/* Book icon + CIBF 2026 */}
+                    <div style={{ display: "flex", alignItems: "center", gap: "9px", cursor: "pointer" }}
+                        onClick={() => navigate("/employee/floor-plan")}
+                    >
+                        <div style={{
+                            background: "#1D4ED8",
+                            borderRadius: "8px",
+                            width: "34px", height: "34px",
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            flexShrink: 0
+                        }}>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                            </svg>
+                        </div>
+                        <span style={{
+                            fontSize: "18px", fontWeight: 800, color: "#111827", letterSpacing: "-0.3px"
+                        }}>CIBF <span style={{ color: "#1D4ED8" }}>2026</span></span>
                     </div>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center", gap: "1.5rem" }}>
-                    {user && (
-                        <div style={{ textAlign: "right" }}>
-                            <div style={{ fontSize: "13px", fontWeight: 600 }}>{user.email}</div>
-                            <div style={{ fontSize: "11px", color: "#90caf9" }}>🟢 Employee</div>
-                        </div>
-                    )}
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            background: "rgba(239,68,68,0.15)",
-                            border: "1px solid rgba(239,68,68,0.4)",
-                            color: "#fca5a5",
-                            padding: "8px 18px",
-                            borderRadius: "8px",
-                            cursor: "pointer",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            transition: "all 0.2s"
-                        }}
-                        onMouseEnter={e => e.target.style.background = "rgba(239,68,68,0.3)"}
-                        onMouseLeave={e => e.target.style.background = "rgba(239,68,68,0.15)"}
+                {/* RIGHT — icon buttons + My Reservations + user avatar */}
+                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+
+                    {/* Home icon */}
+                    <button style={{ background: "none", border: "none", cursor: "pointer", padding: "8px", borderRadius: "50%", color: "#6B7280", display: "flex" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"}
+                        onMouseLeave={e => e.currentTarget.style.background = "none"}
+                        onClick={() => navigate("/employee/floor-plan")}
+                        title="Floor Plan"
                     >
-                        Logout
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                    </button>
+
+                    {/* Bell icon */}
+                    <button style={{ background: "none", border: "none", cursor: "pointer", padding: "8px", borderRadius: "50%", color: "#6B7280", display: "flex", position: "relative" }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"}
+                        onMouseLeave={e => e.currentTarget.style.background = "none"}
+                        title="Notifications"
+                    >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 01-3.46 0" /></svg>
+                        <span style={{ position: "absolute", top: "8px", right: "8px", width: "7px", height: "7px", background: "#EF4444", borderRadius: "50%", border: "2px solid white" }}></span>
+                    </button>
+
+                    {/* Separator */}
+                    <div style={{ width: "1px", height: "22px", background: "#E5E7EB", margin: "0 4px" }} />
+
+                    {/* My Reservations */}
+                    <button style={{
+                        background: "none", border: "none", cursor: "pointer",
+                        display: "flex", alignItems: "center", gap: "6px",
+                        padding: "7px 12px", borderRadius: "8px",
+                        fontSize: "13px", fontWeight: 600, color: "#374151",
+                        transition: "background 0.15s"
+                    }}
+                        onMouseEnter={e => e.currentTarget.style.background = "#F3F4F6"}
+                        onMouseLeave={e => e.currentTarget.style.background = "none"}
+                        onClick={() => navigate("/reservations")}
+                    >
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>
+                        My Reservations
+                    </button>
+
+                    {/* User avatar circle */}
+                    <button style={{
+                        width: "36px", height: "36px", borderRadius: "50%",
+                        background: "#1D4ED8", border: "none", cursor: "pointer",
+                        color: "white", fontWeight: 700, fontSize: "14px",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        marginLeft: "4px"
+                    }}
+                        onClick={handleLogout}
+                        title="Logout"
+                    >
+                        {user?.email?.charAt(0).toUpperCase() || "E"}
                     </button>
                 </div>
-            </header>
+            </nav>
 
-            {/* ── Page Title ── */}
-            <div style={{
-                textAlign: "center",
-                padding: "2.5rem 2rem 1rem",
-                background: "linear-gradient(180deg, #0a1628 0%, #1a3a5c 60%, #f0f4f8 100%)",
-            }}>
-                <h1 style={{
-                    fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                    fontWeight: 900,
-                    color: "white",
-                    letterSpacing: "4px",
-                    margin: 0,
-                    textShadow: "0 2px 20px rgba(0,0,0,0.5)"
-                }}>
-                    CIBF 2026
-                </h1>
-                <h2 style={{
-                    fontSize: "clamp(0.9rem, 2vw, 1.3rem)",
-                    fontWeight: 600,
-                    color: "#90caf9",
-                    letterSpacing: "6px",
-                    margin: "0.4rem 0 0",
-                    textTransform: "uppercase"
-                }}>
-                    BOOK FAIR FLOOR PLAN
-                </h2>
-
-                {/* ── Legend ── */}
+            {/* ══════════════════════════════════════════════════════
+                 SUB-HEADER  — page title + indicators card
+            ══════════════════════════════════════════════════════ */}
+            <div style={{ padding: "1.5rem 2rem 0", maxWidth: "1100px", margin: "0 auto" }}>
                 <div style={{
-                    display: "inline-flex",
+                    background: "#ffffff",
+                    borderRadius: "14px",
+                    border: "1px solid #E5E7EB",
+                    boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+                    padding: "1.25rem 2rem",
+                    display: "flex",
+                    flexDirection: "column",
                     alignItems: "center",
-                    gap: "2rem",
-                    marginTop: "1.5rem",
-                    background: "white",
-                    padding: "10px 28px",
-                    borderRadius: "50px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
+                    gap: "10px",
+                    marginBottom: "1.5rem"
                 }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "default", userSelect: "none" }}>
-                        <input
-                            type="checkbox"
-                            checked={false}
-                            readOnly
-                            style={{
-                                width: "16px", height: "16px",
-                                accentColor: "#22c55e",
-                                cursor: "default"
-                            }}
-                        />
-                        <span style={{
-                            fontSize: "13px", fontWeight: 700, color: "#16a34a",
-                            display: "flex", alignItems: "center", gap: "5px"
-                        }}>
-                            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#22c55e", display: "inline-block" }}></span>
-                            Available
-                        </span>
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "default", userSelect: "none" }}>
-                        <input
-                            type="checkbox"
-                            checked={true}
-                            readOnly
-                            style={{
-                                width: "16px", height: "16px",
-                                accentColor: "#6b7280",
-                                cursor: "default"
-                            }}
-                        />
-                        <span style={{
-                            fontSize: "13px", fontWeight: 700, color: "#4b5563",
-                            display: "flex", alignItems: "center", gap: "5px"
-                        }}>
-                            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#9ca3af", display: "inline-block" }}></span>
-                            Full
-                        </span>
-                    </label>
-                </div>
+                    {/* Page title */}
+                    <h1 style={{
+                        margin: 0,
+                        fontSize: "20px",
+                        fontWeight: 800,
+                        color: "#1E3A8A",
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase"
+                    }}>
+                        Book Fair Floor Plan — Employee
+                    </h1>
 
-                {/* ── Summary Stats ── */}
-                {!loading && !error && (
-                    <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", marginTop: "1.2rem", flexWrap: "wrap" }}>
-                        {[
-                            { label: "Total Stalls", value: totalStalls, color: "#90caf9" },
-                            { label: "Available", value: availableCount, color: "#4ade80" },
-                            { label: "Reserved", value: reservedCount, color: "#f87171" },
-                        ].map(stat => (
-                            <div key={stat.label} style={{
-                                background: "rgba(255,255,255,0.1)",
-                                backdropFilter: "blur(10px)",
-                                border: "1px solid rgba(255,255,255,0.2)",
-                                borderRadius: "12px",
-                                padding: "10px 22px",
-                                textAlign: "center",
-                                color: "white"
+                    {/* Available / Full indicators */}
+                    <div style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: "#F9FAFB",
+                        border: "1px solid #E5E7EB",
+                        borderRadius: "999px",
+                        padding: "5px 18px"
+                    }}>
+                        {/* Green checkbox square — Available */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <div style={{
+                                width: "14px", height: "14px",
+                                borderRadius: "3px",
+                                background: "#22C55E",
+                                border: "1.5px solid #16A34A",
+                                flexShrink: 0,
+                                display: "flex", alignItems: "center", justifyContent: "center"
                             }}>
-                                <div style={{ fontSize: "22px", fontWeight: 800, color: stat.color }}>{stat.value}</div>
-                                <div style={{ fontSize: "11px", letterSpacing: "1px", opacity: 0.8 }}>{stat.label}</div>
+                                <svg width="9" height="9" viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </div>
-                        ))}
+                            <span style={{ fontSize: "12px", fontWeight: 600, color: "#374151" }}>Available</span>
+                        </div>
+
+                        {/* Divider dot */}
+                        <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#D1D5DB", margin: "0 4px" }} />
+
+                        {/* Gray checkbox square — Full */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <div style={{
+                                width: "14px", height: "14px",
+                                borderRadius: "3px",
+                                background: "#E5E7EB",
+                                border: "1.5px solid #9CA3AF",
+                                flexShrink: 0,
+                                display: "flex", alignItems: "center", justifyContent: "center"
+                            }}>
+                                <svg width="9" height="9" viewBox="0 0 10 10" fill="none"><polyline points="2,5 4,7.5 8,2.5" stroke="#6B7280" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                            </div>
+                            <span style={{ fontSize: "12px", fontWeight: 600, color: "#374151" }}>Full</span>
+                        </div>
                     </div>
-                )}
+
+                    {/* Live stall counts */}
+                    {!loading && !error && (
+                        <p style={{ margin: 0, fontSize: "12px", color: "#9CA3AF", fontWeight: 500 }}>
+                            <span style={{ color: "#6B7280" }}>{totalStalls} Total stalls</span>
+                            {" | "}
+                            <span style={{ color: "#16A34A", fontWeight: 700 }}>Available: {availableCount}</span>
+                            {" | "}
+                            <span style={{ color: "#DC2626", fontWeight: 700 }}>Full: {reservedCount}</span>
+                        </p>
+                    )}
+                </div>
             </div>
 
             {/* ── Map Area ── */}

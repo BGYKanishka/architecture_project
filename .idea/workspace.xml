@@ -6,7 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="fdb29281-de52-4027-877b-be217e41c8d2" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/EmployeeStallMap.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/EmployeeStallMap.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/EmployeeFloorPlan.jsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +101,8 @@
       <workItem from="1771493255157" duration="3832000" />
       <workItem from="1771497276178" duration="27000" />
       <workItem from="1771497369844" duration="7042000" />
-      <workItem from="1771509140944" duration="1185000" />
+      <workItem from="1771509140944" duration="2320000" />
+      <workItem from="1771568026957" duration="2978000" />
     </task>
     <servers />
   </component>

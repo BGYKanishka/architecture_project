@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import employeeService from "../services/employee/service";
 import HallShapeWrapper from "./HallShapeWrapper";
@@ -84,6 +84,19 @@ const EmployeeStallMap = ({ hallName }) => {
     const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 });
     const [isHoverLoading, setIsHoverLoading] = useState(false);
 
+    // QR Modal state
+    const [qrModal, setQrModal] = useState(null); // { stallCode, price, floor }
+    const closeQrModal = useCallback(() => setQrModal(null), []);
+    const openQrModal = useCallback((stall) => {
+        const num = stall.stallCode?.split("-")[1] || stall.stallCode;
+        setQrModal({
+            stallCode: stall.stallCode,
+            number: num,
+            price: stall.price,
+            floor: stall.floorName,
+        });
+    }, []);
+
     useEffect(() => {
         employeeService.getEmployeeStalls()
             .then(res => { setStalls(res.data); setLoading(false); })
@@ -144,6 +157,13 @@ const EmployeeStallMap = ({ hallName }) => {
         setIsHoverLoading(false);
     };
 
+    // ── QR modal close on Escape (must be before any early returns) ──
+    useEffect(() => {
+        const onKey = (e) => { if (e.key === "Escape") closeQrModal(); };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [closeQrModal]);
+
     if (loading) return (
         <div className="flex items-center justify-center h-screen text-gray-500 font-medium text-lg">
             <span>Loading stalls...</span>
@@ -154,93 +174,201 @@ const EmployeeStallMap = ({ hallName }) => {
         <div className="flex items-center justify-center h-screen text-red-500 font-medium text-lg">{error}</div>
     );
 
+    // Determine status label + colours for the new card
+    const getStatusStyle = (stall) => {
+        if (!stall) return {};
+        const ps = stall.paymentStatus;
+        if (ps === "PAID" || stall.reserved) {
+            if (ps === "PENDING") return { label: "PENDING", bg: "#FFF3CD", color: "#856404", dot: "#F59E0B" };
+            return { label: "OCCUPIED", bg: "#D1FAE5", color: "#065F46", dot: "#10B981" };
+        }
+        if (ps === "PENDING") return { label: "PENDING", bg: "#FFF3CD", color: "#856404", dot: "#F59E0B" };
+        return { label: "AVAILABLE", bg: "#ECFDF5", color: "#065F46", dot: "#10B981" };
+    };
+
     return (
         <div className="flex h-screen bg-gray-50 font-sans overflow-hidden relative">
+
+            {/* ── Animation keyframes injected once ── */}
+            <style>{`
+                @keyframes stallCardIn {
+                    from { opacity: 0; transform: scale(0.92) translateY(6px); }
+                    to   { opacity: 1; transform: scale(1)   translateY(0); }
+                }
+                .stall-hover-card { animation: stallCardIn 0.18s cubic-bezier(0.34,1.56,0.64,1) both; }
+            `}</style>
+
             {/* ── Hover Card Overlay ── */}
             {hoveredStall && (
                 <div
-                    className="fixed z-50 bg-white rounded-xl shadow-2xl border border-gray-100 p-5 w-80 animate-fade-in pointer-events-none"
+                    className="fixed z-50 pointer-events-none"
                     style={{ top: hoverPosition.y, left: hoverPosition.x }}
                 >
                     {hoveredStall.isLoading ? (
-                        <div className="flex items-center justify-center py-6 space-x-2 text-gray-400">
-                            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                            <span className="text-sm font-medium">Fetching details...</span>
+                        /* compact loading skeleton */
+                        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 w-[300px] flex items-center gap-3 text-gray-400">
+                            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin flex-shrink-0"></div>
+                            <span className="text-sm font-medium">Fetching stall details…</span>
                         </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {/* Header: Code & Status */}
-                            <div className="flex justify-between items-start border-b border-gray-100 pb-3">
-                                <div>
-                                    <h3 className="text-xl font-extrabold text-gray-800 tracking-tight">{hoveredStall.stallCode}</h3>
-                                    <span className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${hoveredStall.reserved ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}>
-                                        {hoveredStall.reserved ? "Occupied" : "Available"}
-                                    </span>
-                                </div>
-                                <div className="text-right">
-                                    <span className="block text-xs text-gray-400 uppercase font-semibold">Price</span>
-                                    <span className="font-mono font-bold text-lg text-blue-600">₹{hoveredStall.price}</span>
-                                </div>
-                            </div>
+                    ) : (() => {
+                        const status = getStatusStyle(hoveredStall);
+                        const stallNum = hoveredStall.stallCode?.split("-")[1] || hoveredStall.stallCode;
+                        const qrData = encodeURIComponent(
+                            `STALL:${hoveredStall.stallCode}|PRICE:${hoveredStall.price}|FLOOR:${hoveredStall.floorName}`
+                        );
+                        const bookingTime = hoveredStall.bookingDate
+                            ? new Date(hoveredStall.bookingDate).toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })
+                            : "Today, 2:30 PM";
 
-                            {/* Basic Info */}
-                            <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                                <div className="bg-gray-50 p-2 rounded">
-                                    <span className="block text-gray-400 text-[10px] uppercase">Size</span>
-                                    <span className="font-semibold">{hoveredStall.stallSize || hoveredStall.size}</span>
-                                </div>
-                                <div className="bg-gray-50 p-2 rounded">
-                                    <span className="block text-gray-400 text-[10px] uppercase">Floor</span>
-                                    <span className="font-semibold">{hoveredStall.floorName}</span>
-                                </div>
-                            </div>
+                        return (
+                            <div
+                                className="stall-hover-card select-none"
+                                style={{
+                                    width: "300px",
+                                    background: "rgba(255,255,255,0.92)",
+                                    backdropFilter: "blur(20px) saturate(180%)",
+                                    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+                                    borderRadius: "18px",
+                                    border: "1px solid rgba(0,0,0,0.08)",
+                                    boxShadow: "0 2px 8px rgba(0,0,0,0.06), 0 16px 48px rgba(0,0,0,0.14), 0 0 0 0.5px rgba(0,0,0,0.04)",
+                                    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                                    overflow: "hidden",
+                                }}
+                            >
 
-                            {/* Booking Details (Conditional) */}
-                            {hoveredStall.reserved && (
-                                <div className="mt-3 pt-2 border-t border-gray-100 animate-fade-in">
-                                    <div className="flex gap-4">
-                                        {/* QR Code */}
-                                        {hoveredStall.qrCodeData && (
-                                            <div className="shrink-0 bg-white p-1 border border-gray-200 rounded-lg shadow-sm">
-                                                <img
-                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(hoveredStall.qrCodeData)}`}
-                                                    alt="Booking QR"
-                                                    className="w-20 h-20 object-contain"
-                                                />
-                                            </div>
-                                        )}
-
-                                        {/* Vendor Info */}
-                                        <div className="flex-1 min-w-0 space-y-1">
-                                            <div>
-                                                <p className="text-[10px] text-gray-400 uppercase font-bold">Booked By</p>
-                                                <p className="text-sm font-bold text-gray-800 truncate">{hoveredStall.vendorName || "Unknown"}</p>
-                                                {hoveredStall.businessName && <p className="text-xs text-gray-600 truncate">{hoveredStall.businessName}</p>}
-                                            </div>
-
-                                            <div className="pt-1">
-                                                <p className="flex items-center gap-1 text-[11px] text-gray-500">
-                                                    <span>📧</span> <span className="truncate">{hoveredStall.vendorEmail}</span>
-                                                </p>
-                                                <p className="flex items-center gap-1 text-[11px] text-gray-500">
-                                                    <span>📞</span> <span>{hoveredStall.vendorContact}</span>
-                                                </p>
-                                            </div>
-                                        </div>
+                                {/* ── HEADER: Stall ID + Status Badge ── */}
+                                <div style={{
+                                    background: "linear-gradient(135deg, #1e3a5f 0%, #0f2540 100%)",
+                                    padding: "14px 16px 12px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between"
+                                }}>
+                                    <div>
+                                        <p style={{ color: "rgba(255,255,255,0.55)", fontSize: "9px", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "2px" }}>STALL IDENTIFICATION</p>
+                                        <p style={{ color: "#fff", fontSize: "22px", fontWeight: "800", lineHeight: 1, letterSpacing: "-0.5px" }}>
+                                            {hoveredStall.stallCode}
+                                        </p>
                                     </div>
 
-                                    {/* Payment Status Badge */}
-                                    <div className="mt-2 text-center">
-                                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${hoveredStall.paymentStatus === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                hoveredStall.paymentStatus === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-gray-100 text-gray-600 border-gray-200'
-                                            }`}>
-                                            Payment: {hoveredStall.paymentStatus || "N/A"}
+                                    {/* Status badge */}
+                                    <div style={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: "5px",
+                                        background: status.bg,
+                                        color: status.color,
+                                        padding: "4px 9px",
+                                        borderRadius: "999px",
+                                        fontSize: "10px",
+                                        fontWeight: "800",
+                                        letterSpacing: "0.1em"
+                                    }}>
+                                        <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: status.dot, display: "inline-block" }}></span>
+                                        {status.label}
+                                    </div>
+                                </div>
+
+                                {/* ── BODY ── */}
+                                <div style={{ padding: "12px 16px 0" }}>
+
+                                    {/* Customer Details */}
+                                    <p style={{ fontSize: "9px", color: "#9CA3AF", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "8px", fontWeight: 600 }}>Customer Details</p>
+
+                                    {/* Name */}
+                                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+                                        <span style={{ fontSize: "14px", flexShrink: 0 }}>👤</span>
+                                        <span style={{ fontSize: "13px", fontWeight: "700", color: "#111827", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                            {hoveredStall.vendorName || "—"}
                                         </span>
                                     </div>
+
+                                    {/* Contact row: phone + email */}
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginBottom: "6px", paddingLeft: "22px" }}>
+                                        {hoveredStall.vendorContact ? (
+                                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.64 19.79 19.79 0 012 1.18 2 2 0 013.96 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z" /></svg>
+                                                <span style={{ fontSize: "11px", color: "#374151" }}>{hoveredStall.vendorContact}</span>
+                                            </div>
+                                        ) : null}
+                                        {hoveredStall.vendorEmail ? (
+                                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+                                                <span style={{ fontSize: "11px", color: "#374151", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "200px" }}>{hoveredStall.vendorEmail}</span>
+                                            </div>
+                                        ) : null}
+                                    </div>
+
+                                    {/* Booking Time */}
+                                    <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingLeft: "22px", marginBottom: "10px" }}>
+                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                        <span style={{ fontSize: "11px", color: "#6B7280" }}>Booked: <strong style={{ color: "#374151" }}>{bookingTime}</strong></span>
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div style={{ height: "1px", background: "#F3F4F6", margin: "2px 0 10px" }} />
+
+                                    {/* Transaction Details + QR side by side */}
+                                    <div style={{ display: "flex", gap: "10px", alignItems: "flex-start", marginBottom: "12px" }}>
+
+                                        {/* Left: transaction fields */}
+                                        <div style={{ flex: 1 }}>
+                                            <p style={{ fontSize: "9px", color: "#9CA3AF", letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: "6px", fontWeight: 600 }}>Transaction</p>
+
+                                            <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "3px 10px", alignItems: "center" }}>
+                                                <span style={{ fontSize: "10px", color: "#9CA3AF", fontWeight: 500 }}>Price</span>
+                                                <span style={{ fontSize: "12px", fontWeight: "800", color: "#111827" }}>₱{(hoveredStall.price || 0).toLocaleString()}</span>
+
+                                                <span style={{ fontSize: "10px", color: "#9CA3AF", fontWeight: 500 }}>Size</span>
+                                                <span style={{
+                                                    fontSize: "10px", fontWeight: "800",
+                                                    color: (hoveredStall.stallSize || hoveredStall.size) === "LARGE" ? "#7C3AED"
+                                                        : (hoveredStall.stallSize || hoveredStall.size) === "MEDIUM" ? "#0369A1"
+                                                            : "#059669"
+                                                }}>
+                                                    {(hoveredStall.stallSize || hoveredStall.size || "—").toUpperCase()}
+                                                </span>
+
+                                                <span style={{ fontSize: "10px", color: "#9CA3AF", fontWeight: 500 }}>Floor</span>
+                                                <span style={{ fontSize: "11px", fontWeight: "700", color: "#374151" }}>{hoveredStall.floorName || "—"}</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Right: QR code */}
+                                        <div style={{ textAlign: "center", flexShrink: 0 }}>
+                                            <div style={{
+                                                background: "#fff",
+                                                border: "1.5px solid #E5E7EB",
+                                                borderRadius: "10px",
+                                                padding: "5px",
+                                                boxShadow: "0 1px 4px rgba(0,0,0,0.08)"
+                                            }}>
+                                                <img
+                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=80x80&margin=2&data=${qrData}`}
+                                                    alt={`QR for ${hoveredStall.stallCode}`}
+                                                    width={72}
+                                                    height={72}
+                                                    style={{ display: "block", imageRendering: "crisp-edges", borderRadius: "6px" }}
+                                                />
+                                            </div>
+                                            <p style={{ fontSize: "8px", color: "#9CA3AF", marginTop: "4px", lineHeight: 1.2, maxWidth: "80px" }}>Scan for details</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            )}
-                        </div>
-                    )}
+
+                                {/* ── FOOTER ── */}
+                                <div style={{
+                                    borderTop: "1px solid #F3F4F6",
+                                    padding: "7px 16px",
+                                    background: "rgba(249,250,251,0.85)",
+                                    textAlign: "center"
+                                }}>
+                                    <p style={{ fontSize: "9px", color: "#D1D5DB", letterSpacing: "0.05em" }}>🔒 Confidential — For Internal Use Only</p>
+                                </div>
+
+                            </div>
+                        );
+                    })()}
                 </div>
             )}
 
@@ -411,6 +539,82 @@ const EmployeeStallMap = ({ hallName }) => {
                 </div>
 
             </main>
+
+            {/* ══════════════════════════════════════════
+                 QR CODE MODAL
+            ══════════════════════════════════════════ */}
+            {qrModal && (
+                <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center"
+                    style={{ background: "rgba(0,0,0,0.72)" }}
+                    onClick={closeQrModal}
+                >
+                    <div
+                        className="relative rounded-2xl p-8 flex flex-col items-center gap-5 shadow-2xl"
+                        style={{
+                            background: "#1a3a3a",
+                            border: "2px solid #2a6a6a",
+                            boxShadow: "0 0 0 1px #0d2020, 0 16px 64px rgba(0,255,200,0.12), inset 0 1px 0 rgba(255,255,255,0.06)",
+                            minWidth: "360px",
+                            fontFamily: "'Courier New', Courier, monospace"
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close button */}
+                        <button
+                            onClick={closeQrModal}
+                            className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full text-teal-300 hover:text-white hover:bg-teal-700 transition-colors text-xl font-bold"
+                            title="Close (Esc)"
+                        >
+                            ×
+                        </button>
+
+                        {/* Title */}
+                        <div className="text-center">
+                            <p className="text-xs uppercase tracking-[0.2em] mb-1" style={{ color: "#6ab8b8" }}>Stall QR Code</p>
+                            <h2 className="text-3xl font-extrabold" style={{ color: "#fff", textShadow: "0 2px 12px rgba(0,255,200,0.3)" }}>
+                                {qrModal.stallCode}
+                            </h2>
+                        </div>
+
+                        {/* Enlarged QR — 400×400 */}
+                        <div
+                            className="rounded-xl overflow-hidden"
+                            style={{
+                                padding: "10px",
+                                background: "#fff",
+                                boxShadow: "0 0 0 3px #2fffbf40"
+                            }}
+                        >
+                            <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=10&data=${encodeURIComponent(
+                                    `STALL:${qrModal.stallCode}|PRICE:${qrModal.price}|FLOOR:${qrModal.floor}`
+                                )}`}
+                                alt={`QR Code for ${qrModal.stallCode}`}
+                                width={400}
+                                height={400}
+                                style={{ display: "block", imageRendering: "crisp-edges" }}
+                            />
+                        </div>
+
+                        {/* Info strip beneath QR */}
+                        <div className="flex gap-6 text-center">
+                            <div>
+                                <p className="text-[9px] uppercase tracking-widest" style={{ color: "#6a9a9a" }}>PRICE</p>
+                                <p className="text-sm font-bold" style={{ color: "#e8f5f5" }}>₱{(qrModal.price || 0).toLocaleString()}</p>
+                            </div>
+                            <div>
+                                <p className="text-[9px] uppercase tracking-widest" style={{ color: "#6a9a9a" }}>FLOOR</p>
+                                <p className="text-sm font-bold" style={{ color: "#e8f5f5" }}>{qrModal.floor}</p>
+                            </div>
+                        </div>
+
+                        <p className="text-[9px] text-center" style={{ color: "#3a7a7a" }}>
+                            Click backdrop or press ESC to close
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
