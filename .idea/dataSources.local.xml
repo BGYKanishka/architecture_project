@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="dataSourceStorageLocal" created-in="IU-252.26199.169">
+  <component name="dataSourceStorageLocal" created-in="IU-253.30387.90">
     <data-source name="postgres@localhost" uuid="f5032c22-7772-45d2-bf76-b05cc8a8bd81">
       <database-info product="PostgreSQL" version="18.2" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.7.3" dbms="POSTGRES" exact-version="18.2" exact-driver-version="42.7">
         <identifier-quote-string>&quot;</identifier-quote-string>
@@ -12,6 +12,21 @@
         <introspection-scope>
           <node kind="database" qname="bookfair_db">
             <node kind="schema" negative="1" />
+          </node>
+        </introspection-scope>
+      </schema-mapping>
+    </data-source>
+    <data-source name="bookfair_db@localhost" uuid="8c043354-36ff-46b5-b13d-a3943e7dc779">
+      <database-info product="PostgreSQL" version="18.1" jdbc-version="4.2" driver-name="PostgreSQL JDBC Driver" driver-version="42.7.3" dbms="POSTGRES" exact-version="18.1" exact-driver-version="42.7">
+        <identifier-quote-string>&quot;</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="lower" quoted-identifiers="exact" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>postgres</user-name>
+      <schema-mapping>
+        <introspection-scope>
+          <node kind="database" qname="@">
+            <node kind="schema" qname="@" />
           </node>
         </introspection-scope>
       </schema-mapping>
