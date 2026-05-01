@@ -1,0 +1,66 @@
+# =========================
+# IntelliJ / IDE Files
+# =========================
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+
+# macOS
+.DS_Store
+
+# =========================
+# Backend (Spring Boot)
+# =========================
+backend/target/
+backend/build/
+
+# Maven Wrapper
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Spring Tool Suite
+backend/.apt_generated
+backend/.classpath
+backend/.factorypath
+backend/.project
+backend/.settings/
+backend/.springBeans
+backend/.sts4-cache
+
+# NetBeans
+backend/nbproject/private/
+backend/nbbuild/
+backend/dist/
+backend/nbdist/
+backend/.nb-gradle/
+
+# =========================
+# Frontend (React/Vite)
+# =========================
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Local environment files
+*.local
+.env
+.env.*
+
+# =========================
+# Optional
+# =========================
+coverage/
+tmp/
+temp/
