@@ -11,9 +11,12 @@ const api = axios.create({
 
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            config.headers["Authorization"] = "Bearer " + token;
+        const isAuthEndpoint = config.url && (config.url.includes("/auth/signin") || config.url.includes("/auth/signup"));
+        if (!isAuthEndpoint) {
+            const token = localStorage.getItem("token");
+            if (token) {
+                config.headers["Authorization"] = "Bearer " + token;
+            }
         }
         return config;
     },
@@ -28,12 +31,18 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response && error.response.status === 401) {
-            console.warn("Session expired. Logging out.");
+            const isAuthEndpoint = error.config?.url && error.config.url.includes("/auth/");
+            if (!isAuthEndpoint) {
+                console.warn("Session expired. Logging out.");
 
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                localStorage.removeItem("token");
+                window.dispatchEvent(new Event("user-updated"));
 
-            window.location.href = "/login";
+                if (window.location.pathname !== "/login") {
+                    window.location.href = "/login";
+                }
+            }
         }
         return Promise.reject(error);
     }

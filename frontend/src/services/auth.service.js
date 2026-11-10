@@ -22,6 +22,7 @@ const login = (email, password) => {
         // Save user data + token in browser storage
         localStorage.setItem("user", JSON.stringify(response.data));
         localStorage.setItem("token", response.data.token);
+        window.dispatchEvent(new Event("user-updated"));
       }
       return response.data;
     });
@@ -30,10 +31,16 @@ const login = (email, password) => {
 const logout = () => {
   localStorage.removeItem("user");
   localStorage.removeItem("token");
+  window.dispatchEvent(new Event("user-updated"));
 };
 
 const getCurrentUser = () => {
-  return JSON.parse(localStorage.getItem("user"));
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
 };
 
 const AuthService = {

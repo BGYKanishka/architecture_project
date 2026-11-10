@@ -14,7 +14,15 @@ import {
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(AuthService.getCurrentUser());
+  const [user, setUser] = useState(() => AuthService.getCurrentUser());
+
+  useEffect(() => {
+    const handleUserUpdate = () => {
+      setUser(AuthService.getCurrentUser());
+    };
+    window.addEventListener("user-updated", handleUserUpdate);
+    return () => window.removeEventListener("user-updated", handleUserUpdate);
+  }, []);
 
   useEffect(() => {
     if (!user) {

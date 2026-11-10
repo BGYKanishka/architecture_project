@@ -11,8 +11,8 @@ const EmployeeRoute = ({ children }) => {
     try {
         const user = JSON.parse(userStr);
         const roles = Array.isArray(user.roles) ? user.roles : [];
-        if (!roles.includes("ROLE_EMPLOYEE")) {
-            // eslint-disable-next-line react-hooks/error-boundaries
+        const isEmployee = roles.includes("ROLE_EMPLOYEE") || user?.role === "EMPLOYEE" || user?.role === "ROLE_EMPLOYEE";
+        if (!isEmployee) {
             return <Navigate to="/login" replace />;
         }
     } catch {

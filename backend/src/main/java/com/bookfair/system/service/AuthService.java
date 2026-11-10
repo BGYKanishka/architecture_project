@@ -41,7 +41,7 @@ public class AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        return new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), roles);
+        return new JwtResponse(jwt, userDetails.getId(), userDetails.getEmail(), userDetails.getName(), userDetails.getRole(), roles);
     }
 
     public String registerUser(SignupRequest signUpRequest) {

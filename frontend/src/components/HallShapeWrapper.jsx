@@ -8,43 +8,43 @@ const HallShapeWrapper = ({ hallName, children }) => {
         return {
           type: "octagon",
           clipPath: "polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)",
-          backgroundColor: "#0d1322",
-          borderColor: "rgba(99, 102, 241, 0.4)",
-          borderWidth: "2px",
+          backgroundColor: "#0b0f19",
+          borderColor: "#334155",
+          borderWidth: "1.5px",
           aspectRatio: "1/1",
           position: "relative",
         };
       case "Hall C":
         return {
           borderRadius: "16px",
-          borderBottomLeftRadius: "40%",
-          backgroundColor: "#0d1322",
-          minHeight: "700px",
-          padding: "40px",
-          border: "2px solid rgba(99, 102, 241, 0.4)",
+          borderBottomLeftRadius: "64px",
+          backgroundColor: "#0b0f19",
+          minHeight: "650px",
+          padding: "36px",
+          border: "1px solid #1e293b",
         };
       case "Hall D":
         return {
           borderRadius: "16px",
-          borderBottomRightRadius: "40%",
-          backgroundColor: "#0d1322",
-          minHeight: "700px",
-          padding: "40px",
-          border: "2px solid rgba(99, 102, 241, 0.4)",
+          borderBottomRightRadius: "64px",
+          backgroundColor: "#0b0f19",
+          minHeight: "650px",
+          padding: "36px",
+          border: "1px solid #1e293b",
         };
       case "Hall F":
       case "Hall G":
       case "Hall E":
         return {
-          borderRadius: "24px",
-          backgroundColor: "#0d1322",
-          minHeight: "700px",
-          padding: "40px",
-          border: "2px solid rgba(99, 102, 241, 0.4)",
+          borderRadius: "16px",
+          backgroundColor: "#0b0f19",
+          minHeight: "650px",
+          padding: "36px",
+          border: "1px solid #1e293b",
         };
 
       default:
-        return { borderRadius: "20px", padding: "40px", backgroundColor: "#0d1322", border: "2px solid #1e293b" };
+        return { borderRadius: "16px", padding: "36px", backgroundColor: "#0b0f19", border: "1px solid #1e293b" };
     }
   };
 

@@ -31,7 +31,7 @@ import EmployeeHeader from "./components/common/EmployeeHeader";
 import { useEffect, useState } from "react";
 
 function AppContent() {
-  const [user, setUser] = useState(undefined);
+  const [user, setUser] = useState(() => AuthService.getCurrentUser());
 
   useEffect(() => {
     const fetchUser = () => {
@@ -39,10 +39,12 @@ function AppContent() {
       setUser(currentUser);
     };
 
-    fetchUser();
-
     window.addEventListener("user-updated", fetchUser);
-    return () => window.removeEventListener("user-updated", fetchUser);
+    window.addEventListener("storage", fetchUser);
+    return () => {
+      window.removeEventListener("user-updated", fetchUser);
+      window.removeEventListener("storage", fetchUser);
+    };
   }, []);
 
   return (

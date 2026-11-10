@@ -20,16 +20,16 @@ const Login = () => {
     setLoading(true);
 
     AuthService.login(email, password).then(
-      () => {
-        const user = AuthService.getCurrentUser();
+      (data) => {
+        const user = data || AuthService.getCurrentUser();
         const role = user?.role || (user?.roles && user.roles[0]) || "";
 
         if (role === "ADMIN" || role === "ROLE_ADMIN") {
-          navigate("/admin/dashboard");
+          navigate("/admin/dashboard", { replace: true });
         } else if (role === "EMPLOYEE" || role === "ROLE_EMPLOYEE") {
-          navigate("/employee/floor-plan");
+          navigate("/employee/floor-plan", { replace: true });
         } else {
-          navigate("/dashboard");
+          navigate("/dashboard", { replace: true });
         }
       },
       (error) => {
