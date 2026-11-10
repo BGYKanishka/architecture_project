@@ -8,11 +8,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/vendor-publishers/reservations")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('VENDOR')")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -21,12 +23,8 @@ public class ReservationController {
     public ResponseEntity<?> makeReservation(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
             @Valid @RequestBody ReservationRequest request) {
-        try {
-            ReservationResponse response = reservationService.createReservation(currentUser.getId(), request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        ReservationResponse response = reservationService.createReservation(currentUser.getId(), request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/count")
@@ -38,21 +36,15 @@ public class ReservationController {
     @GetMapping("/my")
     public ResponseEntity<java.util.List<ReservationResponse>> getMyReservations(
             @AuthenticationPrincipal UserDetailsImpl currentUser) {
-        System.out.println("Fetching reservations for user ID: " + currentUser.getId());
         java.util.List<ReservationResponse> reservations = reservationService
                 .getUserReservations(currentUser.getId());
-        System.out.println("Found " + reservations.size() + " reservations for user ID: " + currentUser.getId());
         return ResponseEntity.ok(reservations);
     }
 
     @DeleteMapping("/{stallId}")
     public ResponseEntity<?> cancelReservation(@AuthenticationPrincipal UserDetailsImpl currentUser,
             @PathVariable Long stallId) {
-        try {
-            reservationService.cancelStallReservation(currentUser.getId(), stallId);
-            return ResponseEntity.ok("Reservation cancelled successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        reservationService.cancelStallReservation(currentUser.getId(), stallId);
+        return ResponseEntity.ok("Reservation cancelled successfully");
     }
 }

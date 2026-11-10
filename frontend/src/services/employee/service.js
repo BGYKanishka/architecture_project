@@ -1,32 +1,11 @@
-import axios from "axios";
-// Removed invalid import
-
-
-
-
-const API_URL = "http://localhost:8080/api/employees";
-const EMPLOYEE_PANEL_API_URL = "http://localhost:8080/api/employee";
-
-const verifyQR = (qrData) => {
-    return axios.post(`${API_URL}/verify-qr`, qrData);
-};
+import api from "../api";
 
 const getEmployeeStalls = () => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${EMPLOYEE_PANEL_API_URL}/stalls`, {
-        headers: {
-            Authorization: 'Bearer ' + token
-        }
-    });
+    return api.get("/employee/stalls");
 };
 
 const getStallDetails = (stallId) => {
-    const token = localStorage.getItem('token');
-    return axios.get(`${EMPLOYEE_PANEL_API_URL}/stalls/${stallId}`, {
-        headers: {
-            Authorization: 'Bearer ' + token
-        }
-    });
+    return api.get(`/employee/stalls/${stallId}`);
 };
 
-export default { verifyQR, getEmployeeStalls, getStallDetails };
+export default { getEmployeeStalls, getStallDetails };

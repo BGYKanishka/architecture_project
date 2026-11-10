@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import {
     QuestionMarkCircleIcon,
     ChevronDownIcon,
@@ -10,7 +10,6 @@ import {
     ArrowLeftIcon
 } from "@heroicons/react/24/outline";
 
-
 const HelpCenter = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("general");
@@ -20,77 +19,81 @@ const HelpCenter = () => {
         general: [
             {
                 q: "How many stalls can I reserve?",
-                a: "Per the Sri Lanka Book Publishers’ Association rules, each registered business or vendor is allowed to reserve a maximum of 3 stalls to ensure fair distribution."
+                a: "Per the Sri Lanka Book Publishers’ Association guidelines, each registered publisher account can reserve a maximum of 3 stalls to ensure equitable access across all exhibitors."
             },
             {
-                q: "How do I get my entrance pass?",
-                a: "Once your reservation is confirmed, a unique QR code is generated. This acts as your official pass and will be sent to your registered email address."
+                q: "How do I access my gate entrance pass?",
+                a: "Once your reservation is confirmed, a digital pass with a cryptographic QR code is generated. This is accessible in your dashboard under 'My Bookings' and is also sent to your registered email."
+            },
+            {
+                q: "What are the exhibition dates and opening hours?",
+                a: "CIBF 2026 takes place from September 18 to 27, 2026. The fair is open daily from 9:00 AM to 7:00 PM at BMICH, Bauddhaloka Mawatha, Colombo 07."
             }
         ],
         reservations: [
             {
                 q: "Can I cancel a reservation?",
-                a: "Reservations can be managed through the 'My Reservations' tab in your dashboard. Cancellations are subject to the terms and conditions of the CIBF committee."
+                a: "Yes. Reservations can be cancelled directly through the 'My Bookings' tab prior to the fair commencement deadline."
             },
             {
-                q: "Why are some stalls grayed out?",
-                a: "Stalls displayed in gray are already reserved by other publishers. Only green/available stalls can be selected for booking."
+                q: "Why are some stalls marked as SOLD on the floor map?",
+                a: "Stalls marked as SOLD have been booked by other publishers or are held during active checkout. Available stalls are colored green (Small), cyan (Medium), or violet (Large)."
+            },
+            {
+                q: "What payment settlement methods are supported?",
+                a: "We currently support cash settlement upon arrival ('Cash on Date') at the BMICH fair secretariat desk, as well as electronic card payment."
             }
         ]
     };
 
     return (
-        <div className="min-h-screen bg-slate-50">
-
-
-            <main className="max-w-5xl mx-auto px-4 py-12">
-                {/* Header Section */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center p-3 bg-blue-100 rounded-2xl text-blue-600 mb-4">
-                        <QuestionMarkCircleIcon className="w-10 h-10" />
-                    </div>
-                    <h1 className="text-4xl font-black text-slate-800 tracking-tight">How can we help?</h1>
-                    <p className="text-slate-500 mt-2 text-lg">Support for the Colombo International Book Fair Reservation System</p>
+        <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans py-16 pb-20">
+            <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                {/* Header */}
+                <div className="mb-12">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-2">Exhibitor Support</p>
+                    <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">Frequently Asked Questions</h1>
+                    <p className="text-slate-400 mt-2 text-sm sm:text-base">Guidelines and assistance for CIBF 2026 exhibitors</p>
                 </div>
 
                 {/* Support Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
                     <SupportCard
-                        icon={<TicketIcon className="w-6 h-6" />}
-                        title="QR Pass Issues"
-                        desc="Didn't receive your QR code? Check your spam or resend it here."
+                        icon={<TicketIcon className="w-5 h-5 text-indigo-400" />}
+                        title="QR Gate Passes"
+                        desc="Instructions on digital credentials, badge allocation, and entrance check-in."
                     />
                     <SupportCard
-                        icon={<MapIcon className="w-6 h-6" />}
-                        title="Stall Mapping"
-                        desc="Detailed guide on hall dimensions and stall categorization."
+                        icon={<MapIcon className="w-5 h-5 text-indigo-400" />}
+                        title="Stall Specifications"
+                        desc="Details on dimensions, shell scheme fittings, and power socket allocation."
                     />
                     <SupportCard
-                        icon={<UserGroupIcon className="w-6 h-6" />}
-                        title="Business Registration"
-                        desc="Updating your publisher details or literary genre lists."
+                        icon={<UserGroupIcon className="w-5 h-5 text-indigo-400" />}
+                        title="Publisher Registration"
+                        desc="Guidelines on updating publishing imprint titles, contacts, and genre tags."
                     />
                 </div>
 
                 {/* FAQ Section */}
-                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                    <div className="flex border-b border-slate-100">
-                        <TabBtn active={activeTab === "general"} label="General" onClick={() => setActiveTab("general")} />
-                        <TabBtn active={activeTab === "reservations"} label="Reservations" onClick={() => setActiveTab("reservations")} />
+                <div className="bg-[#0f1422] rounded-xl border border-slate-800 overflow-hidden">
+                    <div className="flex border-b border-slate-800">
+                        <TabBtn active={activeTab === "general"} label="General Guidelines" onClick={() => setActiveTab("general")} />
+                        <TabBtn active={activeTab === "reservations"} label="Stall Reservations" onClick={() => setActiveTab("reservations")} />
                     </div>
 
-                    <div className="p-8">
+                    <div className="p-6 space-y-3">
                         {faqs[activeTab].map((faq, idx) => (
-                            <div key={idx} className="mb-4 last:mb-0">
+                            <div key={idx} className="rounded-lg border border-slate-800 bg-[#0b0f19] overflow-hidden">
                                 <button
                                     onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                                    className="w-full flex items-center justify-between p-5 rounded-2xl bg-slate-50 hover:bg-slate-100 transition text-left"
+                                    className="w-full flex items-center justify-between p-4 text-left hover:bg-slate-850"
                                 >
-                                    <span className="font-bold text-slate-700">{faq.q}</span>
-                                    <ChevronDownIcon className={`w-5 h-5 text-slate-400 transition ${openFaq === idx ? 'rotate-180' : ''}`} />
+                                    <span className="font-medium text-white text-sm">{faq.q}</span>
+                                    <ChevronDownIcon className={`w-4 h-4 text-slate-400 transition-transform ${openFaq === idx ? 'rotate-180' : ''}`} />
                                 </button>
                                 {openFaq === idx && (
-                                    <div className="p-5 text-slate-600 leading-relaxed animate-in slide-in-from-top-2">
+                                    <div className="px-4 pb-4 pt-1 text-slate-400 text-xs sm:text-sm leading-relaxed border-t border-slate-800">
                                         {faq.a}
                                     </div>
                                 )}
@@ -99,46 +102,53 @@ const HelpCenter = () => {
                     </div>
                 </div>
 
-                {/* Contact Footer */}
-                <div className="mt-16 bg-blue-600 rounded-[2.5rem] p-10 text-white flex flex-col md:flex-row items-center justify-between">
-                    <div className="mb-6 md:mb-0 text-center md:text-left">
-                        <h3 className="text-2xl font-bold">Still have questions?</h3>
-                        <p className="text-blue-100 opacity-80">Our support team is available for publishers 24/7.</p>
+                {/* Contact Banner */}
+                <div className="mt-12 bg-[#0f1422] border border-slate-800 rounded-xl p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 className="text-lg font-bold text-white">Need more assistance?</h2>
+                        <p className="text-slate-400 text-xs sm:text-sm mt-0.5">The CIBF Secretariat team is available for direct inquiries.</p>
                     </div>
                     <a
-                        href="mailto:srilankabookpublishers@gmail.com?subject=CIBF%20Reservation%20Support%20Request"
-                        className="flex items-center gap-3 bg-white text-blue-600 px-8 py-4 rounded-2xl font-bold shadow-xl hover:bg-blue-50 transition no-underline"
+                        href="mailto:srilankabookpublishers@gmail.com?subject=CIBF%20Support%20Request"
+                        className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition shadow-sm shrink-0"
                     >
-                        <EnvelopeIcon className="w-6 h-6" />
-                        Contact Support
+                        <EnvelopeIcon className="w-4 h-4" />
+                        <span>Email Support</span>
                     </a>
                 </div>
 
-                <button
-                    onClick={() => navigate(-1)}
-                    className="mt-8 flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-800 shadow-md transition mx-auto"
-                >
-                    <ArrowLeftIcon className="w-5 h-5" /> Go Back
-                </button>
+                <div className="mt-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition"
+                    >
+                        <ArrowLeftIcon className="w-3.5 h-3.5" />
+                        <span>Back</span>
+                    </button>
+                </div>
             </main>
         </div>
     );
 };
 
 const SupportCard = ({ icon, title, desc }) => (
-    <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition cursor-pointer group">
-        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition mb-6">
+    <div className="bg-[#0f1422] p-5 rounded-xl border border-slate-800">
+        <div className="w-9 h-9 bg-slate-900 border border-slate-800 rounded-lg flex items-center justify-center mb-3">
             {icon}
         </div>
-        <h4 className="font-bold text-slate-800 mb-2">{title}</h4>
-        <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+        <h3 className="font-semibold text-white text-sm mb-1">{title}</h3>
+        <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
     </div>
 );
 
 const TabBtn = ({ active, label, onClick }) => (
     <button
         onClick={onClick}
-        className={`flex-1 py-4 font-bold text-sm transition ${active ? "text-blue-600 border-b-2 border-blue-600" : "text-slate-400 hover:text-slate-600"}`}
+        className={`flex-1 py-3 text-xs sm:text-sm font-medium transition ${
+            active 
+                ? "text-white border-b-2 border-indigo-500 bg-[#0b0f19]" 
+                : "text-slate-400 hover:text-white"
+        }`}
     >
         {label}
     </button>

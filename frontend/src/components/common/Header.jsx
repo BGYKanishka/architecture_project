@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import {
   UserCircleIcon,
@@ -7,10 +7,7 @@ import {
   ArrowLeftOnRectangleIcon,
   XMarkIcon,
   BookOpenIcon,
-  HomeIcon,
   TicketIcon,
-  QuestionMarkCircleIcon,
-  MapIcon
 } from "@heroicons/react/24/outline";
 
 const Header = ({ user }) => {
@@ -24,169 +21,207 @@ const Header = ({ user }) => {
     navigate("/login");
   };
 
-  const handleReservationsClick = () => {
-    navigate("/reservations");
+  const isLoggedIn = !!user;
+
+  const navLinks = [
+    { to: "/", label: "Home", exact: true },
+    ...(isLoggedIn ? [{ to: "/dashboard", label: "Dashboard" }] : []),
+    { to: "/map", label: "Floor Plan & Stalls" },
+    ...(isLoggedIn ? [{ to: "/reservations", label: "My Bookings" }] : []),
+    { to: "/about", label: "About Fair" },
+    { to: "/help", label: "Help" },
+  ];
+
+  const isActive = (link) => {
+    if (link.exact) return location.pathname === link.to;
+    return location.pathname.startsWith(link.to);
   };
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 sm:px-8 py-3">
-      <div className="flex justify-between items-center max-w-[1600px] mx-auto">
+    <header className="sticky top-0 z-50 bg-[#0b0f19] border-b border-slate-800 text-slate-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
 
-        {/* LEFT: Menu Button & Logo */}
+        {/* LEFT: Logo & Mobile Toggle */}
         <div className="flex items-center gap-4">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-600"
+            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition lg:hidden"
+            aria-label="Toggle Navigation"
           >
             {isMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </button>
 
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/dashboard")}>
-            <div className="bg-blue-800 p-1.5 rounded-lg text-white">
-              <BookOpenIcon className="w-6 h-6" />
+          <Link to="/" className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+              <BookOpenIcon className="w-5 h-5" />
             </div>
-            <h1 className="text-xl font-black text-slate-800 hidden sm:block tracking-tight">
-              CIBF <span className="text-blue-800">2026</span>
-            </h1>
-          </div>
+            <div>
+              <span className="text-base font-bold text-white tracking-tight leading-none block">
+                CIBF 2026
+              </span>
+              <span className="text-[11px] text-slate-400 block -mt-0.5">
+                Colombo Book Fair
+              </span>
+            </div>
+          </Link>
         </div>
 
+        {/* MIDDLE: Natural Desktop Nav Links (No pill capsule wrapper, no bubble buttons) */}
+        <nav className="hidden lg:flex items-center gap-6">
+          {navLinks.map((link) => {
+            const active = isActive(link);
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`text-sm font-medium transition-colors py-1 relative ${
+                  active
+                    ? "text-white font-semibold"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                {link.label}
+                {active && (
+                  <span className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-indigo-500 rounded-full" />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
         {/* RIGHT: Actions */}
-        <div className="flex items-center gap-2 sm:gap-5">
-          <button
-            onClick={() => navigate("/dashboard")}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition relative"
-            title="Dashboard"
-          >
-            <HomeIcon className="w-6 h-6" />
-          </button>
+        <div className="flex items-center gap-3">
+          {isLoggedIn ? (
+            <>
+              <Link
+                to="/reservations"
+                className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3 py-1.5 rounded-lg transition"
+              >
+                <TicketIcon className="w-4 h-4 text-indigo-400" />
+                <span>My Bookings</span>
+              </Link>
 
-          <button
-            onClick={() => navigate("/map")}
-            className="p-2 text-slate-500 hover:bg-slate-100 rounded-full transition relative"
-            title="Map"
-          >
-            <MapIcon className="w-6 h-6" />
-          </button>          <button
-            onClick={handleReservationsClick}
-            className="hidden md:flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-full transition font-bold text-sm"
-          >
-            <TicketIcon className="w-5 h-5" />
+              {/* User Menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsProfileOpen(!isProfileOpen)}
+                  className="flex items-center gap-2.5 p-1 text-left rounded-lg hover:bg-slate-800/60 transition"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center text-xs font-bold">
+                    {(user?.name || user?.email)?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <span className="hidden md:block text-xs font-medium text-slate-300 max-w-[120px] truncate">
+                    {user?.name || user?.email}
+                  </span>
+                </button>
 
-          </button>
+                {isProfileOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+                    <div className="absolute right-0 mt-2 w-56 bg-[#0f1422] border border-slate-800 rounded-xl shadow-2xl py-2 z-50 text-slate-200">
+                      <div className="px-4 py-2.5 border-b border-slate-800">
+                        <p className="text-[11px] text-slate-400">Signed in as</p>
+                        <p className="text-xs font-bold text-white truncate">{user?.name || user?.email}</p>
+                      </div>
 
-          {/* Mobile version of ticket button */}
-          <button
-            onClick={handleReservationsClick}
-            className="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-full transition relative"
-          >
-            <TicketIcon className="w-6 h-6" />
-          </button>
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                      >
+                        <UserCircleIcon className="w-4 h-4 text-slate-400" />
+                        <span>Profile Settings</span>
+                      </button>
 
-          <div className="relative">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-2 p-1 hover:bg-slate-100 rounded-full transition"
-            >
-              <div className="w-9 h-9 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold">
-                {(user?.name || user?.email)?.charAt(0).toUpperCase() || "U"}
+                      <button
+                        onClick={() => {
+                          navigate("/reservations");
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                      >
+                        <TicketIcon className="w-4 h-4 text-slate-400" />
+                        <span>My Bookings</span>
+                      </button>
+
+                      <div className="pt-1 mt-1 border-t border-slate-800">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 font-medium transition"
+                        >
+                          <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
-            </button>
-
-            {isProfileOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in duration-150">
-                  <button
-                    onClick={() => {
-                      navigate("/profile");
-                      setIsProfileOpen(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-slate-700 hover:bg-blue-50 font-bold"
-                  >
-                    <UserCircleIcon className="w-5 h-5 " /> Profile
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"
-                  >
-                    <ArrowLeftOnRectangleIcon className="w-5 h-5" /> Logout
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 transition"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                className="text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 rounded-lg transition shadow-sm"
+              >
+                Register
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* MENU DROPDOWN (Now always available and styled for desktop/mobile) */}
+      {/* MOBILE MENU */}
       {isMenuOpen && (
-        <>
-          {/* Overlay to close menu when clicking outside */}
-          <div className="fixed inset-0 bg-black/10 z-40" onClick={() => setIsMenuOpen(false)}></div>
+        <div className="lg:hidden border-t border-slate-800 bg-[#0b0f19] px-4 pt-3 pb-4 space-y-1">
+          {navLinks.map((link) => {
+            const active = isActive(link);
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => setIsMenuOpen(false)}
+                className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${
+                  active
+                    ? "bg-slate-800 text-white font-semibold"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
 
-          <div className="absolute top-full left-4 sm:left-8 mt-2 w-64 bg-white border border-slate-200 shadow-2xl rounded-2xl py-4 px-2 z-50 animate-in slide-in-from-top-2 duration-200">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Navigation</p>
-            <MenuLink
-              icon={<HomeIcon className="w-5 h-5" />}
-              label="Dashboard"
-              onClick={() => { navigate("/dashboard"); setIsMenuOpen(false); }}
-              active={location.pathname === "/dashboard"}
-            />
-            <MenuLink
-              icon={<MapIcon className="w-5 h-5" />}
-              label="Book fair Map"
-              onClick={() => { navigate("/map"); setIsMenuOpen(false); }}
-              active={location.pathname === "/map" || location.pathname.startsWith("/map/")}
-            />
-            <MenuLink
-              icon={<UserCircleIcon className="w-5 h-5" />}
-              label="My Profile"
-              onClick={() => { navigate("/profile"); setIsMenuOpen(false); }}
-              active={location.pathname === "/profile"}
-            />
-            <MenuLink
-              icon={<TicketIcon className="w-5 h-5" />}
-              label="My Reservations"
-              onClick={() => { navigate("/reservations"); setIsMenuOpen(false); }}
-              active={location.pathname === "/reservations"}
-            />
-
-            <hr className="my-3 border-slate-100" />
-
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Support</p>
-            <MenuLink
-              icon={<QuestionMarkCircleIcon className="w-5 h-5" />}
-              label="Help Center"
-              onClick={() => { navigate("/help"); setIsMenuOpen(false); }}
-              active={location.pathname === "/help"}
-            />
-            <MenuLink
-              icon={<ArrowLeftOnRectangleIcon className="w-5 h-5" />}
-              label="Logout"
-              onClick={() => { handleLogout(); setIsMenuOpen(false); }}
-              active={false}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition text-red-600 hover:bg-red-50 hover:text-red-700"
-            />
-          </div>
-        </>
+          {!isLoggedIn && (
+            <div className="pt-3 mt-3 border-t border-slate-800 flex gap-2">
+              <Link
+                to="/login"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex-1 text-center py-2 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-lg"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/register"
+                onClick={() => setIsMenuOpen(false)}
+                className="flex-1 text-center py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg"
+              >
+                Register
+              </Link>
+            </div>
+          )}
+        </div>
       )}
-    </nav>
+    </header>
   );
 };
-
-// Helper component for menu items
-const MenuLink = ({ icon, label, onClick, active = false, className }) => (
-  <button
-    onClick={onClick}
-    className={className || `w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${active
-      ? "bg-blue-50 text-blue-600"
-      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-      }`}
-  >
-    {icon}
-    {label}
-  </button>
-);
 
 export default Header;

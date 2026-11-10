@@ -2,55 +2,67 @@ import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { getStallAvailability, toggleStallDisabled } from "../../services/admin/admin.stall.service";
 import AdminHeader from "../../components/common/AdminHeader";
+import {
+    ArrowLeftIcon,
+    ArrowPathIcon,
+    MagnifyingGlassIcon,
+    CheckCircleIcon,
+    XMarkIcon,
+    ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 
-// ── Constants ────────────────────────────────────────────────
 const STATUS_FILTERS = ["ALL", "AVAILABLE", "RESERVED", "DISABLED"];
 
-// ── Sub-components ───────────────────────────────────────────
-
 function StatusBadge({ status }) {
-    const cfg = {
-        AVAILABLE: "bg-emerald-100 text-emerald-700 border-emerald-200",
-        RESERVED: "bg-rose-100   text-rose-700   border-rose-200",
-        DISABLED: "bg-slate-100  text-slate-500  border-slate-200",
-    };
+    if (status === "AVAILABLE") {
+        return (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                Available
+            </span>
+        );
+    }
+    if (status === "RESERVED") {
+        return (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-rose-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                Reserved
+            </span>
+        );
+    }
     return (
-        <span className={`text-[10px] font-semibold tracking-wide px-2 py-0.5 rounded-full border ${cfg[status] || cfg.DISABLED}`}>
-            {status}
+        <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+            Disabled
         </span>
     );
 }
 
 function StallCard({ stall, onClick }) {
     const coloring = {
-        AVAILABLE: "bg-emerald-50  border-emerald-200 hover:border-emerald-400 hover:bg-emerald-100",
-        RESERVED: "bg-rose-50     border-rose-200    hover:border-rose-400    hover:bg-rose-100",
-        DISABLED: "bg-slate-100   border-slate-200   hover:border-slate-400   opacity-70",
-    };
-    const dot = {
-        AVAILABLE: "bg-emerald-400",
-        RESERVED: "bg-rose-400",
-        DISABLED: "bg-slate-400",
+        AVAILABLE: "bg-[#0f1422] border-slate-800 hover:border-slate-700 text-slate-200",
+        RESERVED: "bg-[#0f1422] border-slate-800 hover:border-slate-700 text-slate-400",
+        DISABLED: "bg-[#0b0f19] border-slate-800/60 text-slate-500 opacity-60",
     };
     const s = stall.statusLabel;
 
     return (
         <button
             onClick={() => onClick(stall)}
-            className={`relative rounded-xl border-2 p-3 text-left transition-all cursor-pointer group ${coloring[s] || coloring.DISABLED}`}
+            className={`rounded-lg border p-3 text-left transition cursor-pointer flex flex-col justify-between ${coloring[s] || coloring.DISABLED}`}
         >
-            {/* Status dot */}
-            <span className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full ${dot[s]}`} />
-
-            <p className="font-bold text-sm text-slate-800 leading-tight">{stall.stallCode}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">{stall.size}</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">{stall.floorName}</p>
-            <div className="mt-2">
-                <StatusBadge status={s} />
+            <div>
+                <p className="font-bold text-sm text-white">{stall.stallCode}</p>
+                <p className="text-[11px] text-slate-400">{stall.size} • {stall.floorName}</p>
             </div>
-            {stall.reserved && stall.vendorName && (
-                <p className="mt-1.5 text-[10px] text-slate-500 truncate">{stall.vendorName}</p>
-            )}
+            <div className="mt-2.5 pt-2 border-t border-slate-800/80 w-full flex items-center justify-between">
+                <StatusBadge status={s} />
+                {stall.price && (
+                    <span className="text-[11px] text-slate-400 font-mono">
+                        {(stall.price / 1000).toFixed(0)}k
+                    </span>
+                )}
+            </div>
         </button>
     );
 }
@@ -58,9 +70,9 @@ function StallCard({ stall, onClick }) {
 function InfoRow({ label, value }) {
     if (!value && value !== 0) return null;
     return (
-        <div className="flex justify-between gap-4 py-2 border-b border-slate-100 last:border-0">
-            <span className="text-xs text-slate-500 shrink-0">{label}</span>
-            <span className="text-xs text-slate-800 font-medium text-right break-all">{value}</span>
+        <div className="flex justify-between gap-4 py-2 border-b border-slate-800/80 last:border-0 text-xs">
+            <span className="text-slate-400 shrink-0">{label}</span>
+            <span className="text-white font-medium text-right break-all">{value}</span>
         </div>
     );
 }
@@ -71,129 +83,102 @@ function StallModal({ stall, onClose, onToggleDisabled, toggling }) {
     const isReserved = stall.reserved;
     const isDisabled = stall.disabled;
 
-    const headerColor = {
-        AVAILABLE: "from-emerald-500 to-emerald-600",
-        RESERVED: "from-rose-500    to-rose-600",
-        DISABLED: "from-slate-400   to-slate-500",
-    };
-
     const formatDate = (d) => d ? new Date(d).toLocaleString() : "—";
 
     return (
         <div
-            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in"
             onClick={onClose}
         >
             <div
-                className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+                className="bg-[#0f1422] border border-slate-800 rounded-xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header */}
-                <div className={`bg-gradient-to-r ${headerColor[s] || headerColor.DISABLED} rounded-t-2xl p-5`}>
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <p className="text-white/70 text-xs font-medium uppercase tracking-wider">{stall.floorName}</p>
-                            <h2 className="text-white text-2xl font-bold mt-0.5">{stall.stallCode}</h2>
+                <div className="p-5 border-b border-slate-800 flex items-start justify-between">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400">{stall.floorName}</p>
+                        <h2 className="text-2xl font-bold text-white mt-0.5">{stall.stallCode}</h2>
+                        <div className="mt-1">
                             <StatusBadge status={s} />
                         </div>
-                        <button onClick={onClose} className="text-white/70 hover:text-white text-2xl leading-none">×</button>
                     </div>
+                    <button onClick={onClose} className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition">
+                        <XMarkIcon className="w-5 h-5" />
+                    </button>
                 </div>
 
                 <div className="p-5 space-y-5">
-                    {/* Stall details */}
                     <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Stall Info</h3>
-                        <div className="bg-slate-50 rounded-xl px-4">
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Stall Information</h3>
+                        <div className="bg-[#0b0f19] border border-slate-800 rounded-lg px-3.5 py-1">
                             <InfoRow label="Stall ID" value={`#${stall.id}`} />
                             <InfoRow label="Stall Code" value={stall.stallCode} />
                             <InfoRow label="Floor" value={stall.floorName} />
-                            <InfoRow label="Size / Type" value={stall.size} />
-                            <InfoRow label="Price" value={stall.price ? `LKR ${stall.price.toLocaleString()}` : null} />
+                            <InfoRow label="Size Category" value={stall.size} />
+                            <InfoRow label="Rental Price" value={stall.price ? `LKR ${stall.price.toLocaleString()}` : null} />
                             <InfoRow label="Status" value={s} />
                         </div>
                     </div>
 
-                    {/* Vendor details */}
                     <div>
                         <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                            {isReserved ? "Vendor Details" : "Occupancy"}
+                            {isReserved ? "Assigned Publisher" : "Occupancy"}
                         </h3>
                         {isReserved ? (
-                            <div className="space-y-4">
-                                <div className="bg-rose-50 border border-rose-100 rounded-xl px-4">
+                            <div className="space-y-3">
+                                <div className="bg-[#0b0f19] border border-slate-800 rounded-lg px-3.5 py-1">
                                     <InfoRow label="Reservation ID" value={`#${stall.reservationId}`} />
-                                    <InfoRow label="Reservation Date" value={formatDate(stall.reservationDate)} />
-                                    <InfoRow label="Reservation Status" value={stall.reservationStatus} />
-                                    <InfoRow label="Vendor ID" value={`#${stall.vendorId}`} />
-                                    <InfoRow label="Vendor Name" value={stall.vendorName} />
+                                    <InfoRow label="Booking Date" value={formatDate(stall.reservationDate)} />
+                                    <InfoRow label="Publisher Name" value={stall.vendorName} />
                                     <InfoRow label="Email" value={stall.vendorEmail} />
                                     <InfoRow label="Contact" value={stall.vendorContact || "—"} />
                                     <InfoRow label="Business" value={stall.vendorBusiness || "—"} />
                                 </div>
 
-                                {/* Vendor Genres */}
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Vendor Genres</p>
-                                    {stall.vendorGenres && stall.vendorGenres.length > 0 ? (
+                                {stall.vendorGenres && stall.vendorGenres.length > 0 && (
+                                    <div>
+                                        <p className="text-xs text-slate-400 mb-1.5">Registered Genres:</p>
                                         <div className="flex flex-wrap gap-1.5">
-                                            {stall.vendorGenres.map((genre, i) => {
-                                                const palettes = [
-                                                    "bg-violet-100 text-violet-700 border-violet-200",
-                                                    "bg-sky-100    text-sky-700    border-sky-200",
-                                                    "bg-amber-100  text-amber-700  border-amber-200",
-                                                    "bg-pink-100   text-pink-700   border-pink-200",
-                                                    "bg-teal-100   text-teal-700   border-teal-200",
-                                                    "bg-orange-100 text-orange-700 border-orange-200",
-                                                    "bg-indigo-100 text-indigo-700 border-indigo-200",
-                                                    "bg-lime-100   text-lime-700   border-lime-200",
-                                                ];
-                                                return (
-                                                    <span
-                                                        key={genre}
-                                                        className={`text-xs font-medium px-2.5 py-1 rounded-full border ${palettes[i % palettes.length]}`}
-                                                    >
-                                                        {genre}
-                                                    </span>
-                                                );
-                                            })}
+                                            {stall.vendorGenres.map((genre) => (
+                                                <span
+                                                    key={genre}
+                                                    className="text-xs text-slate-300 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded"
+                                                >
+                                                    {genre}
+                                                </span>
+                                            ))}
                                         </div>
-                                    ) : (
-                                        <p className="text-xs text-slate-400 italic">No genres specified</p>
-                                    )}
-                                </div>
+                                    </div>
+                                )}
                             </div>
                         ) : (
-                            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3">
-                                <span className="text-2xl">✅</span>
-                                <p className="text-sm text-emerald-700 font-medium">
-                                    No vendor assigned — stall is {isDisabled ? "disabled" : "available for reservation"}.
+                            <div className="bg-[#0b0f19] border border-slate-800 rounded-lg p-3.5 flex items-center gap-2.5">
+                                <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0" />
+                                <p className="text-xs text-slate-300">
+                                    No publisher assigned — stall is {isDisabled ? "currently disabled" : "open for public reservation"}.
                                 </p>
                             </div>
                         )}
                     </div>
 
-                    {/* Enable / Disable toggle */}
-                    <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Admin Actions</h3>
+                    <div className="pt-2">
                         {isReserved ? (
-                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                                <span className="text-xl">⚠️</span>
-                                <p className="text-sm text-amber-700">
-                                    Cannot disable a reserved stall. Please wait until the reservation ends.
-                                </p>
+                            <div className="bg-[#0b0f19] border border-slate-800 rounded-lg p-3 flex items-start gap-2 text-xs text-slate-400">
+                                <ExclamationTriangleIcon className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                                <span>Active reservation present. Stalls cannot be disabled while booked.</span>
                             </div>
                         ) : (
                             <button
                                 onClick={() => onToggleDisabled(stall.id)}
                                 disabled={toggling}
-                                className={`w-full py-2.5 rounded-xl font-medium text-sm transition
-                                    ${isDisabled
-                                        ? "bg-emerald-600 text-white hover:bg-emerald-700"
-                                        : "bg-slate-200 text-slate-700 hover:bg-slate-300"}
-                                    disabled:opacity-50`}
+                                className={`w-full py-2 rounded-lg font-medium text-xs transition ${
+                                    isDisabled
+                                        ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                                        : "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700"
+                                } disabled:opacity-50`}
                             >
-                                {toggling ? "Updating…" : isDisabled ? "✓ Enable Stall" : "⊘ Disable Stall"}
+                                {toggling ? "Updating..." : isDisabled ? "Enable Stall for Booking" : "Disable Stall"}
                             </button>
                         )}
                     </div>
@@ -202,23 +187,6 @@ function StallModal({ stall, onClose, onToggleDisabled, toggling }) {
         </div>
     );
 }
-
-function Toast({ msg, type, onClose }) {
-    useEffect(() => {
-        if (!msg) return;
-        const t = setTimeout(onClose, 3000);
-        return () => clearTimeout(t);
-    }, [msg, onClose]);
-    if (!msg) return null;
-    return (
-        <div className={`fixed top-4 right-4 z-[60] px-4 py-3 rounded-xl shadow-lg text-sm font-medium
-            ${type === "error" ? "bg-red-600 text-white" : "bg-green-600 text-white"}`}>
-            {msg}
-        </div>
-    );
-}
-
-// ── Main page ─────────────────────────────────────────────────
 
 export default function AdminStalls() {
     const [stalls, setStalls] = useState([]);
@@ -232,10 +200,6 @@ export default function AdminStalls() {
 
     const [selected, setSelected] = useState(null);
     const [toggling, setToggling] = useState(false);
-    const [toast, setToast] = useState({ msg: "", type: "success" });
-
-    const showToast = (msg, type = "success") => setToast({ msg, type });
-    const clearToast = () => setToast({ msg: "", type: "success" });
 
     const load = async () => {
         setLoading(true);
@@ -244,7 +208,7 @@ export default function AdminStalls() {
             const data = await getStallAvailability();
             setStalls(data);
         } catch {
-            setError("Failed to load stalls. Please check the backend.");
+            setError("Failed to load stalls. Please check backend connection.");
         } finally {
             setLoading(false);
         }
@@ -252,7 +216,6 @@ export default function AdminStalls() {
 
     useEffect(() => { load(); }, []);
 
-    // Derive unique filter options from data
     const floors = useMemo(() => {
         const names = [...new Set(stalls.map(s => s.floorName))].sort();
         return ["ALL", ...names];
@@ -275,7 +238,6 @@ export default function AdminStalls() {
         });
     }, [stalls, statusFilter, floorFilter, sizeFilter, search]);
 
-    // Summary counts
     const counts = useMemo(() => ({
         total: stalls.length,
         available: stalls.filter(s => s.statusLabel === "AVAILABLE").length,
@@ -289,16 +251,13 @@ export default function AdminStalls() {
             const updated = await toggleStallDisabled(id);
             setStalls(prev => prev.map(s => s.id === id ? updated : s));
             setSelected(updated);
-            showToast(`Stall ${updated.disabled ? "disabled" : "enabled"} successfully.`);
-        } catch (err) {
-            const msg = err?.response?.data?.message || "Toggle failed.";
-            showToast(msg, "error");
+        } catch {
+            // Error handling
         } finally {
             setToggling(false);
         }
     };
 
-    // Group stalls by floor for display
     const byFloor = useMemo(() => {
         const map = {};
         filtered.forEach(s => {
@@ -309,112 +268,121 @@ export default function AdminStalls() {
     }, [filtered]);
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <Toast msg={toast.msg} type={toast.type} onClose={clearToast} />
+        <div className="min-h-screen bg-[#0b0f19] text-slate-100 pb-16">
             <AdminHeader />
 
             {/* Page Title Bar */}
-            <div className="max-w-7xl mx-auto px-4 pt-6 pb-2 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Link to="/admin/dashboard" className="p-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition text-sm font-medium">← Back</Link>
-                    <div>
-                        <h1 className="text-xl font-bold text-slate-900">Stall Availability</h1>
-                        <p className="text-xs text-slate-400 mt-0.5">Click any stall to view details and vendor information</p>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 flex items-center justify-between">
+                <div>
+                    <div className="flex items-center gap-2 mb-1">
+                        <Link to="/admin/dashboard" className="text-xs text-slate-400 hover:text-white flex items-center gap-1">
+                            <ArrowLeftIcon className="w-3.5 h-3.5" />
+                            <span>Dashboard</span>
+                        </Link>
+                        <span className="text-slate-600">/</span>
+                        <span className="text-xs text-indigo-400 font-medium">Stalls</span>
                     </div>
+                    <h1 className="text-2xl font-bold text-white tracking-tight">Stall Inventory</h1>
                 </div>
+
                 <button
                     onClick={load}
                     disabled={loading}
-                    className="border border-slate-200 px-3 py-1.5 rounded-lg text-sm hover:bg-slate-100 disabled:opacity-50"
+                    className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 hover:text-white hover:bg-slate-800 disabled:opacity-50 transition"
                 >
-                    {loading ? "Loading…" : "↻ Refresh"}
+                    <ArrowPathIcon className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+                    <span>{loading ? "Loading…" : "Refresh"}</span>
                 </button>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-6 space-y-5">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
-                {/* Summary cards */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {[
-                        { label: "Total Stalls", value: counts.total, color: "text-slate-700", bg: "bg-white" },
-                        { label: "Available", value: counts.available, color: "text-emerald-600", bg: "bg-emerald-50" },
-                        { label: "Reserved", value: counts.reserved, color: "text-rose-600", bg: "bg-rose-50" },
-                        { label: "Disabled", value: counts.disabled, color: "text-slate-500", bg: "bg-slate-100" },
-                    ].map(c => (
-                        <div key={c.label} className={`${c.bg} rounded-xl p-4 border border-slate-100 shadow-sm`}>
-                            <p className="text-xs text-slate-500">{c.label}</p>
-                            <p className={`text-2xl font-bold mt-1 ${c.color}`}>{c.value}</p>
-                        </div>
-                    ))}
+                {/* Summary numbers */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="bg-[#0f1422] rounded-xl p-4 border border-slate-800">
+                        <p className="text-xs text-slate-400">Total Stalls</p>
+                        <p className="text-2xl font-bold text-white mt-1">{counts.total}</p>
+                    </div>
+                    <div className="bg-[#0f1422] rounded-xl p-4 border border-slate-800">
+                        <p className="text-xs text-slate-400">Available</p>
+                        <p className="text-2xl font-bold text-emerald-400 mt-1">{counts.available}</p>
+                    </div>
+                    <div className="bg-[#0f1422] rounded-xl p-4 border border-slate-800">
+                        <p className="text-xs text-slate-400">Reserved</p>
+                        <p className="text-2xl font-bold text-rose-400 mt-1">{counts.reserved}</p>
+                    </div>
+                    <div className="bg-[#0f1422] rounded-xl p-4 border border-slate-800">
+                        <p className="text-xs text-slate-400">Disabled</p>
+                        <p className="text-2xl font-bold text-slate-400 mt-1">{counts.disabled}</p>
+                    </div>
                 </div>
 
                 {/* Filters */}
-                <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 flex flex-wrap gap-3 items-center">
+                <div className="bg-[#0f1422] rounded-xl border border-slate-800 p-4 flex flex-wrap gap-3 items-center">
                     {/* Status tabs */}
-                    <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+                    <div className="flex gap-1 bg-[#0b0f19] border border-slate-800 rounded-lg p-1">
                         {STATUS_FILTERS.map(f => (
                             <button
                                 key={f}
                                 onClick={() => setStatusFilter(f)}
-                                className={`px-3 py-1 rounded-md text-xs font-medium transition
-                                    ${statusFilter === f ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                                className={`px-2.5 py-1 rounded text-xs font-medium transition ${
+                                    statusFilter === f ? "bg-slate-800 text-white" : "text-slate-400 hover:text-white"
+                                }`}
                             >
                                 {f}
                             </button>
                         ))}
                     </div>
 
-                    {/* Floor filter */}
                     <select
                         value={floorFilter}
                         onChange={e => setFloorFilter(e.target.value)}
-                        className="border rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="bg-[#0b0f19] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
                     >
-                        {floors.map(f => <option key={f} value={f}>{f === "ALL" ? "All Floors" : f}</option>)}
+                        {floors.map(f => <option key={f} value={f}>{f === "ALL" ? "All Wings" : f}</option>)}
                     </select>
 
-                    {/* Size filter */}
                     <select
                         value={sizeFilter}
                         onChange={e => setSizeFilter(e.target.value)}
-                        className="border rounded-lg px-3 py-1.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        className="bg-[#0b0f19] border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500"
                     >
                         {sizes.map(s => <option key={s} value={s}>{s === "ALL" ? "All Sizes" : s}</option>)}
                     </select>
 
-                    {/* Search */}
-                    <input
-                        type="text"
-                        placeholder="Search stall code or vendor…"
-                        value={search}
-                        onChange={e => setSearch(e.target.value)}
-                        className="border rounded-lg px-3 py-1.5 text-xs w-52 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    />
+                    <div className="relative min-w-[200px] flex-1 max-w-xs">
+                        <MagnifyingGlassIcon className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                            type="text"
+                            placeholder="Search code or publisher…"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            className="bg-[#0b0f19] border border-slate-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 w-full focus:outline-none focus:border-indigo-500"
+                        />
+                    </div>
 
-                    <span className="text-xs text-slate-400 ml-auto">{filtered.length} stall{filtered.length !== 1 ? "s" : ""}</span>
+                    <span className="text-xs text-slate-500 ml-auto font-medium">{filtered.length} stall{filtered.length !== 1 ? "s" : ""}</span>
                 </div>
 
-                {/* Error */}
                 {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
+                    <div className="bg-rose-950/40 border border-rose-800/60 rounded-lg px-4 py-3 text-xs text-rose-300">
                         {error}
                     </div>
                 )}
 
-                {/* Stall grid — grouped by floor */}
                 {loading ? (
-                    <div className="text-center py-20 text-slate-400 text-sm">Loading stalls…</div>
+                    <div className="text-center py-20 text-slate-500 text-xs">Loading stall inventory…</div>
                 ) : filtered.length === 0 ? (
-                    <div className="text-center py-20 text-slate-400 text-sm">No stalls match the current filters.</div>
+                    <div className="text-center py-20 text-slate-500 text-xs">No stalls match the selected filter.</div>
                 ) : (
                     Object.keys(byFloor).sort().map(floorName => (
-                        <div key={floorName}>
-                            <div className="flex items-center gap-3 mb-3">
-                                <h2 className="font-semibold text-slate-700 text-sm">{floorName}</h2>
-                                <div className="flex-1 h-px bg-slate-200" />
-                                <span className="text-xs text-slate-400">{byFloor[floorName].length} stalls</span>
+                        <div key={floorName} className="space-y-3">
+                            <div className="flex items-center gap-3">
+                                <h2 className="font-bold text-white text-sm tracking-wide">{floorName}</h2>
+                                <div className="flex-1 h-px bg-slate-800" />
+                                <span className="text-xs text-slate-500 font-medium">{byFloor[floorName].length} stalls</span>
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2.5">
                                 {byFloor[floorName].map(stall => (
                                     <StallCard key={stall.id} stall={stall} onClick={setSelected} />
                                 ))}
@@ -424,7 +392,6 @@ export default function AdminStalls() {
                 )}
             </div>
 
-            {/* Stall detail modal */}
             <StallModal
                 stall={selected}
                 onClose={() => setSelected(null)}

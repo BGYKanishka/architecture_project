@@ -46,6 +46,13 @@ The project is structured into three main directories, each handling a specific 
 - [Maven](https://maven.apache.org/)
 - [PostgreSQL](https://www.postgresql.org/)
 
+### Docker Compose Setup
+1. Copy `.env.example` to `.env` and replace both placeholder values.
+2. Generate `JWT_SECRET` with `openssl rand -base64 32`.
+3. Start the local stack with `docker compose up --build`.
+
+The `.env` file is ignored by Git. Do not commit real credentials.
+
 ### 1. Database Setup
 Please refer to the [database/README.md](database/README.md) for detailed instructions on how to initialize the PostgreSQL database using the provided schema and seed scripts.
 
@@ -54,7 +61,7 @@ Please refer to the [database/README.md](database/README.md) for detailed instru
    ```bash
    cd backend
    ```
-2. Update the `src/main/resources/application.properties` file with your database credentials and email configuration.
+2. Set `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`, and `JWT_SECRET` in your shell environment. `JWT_SECRET` must be a Base64-encoded key generated with `openssl rand -base64 32`.
 3. Run the Spring Boot application:
    ```bash
    ./mvnw spring-boot:run

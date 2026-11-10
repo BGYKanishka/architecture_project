@@ -1,104 +1,122 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import backgroundImg from "../../assets/background.jpg";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import { ArrowLeftIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    try {
-      const data = await AuthService.login(email, password);
-      const roles = Array.isArray(data.roles) ? data.roles : (data.roles || []);
+    AuthService.login(email, password).then(
+      () => {
+        const user = AuthService.getCurrentUser();
+        const role = user?.role || (user?.roles && user.roles[0]) || "";
 
-      if (roles.includes("ROLE_ADMIN")) {
-        navigate("/admin/dashboard");
-      } else if (roles.includes("ROLE_EMPLOYEE")) {
-        navigate("/employee/floor-plan");
-      } else {
-        navigate("/dashboard");
+        if (role === "ADMIN" || role === "ROLE_ADMIN") {
+          navigate("/admin/dashboard");
+        } else if (role === "EMPLOYEE" || role === "ROLE_EMPLOYEE") {
+          navigate("/employee/floor-plan");
+        } else {
+          navigate("/dashboard");
+        }
+      },
+      (error) => {
+        const resMessage =
+          (error.response &&
+            error.response.data &&
+            (error.response.data.message || error.response.data.error)) ||
+          error.message ||
+          "Invalid email or password. Please verify your credentials.";
+        setError(resMessage);
+        setLoading(false);
       }
-    } catch (err) {
-      const resMessage =
-        (err.response && err.response.data && err.response.data.message) ||
-        "Login failed. Invalid credentials.";
-      setError(resMessage);
-      setLoading(false);
-    }
+    );
   };
 
   return (
-    <div
-      className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(to right,      #eff6ff  0%, #eff6ff 50%, #0f1d45 50%, #0f1d45 100%)",
-      }}
-    >
-      <div className="absolute top-[-80px] left-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40"></div>
-      <div className="absolute top-[15%] left-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30"></div>
-      <div className="absolute bottom-[-60px] right-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30"></div>
-      <div className="absolute bottom-[10%] left-[15%] w-[80px] h-[80px] rounded-full bg-blue-300/20"></div>
-      <div className="absolute top-[40%] right-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0b0f19] text-slate-100 font-sans">
+      {/* Top Navigation - Natural link, no pill frame */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition"
+        >
+          <ArrowLeftIcon className="w-3.5 h-3.5" />
+          <span>Back to Home</span>
+        </Link>
+      </div>
 
-      <div className="relative z-10 flex w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-4xl bg-[#0f1422] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex my-8">
 
-        <div className="relative w-1/2 min-h-[600px] hidden md:block">
+        {/* Left Side: Editorial Banner */}
+        <div className="relative w-1/2 min-h-[540px] hidden md:block overflow-hidden">
           <img
             src={backgroundImg}
-            alt="Book Fair Background"
-            className="absolute inset-0 w-full h-full object-cover"
+            alt="CIBF Exhibition"
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
           />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at center, rgba(29,78,216,0.45) 40%, rgba(30,64,175,0.15) 70%, transparent 100%)",
-            }}
-          ></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1422] via-[#0f1422]/80 to-transparent" />
 
-          <div className="relative z-10 flex flex-col justify-center h-full p-10 text-white">
-            <h2 className="text-4xl font-extrabold leading-tight mb-12 drop-shadow-lg">
-              Welcome to the
-              <br />
-              Book Fair 2026
-            </h2>
-            <p className="text-base font-bold text-blue-100 max-w-xs leading-relaxed">
-              One platform for publishers! <br />Book stalls, manage payments, and secure your presence at CIBF 2026.
+          <div className="relative z-10 flex flex-col justify-between h-full p-8 text-white">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+                <BookOpenIcon className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-xs tracking-wider uppercase text-slate-300">
+                CIBF 2026
+              </span>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-2">Exhibitor & Staff Access</p>
+              <h2 className="text-2xl font-bold leading-tight mb-3 text-white">
+                Empowering Publishers & Readers
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Sign in to manage stall reservations, download digital QR gate tickets, and review floor assignments.
+              </p>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              September 18 – 27, 2026 • BMICH Colombo
             </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-center w-full md:w-1/2 p-8">
+        {/* Right Side: Sign-In Form */}
+        <div className="flex items-center justify-center w-full md:w-1/2 p-8 sm:p-10">
           <div className="w-full max-w-sm space-y-6">
 
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-extrabold text-blue-800 tracking-tight">
-                Colombo International
-                <br />
-                <span className="text-blue-600">Book Fair 2026</span>
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                Sign In
               </h1>
-              <div className="mt-4 w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
+              <p className="text-xs text-slate-400 mt-1">
+                Enter your registered credentials to access your account.
+              </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
-
               <div>
-                <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  Email Address
+                </label>
                 <input
                   type="email"
-                  placeholder="name@example.com"
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="publisher@domain.com"
+                  className="w-full px-3.5 py-2.5 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
@@ -106,28 +124,33 @@ const Login = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-medium text-slate-300">
+                    Password
+                  </label>
+                </div>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
-                    className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                    className="w-full px-3.5 py-2.5 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition pr-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3 mt-1 text-gray-500 hover:text-blue-600 focus:outline-none"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400 hover:text-slate-200"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label="Toggle password visibility"
                   >
-                    {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}
+                    {showPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
                   </button>
                 </div>
               </div>
 
               {error && (
-                <div className="p-3 text-sm text-red-700 bg-red-100 rounded border border-red-200">
+                <div className="p-3 text-xs text-rose-300 bg-rose-950/60 rounded-lg border border-rose-800/60">
                   {error}
                 </div>
               )}
@@ -135,28 +158,17 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+                className="w-full py-2.5 text-white bg-indigo-600 hover:bg-indigo-500 font-medium rounded-lg text-sm transition shadow-sm disabled:opacity-60"
               >
-                {loading ? "Signing in..." : "Login"}
+                {loading ? "Signing In..." : "Sign In"}
               </button>
             </form>
 
-            {/* Divider */}
-            <div className="relative flex items-center justify-center w-full mt-6 border-t border-gray-200">
-              <span className="absolute px-3 bg-white text-gray-500 text-sm">
-                OR
-              </span>
-            </div>
-
-            {/* Signup Link Section */}
-            <div className="text-center pt-4">
-              <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
-                <Link
-                  to="/register"
-                  className="font-medium text-blue-600 hover:text-blue-500 hover:underline"
-                >
-                  Create a new account
+            <div className="pt-4 border-t border-slate-800 text-center">
+              <p className="text-xs text-slate-400">
+                New to CIBF?{" "}
+                <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-semibold ml-1">
+                  Create Publisher Account
                 </Link>
               </p>
             </div>

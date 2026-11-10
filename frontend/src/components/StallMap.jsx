@@ -5,19 +5,15 @@ import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
 import ConfirmationModal from "./common/ConfirmationModal";
 
-// Coordinate Maps for Visual Layout
 const hallLayouts = {
-  "Hall A": [ // 20 Stalls (Octagon)
-    { top: "6%", left: "36%" }, // A-01 (Top)
-    { top: "6%", left: "50%" }, { top: "6%", left: "64%" }, { top: "15%", left: "75%" }, { top: "35%", left: "93%" }, // Right Side
-    { top: "50%", left: "93%" }, // A-06
-    { top: "65%", left: "93%" }, { top: "80%", left: "77%" },//7,8
-    { top: "80%", left: "23%" }, { top: "65%", left: "8%" }, // 9,10
-    { top: "50%", left: "8%" }, { top: "35%", left: "8%" }, //11,12
-
-
-    // Center Block
-    { top: "35%", left: "36%" }, { top: "35%", left: "64%" },//13,14
+  "Hall A": [
+    { top: "6%", left: "36%" },
+    { top: "6%", left: "50%" }, { top: "6%", left: "64%" }, { top: "15%", left: "75%" }, { top: "35%", left: "93%" },
+    { top: "50%", left: "93%" },
+    { top: "65%", left: "93%" }, { top: "80%", left: "77%" },
+    { top: "80%", left: "23%" }, { top: "65%", left: "8%" },
+    { top: "50%", left: "8%" }, { top: "35%", left: "8%" },
+    { top: "35%", left: "36%" }, { top: "35%", left: "64%" },
     { top: "63%", left: "64%" }, { top: "63%", left: "36%" }, { top: "35%", left: "50%" },
     { top: "49%", left: "50%" }, { top: "49%", left: "64%" }, { top: "49%", left: "36%" }
   ],
@@ -96,7 +92,6 @@ const StallMap = () => {
   });
   const [reservationCount, setReservationCount] = useState(0);
 
-  // Alert Modal State
   const [alertConfig, setAlertConfig] = useState({
     isOpen: false,
     title: "",
@@ -110,20 +105,14 @@ const StallMap = () => {
   useEffect(() => {
     const fetchCount = () => {
       StallService.getReservationCount()
-        .then((res) => {
-          // console.log("Reservation count loaded:", res.data);
-          setReservationCount(res.data);
-        })
+        .then((res) => setReservationCount(res.data))
         .catch((err) => console.error("Error fetching reservation count:", err));
     };
 
     fetchCount();
-    const intervalId = setInterval(fetchCount, 3000); // Poll count as well
-
+    const intervalId = setInterval(fetchCount, 3000);
     return () => clearInterval(intervalId);
   }, []);
-
-
 
   useEffect(() => {
     const syncStates = () => {
@@ -145,50 +134,30 @@ const StallMap = () => {
     const fetchStalls = () => {
       StallService.getAllStalls()
         .then((res) => {
-          // console.log("Stalls loaded:", res.data); // Debug log (Optional: remove to reduce noise)
           if (Array.isArray(res.data)) {
             setStalls(res.data);
-
-            // Sync Local Storage with Backend
             const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
             const validatedPaid = localPaid.filter((paidItem) => {
               const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
               const stall = res.data.find((s) => s.id === paidId);
-              if (stall && !stall.reserved) {
-                return false;
-              }
+              if (stall && !stall.reserved) return false;
               return true;
             });
 
             if (validatedPaid.length !== localPaid.length) {
-              console.warn("Found stale reservations in local storage. Cleaning up...", {
-                before: localPaid,
-                after: validatedPaid
-              });
               localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
               setPaidReservations(validatedPaid);
               window.dispatchEvent(new Event("paidReservationsUpdated"));
             }
-
           } else {
-            console.error("API returned non-array for stalls:", res.data);
             setStalls([]);
           }
         })
-        .catch((err) => {
-          console.error("Error loading stalls:", err);
-          // Only clear stalls if it's a critical failure, otherwise keep old data
-          // setStalls([]); 
-        });
+        .catch((err) => console.error("Error loading stalls:", err));
     };
 
-    // Initial fetch
     fetchStalls();
-
-    // Set up polling every 3 seconds
     const intervalId = setInterval(fetchStalls, 3000);
-
-    // Cleanup on unmount
     return () => clearInterval(intervalId);
   }, []);
 
@@ -210,7 +179,7 @@ const StallMap = () => {
 
   const toggleSelection = (stall) => {
     if (stall.disabled) {
-      showAlert("Stall Unavailable", "This stall has been disabled by the administrator and cannot be booked.");
+      showAlert("Stall Unavailable", "This stall has been disabled by the administrator.");
       return;
     }
     const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
@@ -231,16 +200,16 @@ const StallMap = () => {
   };
 
   const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled, isDisabled) => {
-    if (isDisabled) return "bg-slate-200 border-slate-300 text-slate-400 cursor-not-allowed opacity-60";
+    if (isDisabled) return "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed opacity-40";
     const isActuallyReserved = isReserved && !isCancelled;
-    if (isActuallyReserved || isPaid) return "bg-gray-300 border-gray-400 text-gray-500 cursor-not-allowed";
-    if (isSelected) return "bg-blue-600 border-blue-800 text-white shadow-xl z-50 scale-110";
+    if (isActuallyReserved || isPaid) return "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed";
+    if (isSelected) return "bg-indigo-600 border-indigo-400 text-white z-50 scale-105 shadow-md";
 
     switch (size) {
-      case "SMALL": return "bg-emerald-100 border-emerald-400 text-emerald-800 hover:bg-emerald-200";
-      case "MEDIUM": return "bg-cyan-100 border-cyan-400 text-cyan-800 hover:bg-cyan-200";
-      case "LARGE": return "bg-violet-100 border-violet-400 text-violet-800 hover:bg-violet-200";
-      default: return "bg-white border-gray-300";
+      case "SMALL": return "bg-emerald-950/80 border-emerald-500/80 text-emerald-300 hover:border-emerald-400";
+      case "MEDIUM": return "bg-cyan-950/80 border-cyan-500/80 text-cyan-300 hover:border-cyan-400";
+      case "LARGE": return "bg-violet-950/80 border-violet-500/80 text-violet-300 hover:border-violet-400";
+      default: return "bg-slate-900 border-slate-800 text-slate-300";
     }
   };
 
@@ -252,7 +221,6 @@ const StallMap = () => {
 
   const currentLayout = hallLayouts[activeHall];
 
-  // --- CONFIRM HANDLER ---
   const handleConfirmReservation = () => {
     if (selectedStalls.length + reservationCount > 3) {
       showAlert(
@@ -272,10 +240,15 @@ const StallMap = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen font-sans">
-      <h1 className="text-3xl font-extrabold text-center text-blue-900 mb-2 uppercase">
-        Book Fair Floor Plan
-      </h1>
+    <div className="p-4 md:p-6 bg-[#0f1422] min-h-[600px] font-sans text-slate-100">
+      <div className="text-center mb-6">
+        <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+          BMICH Exhibition Floor Plan
+        </h1>
+        <p className="text-slate-400 text-xs mt-1">
+          Select an exhibition wing to view stall allocations and real-time availability
+        </p>
+      </div>
 
       {view === "map" && (
         <HallMap getHallStatus={getHallStatus} onHallClick={handleHallClick} />
@@ -284,33 +257,34 @@ const StallMap = () => {
       {view === "hall" && (
         <div className="max-w-6xl mx-auto">
           {/* Header Bar */}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">{activeHall} Booking</h2>
-              <div className="flex gap-3 text-xs mt-1">
-                <span className="flex items-center gap-1"><div className="w-3 h-3 bg-emerald-100 border border-emerald-400"></div> Small</span>
-                <span className="flex items-center gap-1"><div className="w-3 h-3 bg-cyan-100 border border-cyan-400"></div> Medium</span>
-                <span className="flex items-center gap-1"><div className="w-3 h-3 bg-violet-100 border border-violet-400"></div> Large</span>
+              <h2 className="text-xl font-bold text-white">{activeHall}</h2>
+              <div className="flex gap-4 text-xs mt-1.5 text-slate-400">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span> Small (Rs 5k)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-cyan-500 rounded-sm"></span> Medium (Rs 7.5k)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-violet-500 rounded-sm"></span> Large (Rs 10k)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-slate-700 rounded-sm"></span> Reserved</span>
               </div>
             </div>
-            <button onClick={handleBackToMap} className="bg-blue-600 text-white font-bold rounded-full border px-4 py-2 rounded shadow-sm hover:bg-blue-800">
-              Back to Map
+            <button onClick={handleBackToMap} className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-medium px-4 py-2 rounded-lg text-xs transition">
+              ← Back to Wing Overview
             </button>
           </div>
 
           <HallShapeWrapper hallName={activeHall}>
             {activeFloorStalls.length === 0 ? (
               <div className="flex items-center justify-center h-full">
-                <p className="text-gray-400">No stalls found.</p>
+                <p className="text-slate-500 text-xs">No stalls configured for this hall.</p>
               </div>
             ) : (
-              <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-10'}`}>
+              <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-8'}`}>
 
                 {/* Render Doors */}
                 {hallDoors[activeHall]?.map((door, idx) => (
                   <div
                     key={`door-${idx}`}
-                    className="absolute px-2 py-1 bg-green-600 text-white text-[10px] font-bold rounded shadow-md border border-white z-40 hover:scale-110 transition-transform cursor-default"
+                    className="absolute px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-medium rounded shadow-sm z-30"
                     style={{
                       top: door.top,
                       left: door.left,
@@ -345,29 +319,27 @@ const StallMap = () => {
                           : {}
                       }
                       className={`
-                        relative group rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all duration-300 border-2 shadow-sm
-                        ${colorClass}
+                        relative group rounded-lg flex flex-col items-center justify-center cursor-pointer transition border ${colorClass}
                       `}
                     >
-                      <span className="font-bold text-sm md:text-lg leading-none">
+                      <span className="font-bold text-xs md:text-sm leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
                       {!stall.reserved && !isPaid && !stall.disabled && (
-                        <span className="text-[10px] font-mono font-medium mt-1">
+                        <span className="text-[9px] font-mono mt-0.5 opacity-90">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {stall.reserved && isCancelled && !stall.disabled && (
-                        <span className="text-[10px] font-mono font-medium mt-1">
-                          {stall.price / 1000}k
-                        </span>
+                      {(stall.reserved && !isCancelled || isPaid) && !stall.disabled && (
+                        <span className="text-[8px] font-semibold mt-0.5 text-slate-500">SOLD</span>
                       )}
-                      {(stall.reserved && !isCancelled || isPaid) && !stall.disabled && <span className="text-[8px] font-bold mt-1">SOLD</span>}
-                      {stall.disabled && <span className="text-[7px] font-bold mt-1 text-slate-500">DISABLED</span>}
+                      {stall.disabled && (
+                        <span className="text-[7px] font-semibold mt-0.5 text-slate-500">OFF</span>
+                      )}
 
                       {/* Tooltip */}
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center bg-gray-200 text-black text-[8px] sm:text-[10px] font-medium rounded py-0.5 px-1 whitespace-nowrap z-[100] shadow-sm">
-                        {stall.size === "SMALL" ? "Small - 3m * 3m" : stall.size === "MEDIUM" ? "Medium- 5m* 5m" : "Large -7m * 7m"}
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 hidden group-hover:flex items-center bg-slate-900 border border-slate-700 text-slate-200 text-[10px] font-medium rounded py-0.5 px-1.5 whitespace-nowrap z-50 shadow-md">
+                        {stall.size === "SMALL" ? "Small (10x10)" : stall.size === "MEDIUM" ? "Medium (15x15)" : "Large (20x20)"}
                       </div>
                     </div>
                   );
@@ -377,13 +349,13 @@ const StallMap = () => {
           </HallShapeWrapper>
 
           {selectedStalls.length > 0 && (
-            <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white px-8 py-3 rounded-full shadow-xl border flex gap-4 items-center z-50">
-              <span className="font-bold text-blue-900">{selectedStalls.length} Selected</span>
+            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#0f1422] px-6 py-3 rounded-xl shadow-2xl border border-slate-700 flex gap-4 items-center z-50">
+              <span className="font-semibold text-white text-xs">{selectedStalls.length} Selected Stalls</span>
               <button
                 onClick={handleConfirmReservation}
-                className="bg-blue-600 text-white px-6 py-2 rounded-full font-bold hover:bg-blue-700 shadow-lg transform hover:scale-105 transition-all"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium text-xs transition shadow-sm"
               >
-                Confirm
+                Continue to Booking
               </button>
             </div>
           )}

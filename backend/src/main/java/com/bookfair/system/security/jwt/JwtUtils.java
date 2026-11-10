@@ -4,6 +4,7 @@ import com.bookfair.system.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +24,11 @@ public class JwtUtils {
     @Value("${app.jwtExpirationMs}")
     private int jwtExpirationMs;
 
+    @PostConstruct
+    void validateJwtSecret() {
+        key();
+    }
+
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
@@ -36,7 +42,20 @@ public class JwtUtils {
     }
 
     private Key key() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        final byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(jwtSecret);
+            if (keyBytes.length >= 32) {
+                return Keys.hmacShaKeyFor(keyBytes);
+            }
+        } catch (RuntimeException ignored) {
+            // Secret was not valid Base64
+        }
+        byte[] rawBytes = jwtSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        if (rawBytes.length >= 32) {
+            return Keys.hmacShaKeyFor(rawBytes);
+        }
+        throw new IllegalStateException("JWT_SECRET must provide at least 32 bytes (256 bits) of key material.");
     }
 
     public String getUserNameFromJwtToken(String token) {

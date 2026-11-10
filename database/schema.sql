@@ -1,4 +1,4 @@
-# architecture_project
+-- architecture_project
 
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
@@ -26,6 +26,8 @@ CREATE TABLE stalls (
                     floor_id INT NOT NULL REFERENCES floors(id) ON DELETE RESTRICT,
                     stall_code VARCHAR(10) NOT NULL,
                     stall_type_id INT NOT NULL REFERENCES stall_types(id) ON DELETE RESTRICT,
+                    reserved BOOLEAN DEFAULT FALSE,
+                    disabled BOOLEAN DEFAULT FALSE,
                     UNIQUE (floor_id, stall_code)
 );
 CREATE TABLE genres (
@@ -46,23 +48,27 @@ CREATE TABLE reservations (
 );
 
 CREATE TABLE reservation_stalls (
+                            id SERIAL PRIMARY KEY,
                             reservation_id INT NOT NULL REFERENCES reservations(id) ON DELETE RESTRICT,
                             stall_id INT NOT NULL REFERENCES stalls(id) ON DELETE RESTRICT,
-                            PRIMARY KEY (reservation_id, stall_id)
+                            UNIQUE (reservation_id, stall_id)
 );
 CREATE TABLE payments (
                     id SERIAL PRIMARY KEY,
-                    reservation_id INT NOT NULL REFERENCES reservations(id) ON DELETE RESTRICT,
+                    reservation_id INT NOT NULL UNIQUE REFERENCES reservations(id) ON DELETE RESTRICT,
                     amount NUMERIC(10,2) NOT NULL,
                     payment_status VARCHAR(20) NOT NULL CHECK (payment_status IN ('PENDING', 'PAID', 'FAILED')),
                     payment_method VARCHAR(50),
                     payment_date TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE admin_actions (
+
+CREATE TABLE duties (
                         id SERIAL PRIMARY KEY,
-                        admin_id INT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
-                        action VARCHAR(255) NOT NULL,
-                        target_user_id INT REFERENCES users(id) ON DELETE SET NULL,
-                        target_stall_id INT REFERENCES stalls(id) ON DELETE SET NULL,
-                        created_at TIMESTAMP DEFAULT NOW()
+                        description VARCHAR(255) NOT NULL,
+                        start_time TIMESTAMP NOT NULL,
+                        end_time TIMESTAMP NOT NULL,
+                        status VARCHAR(20) NOT NULL CHECK (status IN ('ASSIGNED', 'COMPLETED', 'CANCELLED')),
+                        assigned_to_id INT REFERENCES users(id) ON DELETE SET NULL,
+                        created_at TIMESTAMP DEFAULT NOW(),
+                        updated_at TIMESTAMP DEFAULT NOW()
 );

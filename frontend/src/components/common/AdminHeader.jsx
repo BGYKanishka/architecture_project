@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import {
-    UserCircleIcon,
     Bars3Icon,
     ArrowLeftOnRectangleIcon,
-    BellIcon,
     XMarkIcon,
     ShieldCheckIcon,
     HomeIcon,
@@ -29,161 +27,139 @@ const AdminHeader = () => {
         navigate("/login");
     };
 
-    return (
-        <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 px-4 sm:px-8 py-3">
-            <div className="flex justify-between items-center max-w-[1600px] mx-auto">
+    const navItems = [
+        { to: "/admin/dashboard", label: "Dashboard", icon: <HomeIcon className="w-4 h-4" /> },
+        { to: "/admin/stalls", label: "Stalls", icon: <BuildingStorefrontIcon className="w-4 h-4" /> },
+        { to: "/admin/reservations", label: "Reservations", icon: <ClipboardDocumentListIcon className="w-4 h-4" /> },
+        { to: "/admin/users", label: "Users", icon: <UsersIcon className="w-4 h-4" /> },
+    ];
 
-                {/* LEFT: Menu Button & Logo */}
+    return (
+        <header className="sticky top-0 z-50 bg-[#0b0f19] border-b border-slate-800 text-slate-100">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+
+                {/* LEFT: Logo & Mobile Toggle */}
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="p-2 hover:bg-slate-100 rounded-lg transition text-slate-600"
+                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-md transition md:hidden"
+                        aria-label="Toggle navigation"
                     >
                         {isMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
                     </button>
 
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/admin/dashboard")}>
-                        <div className="bg-blue-800 p-1.5 rounded-lg text-white">
-                            <ShieldCheckIcon className="w-6 h-6" />
+                    <Link to="/admin/dashboard" className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+                            <ShieldCheckIcon className="w-5 h-5" />
                         </div>
-                        <h1 className="text-xl font-black text-slate-800 hidden sm:block tracking-tight">
-                            CIBF 2026 <span className="text-blue-800">Admin Portal</span>
-                        </h1>
-                    </div>
+                        <div>
+                            <span className="text-base font-bold text-white tracking-tight leading-none block">
+                                CIBF 2026
+                            </span>
+                            <span className="text-[11px] text-slate-400 block -mt-0.5">
+                                Admin Portal
+                            </span>
+                        </div>
+                    </Link>
                 </div>
 
+                {/* MIDDLE: Desktop Navigation */}
+                <nav className="hidden md:flex items-center gap-6">
+                    {navItems.map((item) => {
+                        const active = location.pathname === item.to;
+                        return (
+                            <Link
+                                key={item.to}
+                                to={item.to}
+                                className={`text-sm font-medium transition-colors py-1 relative flex items-center gap-1.5 ${
+                                    active
+                                        ? "text-white font-semibold"
+                                        : "text-slate-400 hover:text-slate-200"
+                                }`}
+                            >
+                                {item.icon}
+                                <span>{item.label}</span>
+                                {active && (
+                                    <span className="absolute -bottom-[21px] left-0 right-0 h-0.5 bg-indigo-500 rounded-full" />
+                                )}
+                            </Link>
+                        );
+                    })}
+                </nav>
 
-                {/* RIGHT: Actions */}
-                <div className="flex items-center gap-2 sm:gap-4">
+                {/* RIGHT: User Profile */}
+                <div className="relative">
+                    <button
+                        onClick={() => setIsProfileOpen(!isProfileOpen)}
+                        className="flex items-center gap-2.5 p-1 text-left rounded-lg hover:bg-slate-800/60 transition"
+                    >
+                        <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center text-xs font-bold">
+                            {username?.charAt(0).toUpperCase() || "A"}
+                        </div>
+                        <div className="hidden sm:block text-left">
+                            <span className="block text-xs font-medium text-slate-200 truncate max-w-[120px]">{username}</span>
+                            <span className="block text-[10px] text-slate-400 uppercase tracking-wider">{role}</span>
+                        </div>
+                    </button>
 
-                    {/* Quick Nav Icons */}
-                    <div className="hidden md:flex items-center gap-1">
-                        <NavIconBtn
-                            icon={<HomeIcon className="w-5 h-5" />}
-                            label="Dashboard"
-                            onClick={() => navigate("/admin/dashboard")}
-                            active={location.pathname === "/admin/dashboard"}
-                        />
-                        <NavIconBtn
-                            icon={<BuildingStorefrontIcon className="w-5 h-5" />}
-                            label="Stalls"
-                            onClick={() => navigate("/admin/stalls")}
-                            active={location.pathname === "/admin/stalls"}
-                        />
-                        <NavIconBtn
-                            icon={<ClipboardDocumentListIcon className="w-5 h-5" />}
-                            label="Reservations"
-                            onClick={() => navigate("/admin/reservations")}
-                            active={location.pathname === "/admin/reservations"}
-                        />
-                        <NavIconBtn
-                            icon={<UsersIcon className="w-5 h-5" />}
-                            label="Users"
-                            onClick={() => navigate("/admin/users")}
-                            active={location.pathname === "/admin/users"}
-                        />
-                    </div>
-
-
-                    <div className="relative">
-                        <button
-                            onClick={() => setIsProfileOpen(!isProfileOpen)}
-                            className="flex items-center gap-2 p-1 pr-3 hover:bg-slate-100 rounded-full transition border border-slate-200"
-                        >
-                            <div className="w-9 h-9 bg-blue-800 rounded-full flex items-center justify-center text-white font-bold">
-                                {username?.charAt(0).toUpperCase() || "A"}
-                            </div>
-                            <div className="hidden sm:block text-left">
-                                <span className="block text-xs font-bold text-slate-800 leading-tight">{username}</span>
-                                <span className="block text-[10px] text-slate-400 uppercase tracking-wide">{role}</span>
-                            </div>
-                        </button>
-
-                        {isProfileOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in duration-150">
-                                <div className="px-4 py-2 border-b border-slate-100">
-                                    <p className="text-xs font-bold text-slate-800">{username}</p>
-                                    <p className="text-[10px] text-slate-400 uppercase tracking-wide">{role}</p>
+                    {isProfileOpen && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
+                            <div className="absolute right-0 mt-2 w-56 bg-[#0f1422] border border-slate-800 rounded-xl shadow-2xl py-2 z-50 text-slate-200">
+                                <div className="px-4 py-2.5 border-b border-slate-800">
+                                    <p className="text-[11px] text-slate-400">Administrator</p>
+                                    <p className="text-xs font-bold text-white truncate">{username}</p>
                                 </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-bold"
-                                >
-                                    <ArrowLeftOnRectangleIcon className="w-5 h-5" /> Logout
-                                </button>
+                                <div className="pt-1 mt-1">
+                                    <button
+                                        onClick={handleLogout}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 font-medium transition"
+                                    >
+                                        <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+                                        <span>Sign Out</span>
+                                    </button>
+                                </div>
                             </div>
-                        )}
-                    </div>
+                        </>
+                    )}
                 </div>
             </div>
 
-            {/* MENU DROPDOWN */}
+            {/* MOBILE MENU */}
             {isMenuOpen && (
-                <>
-                    {/* Overlay to close menu when clicking outside */}
-                    <div className="fixed inset-0 bg-black/10 z-40" onClick={() => setIsMenuOpen(false)}></div>
+                <div className="md:hidden border-t border-slate-800 bg-[#0b0f19] px-4 pt-3 pb-4 space-y-1">
+                    {navItems.map((item) => {
+                        const active = location.pathname === item.to;
+                        return (
+                            <Link
+                                key={item.to}
+                                to={item.to}
+                                onClick={() => setIsMenuOpen(false)}
+                                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                    active
+                                        ? "bg-slate-800 text-white font-semibold"
+                                        : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                                }`}
+                            >
+                                {item.icon}
+                                <span>{item.label}</span>
+                            </Link>
+                        );
+                    })}
 
-                    <div className="absolute top-full left-4 sm:left-8 mt-2 w-64 bg-white border border-slate-200 shadow-2xl rounded-2xl py-4 px-2 z-50 animate-in slide-in-from-top-2 duration-200">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-2">Admin Navigation</p>
-                        <MenuLink
-                            icon={<HomeIcon className="w-5 h-5" />}
-                            label="Dashboard"
-                            onClick={() => { navigate("/admin/dashboard"); setIsMenuOpen(false); }}
-                            active={location.pathname === "/admin/dashboard"}
-                        />
-                        <MenuLink
-                            icon={<BuildingStorefrontIcon className="w-5 h-5" />}
-                            label="Stall Management"
-                            onClick={() => { navigate("/admin/stalls"); setIsMenuOpen(false); }}
-                            active={location.pathname === "/admin/stalls"}
-                        />
-                        <MenuLink
-                            icon={<ClipboardDocumentListIcon className="w-5 h-5" />}
-                            label="Reservations"
-                            onClick={() => { navigate("/admin/reservations"); setIsMenuOpen(false); }}
-                            active={location.pathname === "/admin/reservations"}
-                        />
-                        <MenuLink
-                            icon={<UsersIcon className="w-5 h-5" />}
-                            label="User Management"
-                            onClick={() => { navigate("/admin/users"); setIsMenuOpen(false); }}
-                            active={location.pathname === "/admin/users"}
-                        />
+                    <div className="pt-2 mt-2 border-t border-slate-800">
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition"
+                        >
+                            <ArrowLeftOnRectangleIcon className="w-4 h-4" />
+                            <span>Sign Out</span>
+                        </button>
                     </div>
-                </>
+                </div>
             )}
-        </nav>
+        </header>
     );
 };
-
-// Helper component for menu items
-const MenuLink = ({ icon, label, onClick, active = false }) => (
-    <button
-        onClick={onClick}
-        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition ${active
-            ? "bg-blue-50 text-blue-600"
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-            }`}
-    >
-        {icon}
-        {label}
-    </button>
-);
-
-// Icon nav button — shows icon + small label, highlights active route
-const NavIconBtn = ({ icon, label, onClick, active = false }) => (
-    <button
-        onClick={onClick}
-        title={label}
-        className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl text-xs font-semibold transition
-            ${active
-                ? "bg-blue-50 text-blue-600"
-                : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-            }`}
-    >
-        {icon}
-        <span className="text-[10px]">{label}</span>
-    </button>
-);
 
 export default AdminHeader;

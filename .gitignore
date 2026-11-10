@@ -57,6 +57,7 @@ lerna-debug.log*
 *.local
 .env
 .env.*
+!.env.example
 
 # =========================
 # Optional

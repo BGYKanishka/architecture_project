@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import { useEffect, useState } from "react";
 import {
@@ -7,8 +7,9 @@ import {
   TagIcon,
   UserCircleIcon,
   ArrowRightIcon,
-  BookOpenIcon,
-  CalendarDaysIcon
+  CalendarDaysIcon,
+  ClockIcon,
+  MapPinIcon,
 } from "@heroicons/react/24/outline";
 
 const Dashboard = () => {
@@ -22,107 +23,189 @@ const Dashboard = () => {
   }, [user, navigate]);
 
   if (!user) return (
-    <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+    <div className="flex h-screen w-screen items-center justify-center bg-[#0b0f19]">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="bg-blue-800 text-white pb-24 pt-12 px-4 sm:px-8">
-        <div className="max-w-[1200px] mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
-            Welcome back !
-          </h1>
-          <p className="text-blue-200 text-lg max-w-2xl">
-            Get ready for the Colombo International Book Fair 2026. Manage your stall reservations, explore the floor plan, and customize your experience.
-          </p>
+    <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans pb-16">
+      {/* ── TOP HEADER BAR ── */}
+      <div className="border-b border-slate-800/80 py-10 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">
+              Publisher Control Center
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+              Welcome back, {user.name || user.email?.split("@")[0]}
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">
+              Manage your stall bookings, view digital entry passes, and update your publisher profile.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              to="/map"
+              className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-2.5 rounded-lg text-sm transition shadow-sm"
+            >
+              <MapIcon className="w-4 h-4" />
+              <span>Book Stalls</span>
+            </Link>
+            <Link
+              to="/reservations"
+              className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-4 py-2.5 rounded-lg text-sm transition"
+            >
+              <TicketIcon className="w-4 h-4" />
+              <span>My Passes</span>
+            </Link>
+          </div>
         </div>
       </div>
 
-      <main className="px-4 sm:px-8 -mt-16 pb-12">
-        <div className="max-w-[1200px] mx-auto">
+      {/* ── MAIN CONTENT ── */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-            {/* Quick Action: Map */}
-            <div
-              onClick={() => navigate("/map")}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 cursor-pointer hover:shadow-md hover:border-blue-200 transition group flex flex-col justify-between"
-            >
-              <div>
-                <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <MapIcon className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Explore Map</h3>
-                <p className="text-slate-500 mb-6">
-                  View the interactive floor plan and browse available stalls across all halls.
-                </p>
+        {/* 4 Action Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+
+          {/* Action 1: Map */}
+          <div
+            onClick={() => navigate("/map")}
+            className="bg-[#0f1422] rounded-xl border border-slate-800 p-5 cursor-pointer hover:border-slate-700 transition flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 bg-slate-900 border border-slate-800 text-indigo-400 rounded-lg flex items-center justify-center mb-4">
+                <MapIcon className="w-5 h-5" />
               </div>
-              <div className="flex items-center text-blue-600 font-semibold group-hover:translate-x-1 transition-transform">
-                <span>View Floor Plan</span>
-                <ArrowRightIcon className="w-4 h-4 ml-2" />
-              </div>
+              <h3 className="text-base font-bold text-white mb-1">Floor Plan</h3>
+              <p className="text-slate-400 text-xs leading-relaxed mb-4">
+                Explore 8 thematic halls, inspect stall dimensions, and reserve slots in real time.
+              </p>
             </div>
-
-            {/* Quick Action: Reservations */}
-            <div
-              onClick={() => navigate("/reservations")}
-              className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 cursor-pointer hover:shadow-md hover:teal-200 transition group flex flex-col justify-between"
-            >
-              <div>
-                <div className="w-12 h-12 bg-teal-50 text-teal-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                  <TicketIcon className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">My Reservations</h3>
-                <p className="text-slate-500 mb-6">
-                  Manage your booked stalls, make payments, and download confirmation tickets.
-                </p>
-              </div>
-              <div className="flex items-center text-teal-600 font-semibold group-hover:translate-x-1 transition-transform">
-                <span>View Bookings</span>
-                <ArrowRightIcon className="w-4 h-4 ml-2" />
-              </div>
+            <div className="flex items-center text-indigo-400 font-medium text-xs">
+              <span>View venue map</span>
+              <ArrowRightIcon className="w-3 h-3 ml-1" />
             </div>
-
-
           </div>
 
-          {/* Info Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 flex flex-col md:flex-row items-center gap-8">
-            <div className="md:w-1/3 flex justify-center">
-              <div className="w-40 h-40 bg-blue-50 rounded-full flex items-center justify-center text-blue-200">
-                <BookOpenIcon className="w-20 h-20 text-blue-800" />
+          {/* Action 2: Reservations */}
+          <div
+            onClick={() => navigate("/reservations")}
+            className="bg-[#0f1422] rounded-xl border border-slate-800 p-5 cursor-pointer hover:border-slate-700 transition flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 bg-slate-900 border border-slate-800 text-indigo-400 rounded-lg flex items-center justify-center mb-4">
+                <TicketIcon className="w-5 h-5" />
               </div>
-            </div>
-            <div className="md:w-2/3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-bold mb-4">
-                <CalendarDaysIcon className="w-4 h-4" />
-                <span>Upcoming Event</span>
-              </div>
-              <h2 className="text-2xl font-black text-slate-800 mb-3">
-                CIBF 2026 Registration is Open!
-              </h2>
-              <p className="text-slate-600 mb-6 text-lg">
-                The grandest book fair is back. Secure your stalls early to get the best spots in the main halls. If you need assistance with bulk bookings, please contact our support team.
+              <h3 className="text-base font-bold text-white mb-1">My Bookings</h3>
+              <p className="text-slate-400 text-xs leading-relaxed mb-4">
+                View confirmed stalls, review payment status, and download digital QR entry tickets.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => navigate("/map")}
-                  className="bg-blue-800 hover:bg-blue-900 text-white px-6 py-3 rounded-xl font-bold transition shadow-sm"
-                >
-                  Book a Stall Now
-                </button>
-                <button
-                  onClick={() => navigate("/help")}
-                  className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-bold transition"
-                >
-                  Help Center
-                </button>
+            </div>
+            <div className="flex items-center text-indigo-400 font-medium text-xs">
+              <span>Inspect passes</span>
+              <ArrowRightIcon className="w-3 h-3 ml-1" />
+            </div>
+          </div>
+
+          {/* Action 3: Genres & Categories */}
+          <div
+            onClick={() => navigate("/genres")}
+            className="bg-[#0f1422] rounded-xl border border-slate-800 p-5 cursor-pointer hover:border-slate-700 transition flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 bg-slate-900 border border-slate-800 text-indigo-400 rounded-lg flex items-center justify-center mb-4">
+                <TagIcon className="w-5 h-5" />
               </div>
+              <h3 className="text-base font-bold text-white mb-1">Book Genres</h3>
+              <p className="text-slate-400 text-xs leading-relaxed mb-4">
+                Select your publication categories (Fiction, Academic, Sci-Fi) to aid reader discovery.
+              </p>
+            </div>
+            <div className="flex items-center text-indigo-400 font-medium text-xs">
+              <span>Select categories</span>
+              <ArrowRightIcon className="w-3 h-3 ml-1" />
+            </div>
+          </div>
+
+          {/* Action 4: Profile Settings */}
+          <div
+            onClick={() => navigate("/profile")}
+            className="bg-[#0f1422] rounded-xl border border-slate-800 p-5 cursor-pointer hover:border-slate-700 transition flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-10 h-10 bg-slate-900 border border-slate-800 text-indigo-400 rounded-lg flex items-center justify-center mb-4">
+                <UserCircleIcon className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1">Profile</h3>
+              <p className="text-slate-400 text-xs leading-relaxed mb-4">
+                Update representative contact info, publishing imprint title, and password security.
+              </p>
+            </div>
+            <div className="flex items-center text-indigo-400 font-medium text-xs">
+              <span>Manage account</span>
+              <ArrowRightIcon className="w-3 h-3 ml-1" />
             </div>
           </div>
 
         </div>
+
+        {/* ── EVENT HIGHLIGHT / BANNER CARD ── */}
+        <div className="bg-[#0f1422] rounded-xl border border-slate-800 p-6 sm:p-8 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="lg:w-2/3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1">
+              Event Details
+            </p>
+            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mb-2">
+              Colombo International Book Fair 2026
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
+              Stall check-in and layout setup commences 48 hours prior to the ceremonial inauguration. Please ensure your booking fees are finalized and your digital QR pass is saved on your device.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-slate-800 text-xs">
+              <div className="flex items-center gap-2 text-slate-300">
+                <CalendarDaysIcon className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div>
+                  <div className="font-semibold text-white">Sep 18 – 27, 2026</div>
+                  <div className="text-slate-500">10 Full Days</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-slate-300">
+                <ClockIcon className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div>
+                  <div className="font-semibold text-white">9:00 AM – 7:00 PM</div>
+                  <div className="text-slate-500">Daily Public Hours</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 text-slate-300">
+                <MapPinIcon className="w-4 h-4 text-indigo-400 shrink-0" />
+                <div>
+                  <div className="font-semibold text-white">BMICH Colombo</div>
+                  <div className="text-slate-500">All Exhibition Halls</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="lg:w-1/3 flex flex-col sm:flex-row lg:flex-col gap-2.5 w-full sm:w-auto shrink-0">
+            <button
+              onClick={() => navigate("/map")}
+              className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs sm:text-sm transition text-center shadow-sm"
+            >
+              Reserve Additional Stalls
+            </button>
+            <button
+              onClick={() => navigate("/help")}
+              className="px-5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-medium text-xs sm:text-sm transition text-center"
+            >
+              Exhibitor FAQ & Rules
+            </button>
+          </div>
+        </div>
+
       </main>
     </div>
   );

@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
+import Landing from "./pages/public/Landing";
 import Login from "./pages/public/login";
 import Register from "./pages/public/Register";
 import Dashboard from "./pages/user/Dashboard";
 import Map from "./pages/user/Map";
 import Footer from "./components/common/footer";
-import EmployeePanel from "./pages/employee/EmployeePanel";
 import Header from "./components/common/Header";
 import MainLayout from "./layouts/MainLayout";
 import EmployeeLayout from "./layouts/EmployeeLayout";
@@ -49,12 +49,12 @@ function AppContent() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Routes>
         {/* ── Public / Blank Layout routes ── */}
-        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
         {/* ── Main Layout routes (User/Public with Header & Footer) ── */}
         <Route element={<MainLayout user={user} />}>
+          <Route path="/" element={<Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/reservations" element={<Reservations />} />
@@ -65,7 +65,7 @@ function AppContent() {
           <Route path="/payment-selection" element={<PaymentSelection />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
           <Route path="/help" element={<HelpCenter />} />
-          <Route path="/employee" element={<EmployeePanel />} />
+          <Route path="/employee" element={<Navigate to="/employee/floor-plan" replace />} />
           <Route path="/genres" element={<GenreSelection />} />
         </Route>
 

@@ -11,15 +11,9 @@ import java.util.List;
 @Repository
 public interface ReservationStallRepository extends JpaRepository<ReservationStall, Long> {
 
-       @Query("SELECT COUNT(rs) > 0 FROM ReservationStall rs " +
-                     "WHERE rs.stall.id = :stallId AND rs.reservation.status = 'CONFIRMED'")
-       boolean isStallReserved(@Param("stallId") Long stallId);
-
        @Query("SELECT COUNT(rs) FROM ReservationStall rs " +
                      "WHERE rs.reservation.user.id = :userId AND rs.reservation.status != 'CANCELLED'")
        long countStallsByUserId(@Param("userId") Long userId);
-
-       Optional<ReservationStall> findByStallId(Long stallId);
 
        Optional<ReservationStall> findByStall_IdAndReservation_StatusIn(
                      Long stallId,

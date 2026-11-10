@@ -171,16 +171,16 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-800"></div>
+      <div className="min-h-screen bg-[#080b14] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="bg-red-50 text-red-600 p-4 rounded-lg shadow border border-red-200">
+      <div className="min-h-screen bg-[#080b14] flex items-center justify-center">
+        <div className="bg-rose-950/70 text-rose-300 p-4 rounded-xl shadow border border-rose-800/60">
           {error}
         </div>
       </div>
@@ -188,43 +188,41 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#0b0f19] py-12 px-4 sm:px-6 lg:px-8 font-sans text-slate-100">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100 relative">
+        <div className="bg-[#0f1422] rounded-xl overflow-hidden border border-slate-800">
 
           {/* Header Section */}
-          <div className="bg-blue-900 px-8 py-10 text-center relative overflow-hidden">
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-blue-900 to-black"></div>
-
-            <div className="relative z-10">
-              <div className="w-24 h-24 bg-white rounded-full mx-auto flex items-center justify-center text-blue-900 text-4xl font-black shadow-lg mb-4 ring-4 ring-blue-800/50">
+          <div className="bg-[#0b0f19] border-b border-slate-800 px-8 py-8 text-center">
+            <div>
+              <div className="w-16 h-16 bg-indigo-600 rounded-lg mx-auto flex items-center justify-center text-white text-2xl font-bold mb-3 border border-indigo-500/30">
                 {profile?.name?.charAt(0).toUpperCase() || "U"}
               </div>
-              <h1 className="text-3xl font-bold text-white mb-2">{profile?.name}</h1>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-800/50 text-blue-100 text-sm font-medium border border-blue-700 backdrop-blur-sm">
-                <ShieldCheckIcon className="w-4 h-4" />
+              <h1 className="text-2xl font-bold text-white mb-1.5">{profile?.name}</h1>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium text-indigo-400 bg-indigo-500/10 border border-indigo-500/20">
+                <ShieldCheckIcon className="w-3.5 h-3.5 text-indigo-400" />
                 {profile?.role}
               </span>
             </div>
           </div>
 
           {/* Details Section */}
-          <div className="px-8 py-10">
-            <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-2">
-              <h2 className="text-xl font-bold text-slate-800">
-                Personal Information
+          <div className="px-8 py-8">
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-3">
+              <h2 className="text-base font-bold text-white">
+                Personal & Business Information
               </h2>
               {saveMessage && (
-                <span className={`text - sm font - bold ${saveMessage.includes("Failed") ? "text-red-500" : "text-green-600"} `}>
+                <span className={`text-xs font-medium ${saveMessage.includes("Failed") ? "text-rose-400" : "text-emerald-400"}`}>
                   {saveMessage}
                 </span>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Email is typically read-only */}
               <ProfileItem
-                icon={<EnvelopeIcon className="w-5 h-5" />}
+                icon={<EnvelopeIcon className="w-5 h-5 text-indigo-400" />}
                 label="Email Address"
                 value={profile?.email}
                 readOnly={true}
@@ -232,7 +230,7 @@ const Profile = () => {
 
               {/* Editable Fields */}
               <EditableProfileItem
-                icon={<UserCircleIcon className="w-5 h-5" />}
+                icon={<UserCircleIcon className="w-5 h-5 text-indigo-400" />}
                 label="Full Name"
                 name="name"
                 value={isEditing ? editForm.name : profile?.name}
@@ -241,7 +239,7 @@ const Profile = () => {
               />
 
               <EditableProfileItem
-                icon={<PhoneIcon className="w-5 h-5" />}
+                icon={<PhoneIcon className="w-5 h-5 text-indigo-400" />}
                 label="Contact Number"
                 name="contactNumber"
                 value={isEditing ? editForm.contactNumber : (profile?.contactNumber || "Not provided")}
@@ -250,8 +248,8 @@ const Profile = () => {
               />
 
               <EditableProfileItem
-                icon={<BriefcaseIcon className="w-5 h-5" />}
-                label="Business Name"
+                icon={<BriefcaseIcon className="w-5 h-5 text-indigo-400" />}
+                label="Business / Imprint Name"
                 name="businessName"
                 value={isEditing ? editForm.businessName : (profile?.businessName || "N/A")}
                 isEditing={isEditing}
@@ -260,14 +258,14 @@ const Profile = () => {
               />
             </div>
 
-            <div className="mt-10 flex flex-wrap justify-end gap-3">
+            <div className="mt-8 flex flex-wrap justify-end gap-3 pt-4 border-t border-slate-800">
               {/* Change Password Button */}
               {!isEditing && (
                 <button
                   onClick={() => setIsPasswordModalOpen(true)}
-                  className="mr-auto flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-bold transition"
+                  className="mr-auto flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium transition"
                 >
-                  <KeyIcon className="w-5 h-5" /> Change Password
+                  <KeyIcon className="w-4 h-4 text-indigo-400" /> Change Password
                 </button>
               )}
 
@@ -275,25 +273,25 @@ const Profile = () => {
                 <>
                   <button
                     onClick={handleEditToggle}
-                    className="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-bold transition"
+                    className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-slate-400 hover:text-white rounded-lg text-xs font-medium transition border border-slate-800"
                     disabled={saveLoading}
                   >
-                    <XMarkIcon className="w-5 h-5" /> Cancel
+                    <XMarkIcon className="w-4 h-4" /> Cancel
                   </button>
                   <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition shadow-md shadow-blue-200"
+                    className="flex items-center gap-2 px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 font-medium text-xs transition"
                     disabled={saveLoading}
                   >
-                    {saveLoading ? "Saving..." : <><CheckIcon className="w-5 h-5" /> Save Changes</>}
+                    {saveLoading ? "Saving..." : <><CheckIcon className="w-4 h-4" /> Save Changes</>}
                   </button>
                 </>
               ) : (
                 <button
                   onClick={handleEditToggle}
-                  className="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-lg hover:bg-slate-200 font-bold transition"
+                  className="flex items-center gap-2 px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition"
                 >
-                  <PencilSquareIcon className="w-5 h-5" /> Edit Profile
+                  <PencilSquareIcon className="w-4 h-4" /> Edit Profile
                 </button>
               )}
             </div>
@@ -303,108 +301,108 @@ const Profile = () => {
 
       {/* Change Password Modal */}
       {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-[#0f1422] border border-slate-800 rounded-xl shadow-xl w-full max-w-md p-6 text-slate-100">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-slate-800">Change Password</h3>
-              <button onClick={() => setIsPasswordModalOpen(false)} className="p-1 rounded-full hover:bg-slate-100">
-                <XMarkIcon className="w-6 h-6 text-slate-500" />
+              <h3 className="text-lg font-bold text-white">Change Password</h3>
+              <button onClick={() => setIsPasswordModalOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
+                <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={submitPasswordChange} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Current Password</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Current Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords.current ? "text" : "password"}
                     name="currentPassword"
                     required
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full bg-[#0b0f19] border border-slate-800 text-white rounded-lg px-3.5 py-2 pr-10 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs"
                     value={passwordForm.currentPassword}
                     onChange={handlePasswordChange}
                   />
                   <button
                     type="button"
                     onClick={() => togglePasswordVisibility('current')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
                   >
                     {showPasswords.current ? (
-                      <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                      <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                      <EyeIcon className="h-4 w-4" aria-hidden="true" />
                     )}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">New Password</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">New Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords.new ? "text" : "password"}
                     name="newPassword"
                     required
                     minLength={6}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full bg-[#0b0f19] border border-slate-800 text-white rounded-lg px-3.5 py-2 pr-10 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs"
                     value={passwordForm.newPassword}
                     onChange={handlePasswordChange}
                   />
                   <button
                     type="button"
                     onClick={() => togglePasswordVisibility('new')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
                   >
                     {showPasswords.new ? (
-                      <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                      <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                      <EyeIcon className="h-4 w-4" aria-hidden="true" />
                     )}
                   </button>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1">Confirm New Password</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Confirm New Password</label>
                 <div className="relative">
                   <input
                     type={showPasswords.confirm ? "text" : "password"}
                     name="confirmPassword"
                     required
                     minLength={6}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="w-full bg-[#0b0f19] border border-slate-800 text-white rounded-lg px-3.5 py-2 pr-10 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs"
                     value={passwordForm.confirmPassword}
                     onChange={handlePasswordChange}
                   />
                   <button
                     type="button"
                     onClick={() => togglePasswordVisibility('confirm')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
                   >
                     {showPasswords.confirm ? (
-                      <EyeSlashIcon className="h-5 w-5" aria-hidden="true" />
+                      <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <EyeIcon className="h-5 w-5" aria-hidden="true" />
+                      <EyeIcon className="h-4 w-4" aria-hidden="true" />
                     )}
                   </button>
                 </div>
               </div>
 
               {passwordMessage.text && (
-                <div className={`text-sm p-3 rounded-lg font-medium ${passwordMessage.type === "error" ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}>
+                <div className={`text-xs p-3 rounded-lg font-medium ${passwordMessage.type === "error" ? "bg-rose-500/10 border border-rose-500/20 text-rose-300" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300"}`}>
                   {passwordMessage.text}
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg transition"
+                  className="px-4 py-2 text-slate-400 font-medium hover:text-white rounded-lg transition text-xs"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition shadow-md shadow-blue-200"
+                  className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-500 transition text-xs"
                 >
                   Update Password
                 </button>
@@ -420,12 +418,12 @@ const Profile = () => {
 
 // Helper for read-only items
 const ProfileItem = ({ icon, label, value, readOnly, fullWidth }) => (
-  <div className={`p-4 rounded-xl bg-slate-50 border border-slate-100 ${readOnly ? "opacity-75" : ""} ${fullWidth ? "md:col-span-2" : ""}`}>
-    <div className="flex items-center gap-3 text-slate-400 mb-2">
+  <div className={`p-4 rounded-lg bg-[#0b0f19] border border-slate-800 ${readOnly ? "opacity-90" : ""} ${fullWidth ? "md:col-span-2" : ""}`}>
+    <div className="flex items-center gap-2 text-slate-400 mb-1">
       {icon}
-      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
     </div>
-    <div className="text-slate-800 font-semibold pl-8">
+    <div className="text-white font-medium pl-7 text-xs">
       {value}
     </div>
   </div>
@@ -433,22 +431,22 @@ const ProfileItem = ({ icon, label, value, readOnly, fullWidth }) => (
 
 // Helper for editable items
 const EditableProfileItem = ({ icon, label, name, value, isEditing, onChange, fullWidth }) => (
-  <div className={`p-4 rounded-xl bg-slate-50 border ${isEditing ? "border-blue-200 bg-blue-50/30" : "border-slate-100 hover:border-slate-200"} transition ${fullWidth ? "md:col-span-2" : ""}`}>
-    <div className="flex items-center gap-3 text-slate-400 mb-2">
+  <div className={`p-4 rounded-lg bg-[#0b0f19] border ${isEditing ? "border-indigo-500" : "border-slate-800 hover:border-slate-700"} transition ${fullWidth ? "md:col-span-2" : ""}`}>
+    <div className="flex items-center gap-2 text-slate-400 mb-1">
       {icon}
-      <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{label}</span>
     </div>
-    <div className="pl-8">
+    <div className="pl-7">
       {isEditing ? (
         <input
           type="text"
           name={name}
           value={value}
           onChange={onChange}
-          className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-800 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+          className="w-full bg-[#0f1422] border border-slate-700 rounded-lg px-3 py-1.5 text-white font-medium focus:outline-none focus:ring-1 focus:ring-indigo-500 text-xs transition"
         />
       ) : (
-        <div className="text-slate-800 font-semibold">{value}</div>
+        <div className="text-white font-medium text-xs">{value}</div>
       )}
     </div>
   </div>

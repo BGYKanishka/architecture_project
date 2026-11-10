@@ -1,12 +1,11 @@
 
 import api from "./api";
 
-const register = (name, email, password, role, contactNumber, businessName) => {
+const register = (name, email, password, contactNumber, businessName) => {
   return api.post("/auth/signup", {
     name,
     email,
     password,
-    role,
     contactNumber,
     businessName,
   });

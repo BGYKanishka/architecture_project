@@ -16,8 +16,6 @@ public class SignupRequest {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
     
-    private String role; 
-    
     @NotBlank(message = "Contact number is required")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Contact number must be a valid format (10-15 digits)")
     private String contactNumber;

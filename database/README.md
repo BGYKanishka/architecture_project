@@ -19,7 +19,6 @@ This directory contains the database schema and seed data for the **Book Fair Sy
   - `reservations`
   - `reservation_stalls`
   - `payments`
-  - `admin_actions`
   
 - **`seed.sql`**: Contains initial sample data (Data Manipulation Language - DML) to populate the database for testing and development. It inserts:
   - Floor definitions (A, B, C, D, E, F, G, MainBuilding)

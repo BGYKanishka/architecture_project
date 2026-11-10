@@ -12,10 +12,18 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -33,27 +41,38 @@ public class ReservationService {
     @Transactional
     public ReservationResponse createReservation(Long userId, ReservationRequest request) {
 
+        if (request == null || request.getStallIds() == null || request.getStallIds().isEmpty()) {
+            throw new IllegalArgumentException("Select at least one stall.");
+        }
+        if (request.getStallIds().size() > 3) {
+            throw new IllegalArgumentException("You can reserve at most 3 stalls at a time.");
+        }
+        if (new HashSet<>(request.getStallIds()).size() != request.getStallIds().size()) {
+            throw new IllegalArgumentException("A stall can only be selected once.");
+        }
+        if (request.getStallIds().stream().anyMatch(stallId -> stallId == null || stallId <= 0)) {
+            throw new IllegalArgumentException("Stall IDs must be positive values.");
+        }
+        if (!"CASH_ON_DATE".equals(request.getPaymentMethod())) {
+            throw new IllegalArgumentException("Unsupported payment method.");
+        }
+
         // 1. Validate User
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByIdForUpdate(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found."));
 
         // 2. Validate Limit (Max 3 stalls)
         long currentBookings = reservationStallRepository.countStallsByUserId(userId);
         if (currentBookings + request.getStallIds().size() > 3) {
-            throw new RuntimeException("Limit Exceeded: You can only reserve up to 3 stalls per business.");
+            throw new IllegalStateException("You can only reserve up to 3 active stalls per business.");
         }
 
         // 3. Set Status (Matches your DB Constraints: PENDING, CONFIRMED)
         String reservationStatus = "CONFIRMED";
-        String paymentStatus = "PAID";
-
-        if ("CASH_ON_DATE".equals(request.getPaymentMethod())) {
-            reservationStatus = "CONFIRMED";
-            paymentStatus = "PENDING";
-        }
+        String paymentStatus = "PENDING";
 
         // 4. Create Reservation Object
-        String qrToken = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        String qrToken = "RES-" + UUID.randomUUID().toString().toUpperCase(Locale.ROOT);
 
         Reservation reservation = Reservation.builder()
                 .user(user)
@@ -63,14 +82,23 @@ public class ReservationService {
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        // 5. Process Stalls
-        List<Stall> stalls = stallRepository.findAllById(request.getStallIds());
+        // 5. Process Stalls with Pessimistic Locking to prevent double-booking race conditions
+        List<Long> sortedStallIds = new ArrayList<>(request.getStallIds());
+        Collections.sort(sortedStallIds); // Canonical lock order to prevent deadlocks
+
+        List<Stall> stalls = new ArrayList<>();
         double calculatedTotal = 0.0;
 
-        for (Stall stall : stalls) {
-            // SAFE CHECK: Only check the boolean flag on the Stall entity
+        for (Long stallId : sortedStallIds) {
+            // Lock the stall row exclusively (SELECT ... FOR UPDATE)
+            Stall stall = stallRepository.findByIdWithLock(stallId)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stall not found."));
+
             if (stall.isReserved()) {
-                throw new RuntimeException("Stall " + stall.getStallCode() + " is already reserved!");
+                throw new IllegalStateException("Stall " + stall.getStallCode() + " is already reserved.");
+            }
+            if (stall.isDisabled()) {
+                throw new IllegalStateException("Stall " + stall.getStallCode() + " is disabled and unavailable.");
             }
 
             // Link Stall to Reservation
@@ -80,11 +108,12 @@ public class ReservationService {
                             .stall(stall)
                             .build());
 
-            // LOCK THE STALL
+            // Mark reserved and persist
             stall.setReserved(true);
             stallRepository.save(stall);
 
             calculatedTotal += stall.getPrice();
+            stalls.add(stall);
         }
 
         // 6. Create Payment Record
@@ -139,10 +168,14 @@ public class ReservationService {
         List<Reservation> baseReservations = reservationRepository.findAllBaseReservationsWithUser();
         List<ReservationStall> allStalls = reservationStallRepository.findAllWithStallsAndReservations();
 
+        Map<Long, List<ReservationStall>> stallsByReservationId = allStalls.stream()
+                .filter(rs -> rs.getReservation() != null && rs.getReservation().getId() != null)
+                .collect(Collectors.groupingBy(rs -> rs.getReservation().getId()));
+
         return baseReservations.stream().map(r -> {
-            String baseToken = r.getQrCodeToken();
-            List<AdminReservationResponse.StallDetail> stallDetails = allStalls.stream()
-                    .filter(rs -> rs.getReservation().getQrCodeToken().startsWith(baseToken))
+            List<AdminReservationResponse.StallDetail> stallDetails = stallsByReservationId
+                    .getOrDefault(r.getId(), Collections.emptyList())
+                    .stream()
                     .map(rs -> new AdminReservationResponse.StallDetail(
                             rs.getStall().getId(),
                             rs.getStall().getStallCode(),
@@ -154,7 +187,7 @@ public class ReservationService {
                     r.getUser().getEmail(),
                     r.getUser().getName(),
                     r.getReservationDate(),
-                    baseToken,
+                    r.getQrCodeToken(),
                     r.getStatus(),
                     stallDetails);
         }).collect(Collectors.toList());
@@ -163,9 +196,33 @@ public class ReservationService {
     @Transactional
     public AdminReservationResponse updateReservationStatus(Long id, String status) {
         // Use JOIN FETCH to load User eagerly before updating
-        Reservation reservation = reservationRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found with id: " + id));
-        reservation.setStatus(status);
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found."));
+        String normalizedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
+        if (!Set.of("PENDING", "CONFIRMED", "CANCELLED").contains(normalizedStatus)) {
+            throw new IllegalArgumentException("Unsupported reservation status.");
+        }
+
+        String currentStatus = reservation.getStatus();
+        if ("CANCELLED".equals(currentStatus) && !"CANCELLED".equals(normalizedStatus)) {
+            throw new IllegalStateException("A cancelled reservation cannot be reactivated.");
+        }
+
+        if (!"CANCELLED".equals(currentStatus) && "CANCELLED".equals(normalizedStatus)) {
+            List<Long> stallIds = reservationStallRepository.findAllByReservationId(id).stream()
+                    .map(reservationStall -> reservationStall.getStall().getId())
+                    .distinct()
+                    .sorted()
+                    .toList();
+            for (Long stallId : stallIds) {
+                Stall stall = stallRepository.findByIdWithLock(stallId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stall not found."));
+                stall.setReserved(false);
+                stallRepository.save(stall);
+            }
+        }
+
+        reservation.setStatus(normalizedStatus);
         Reservation saved = reservationRepository.save(reservation);
         return new AdminReservationResponse(
                 saved.getId(),
@@ -214,16 +271,24 @@ public class ReservationService {
 
     @Transactional
     public void cancelStallReservation(Long userId, Long stallId) {
-        ReservationStall reservationStall = reservationStallRepository.findActiveByUserIdAndStallId(userId, stallId)
-                .orElseThrow(() -> new RuntimeException("Active reservation not found for this stall"));
+        ReservationStall initialReservationStall = reservationStallRepository
+                .findActiveByUserIdAndStallId(userId, stallId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Active reservation not found for this stall."));
 
-        Stall stall = reservationStall.getStall();
-        if (stall.isReserved()) {
-            stall.setReserved(false);
-            stallRepository.save(stall);
-        }
+        Long reservationId = initialReservationStall.getReservation().getId();
+        Reservation originalReservation = reservationRepository.findByIdForUpdate(reservationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reservation not found."));
+        Stall stall = stallRepository.findByIdWithLock(stallId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Stall not found."));
+        ReservationStall reservationStall = reservationStallRepository
+                .findActiveByUserIdAndStallId(userId, stallId)
+                .filter(active -> active.getReservation().getId().equals(reservationId))
+                .orElseThrow(() -> new IllegalStateException("Reservation changed while cancellation was in progress."));
 
-        Reservation originalReservation = reservationStall.getReservation();
+        stall.setReserved(false);
+        stallRepository.save(stall);
+
         long remainingStalls = reservationStallRepository.countByReservationId(originalReservation.getId());
 
         if (remainingStalls <= 1) {

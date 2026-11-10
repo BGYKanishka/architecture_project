@@ -4,6 +4,7 @@ import com.bookfair.system.security.jwt.AuthEntryPointJwt;
 import com.bookfair.system.security.jwt.AuthTokenFilter;
 import com.bookfair.system.security.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,15 +24,18 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    // abcd efgh
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthEntryPointJwt unauthorizedHandler;
     private final AuthTokenFilter authTokenFilter;
+
+    @Value("${app.cors.allowed-origins:http://localhost:5173}")
+    private String allowedOrigins;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -74,7 +78,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+        configuration.setAllowedOrigins(origins);
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
@@ -84,36 +92,3 @@ public class SecurityConfig {
         return source;
     }
 }
-
-// package com.bookfair.system.config;
-
-// import org.springframework.context.annotation.Bean;
-// import org.springframework.context.annotation.Configuration;
-// import
-// org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-// import
-// org.springframework.security.config.annotation.web.builders.HttpSecurity;
-// import org.springframework.security.web.SecurityFilterChain;
-
-// @Configuration
-// @EnableMethodSecurity
-// public class SecurityConfig {
-
-// @Bean
-// public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-// http.csrf(csrf -> csrf.disable());
-
-// http.authorizeHttpRequests(auth -> auth
-// .requestMatchers("/auth/**").permitAll()
-// .requestMatchers("/admin/**").hasAnyRole("ADMIN", "EMPLOYEE")
-// .anyRequest().authenticated()
-// );
-
-// // ✅ If you already have a JwtFilter, add it here:
-// // http.addFilterBefore(jwtFilter,
-// UsernamePasswordAuthenticationFilter.class);
-
-// return http.build();
-// }
-// }

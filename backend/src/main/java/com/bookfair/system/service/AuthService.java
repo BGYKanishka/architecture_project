@@ -46,14 +46,14 @@ public class AuthService {
 
     public String registerUser(SignupRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            throw new RuntimeException("Error: Email is already in use!");
+            throw new IllegalArgumentException("Email is already in use.");
         }
 
         User user = User.builder()
                 .name(signUpRequest.getName())
                 .email(signUpRequest.getEmail())
                 .password(encoder.encode(signUpRequest.getPassword()))
-                .role(signUpRequest.getRole().toUpperCase())
+                .role("VENDOR") // Public signup is restricted to VENDOR. Admin and Employee creation must go through /api/admin/users
                 .contactNumber(signUpRequest.getContactNumber())
                 .businessName(signUpRequest.getBusinessName())
                 .enabled(true)

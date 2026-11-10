@@ -3,108 +3,70 @@ import { BookOpenIcon, UserGroupIcon, CalendarDaysIcon, MapPinIcon } from '@hero
 
 const About = () => {
     return (
-        <div className="bg-slate-50 min-h-screen pt-12 pb-24 font-sans text-slate-800">
+        <div className="bg-[#0b0f19] min-h-screen py-16 font-sans text-slate-100">
 
             {/* Hero Section */}
-            <div className="bg-blue-800 text-white rounded-3xl mx-4 md:mx-auto max-w-5xl px-8 py-6 md:py-10 flex flex-col items-center justify-center text-center shadow-lg relative overflow-hidden">
-                {/* Abstract Background Shapes */}
-                <div className="absolute -top-32 -left-32 w-80 h-80 bg-blue-700 rounded-full blur-3xl opacity-50"></div>
-                <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-600 rounded-full blur-3xl opacity-50"></div>
-
-                <div className="relative z-10 bg-white/10 p-3 rounded-2xl mb-4 backdrop-blur-sm shadow-inner border border-white/10">
-                    <BookOpenIcon className="w-8 h-8 text-white" />
-                </div>
-                <h1 className="relative z-10 text-4xl md:text-5xl font-extrabold tracking-tight mb-2">
-                    About
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+                <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-2">
+                    Event Overview
+                </p>
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-4">
+                    About Colombo International Book Fair
                 </h1>
-                <p className="relative z-10 text-lg text-blue-100 max-w-2xl mt-2 font-medium">
-                    Celebrating a legacy of literature, knowledge, and culture at the Colombo International Book Fair.
+                <p className="text-base text-slate-300 max-w-2xl leading-relaxed">
+                    Celebrating over a quarter-century of literature, education, and cultural exchange at South Asia's flagship literary gathering.
                 </p>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 mt-16 space-y-20">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
 
-                {/* Section 1: Legacy */}
-                <section className="flex flex-col md:flex-row gap-12 items-center">
-                    <div className="md:w-1/2 order-2 md:order-1 flex justify-center">
-                        <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-xl border border-slate-200 bg-white p-8 flex flex-col justify-center items-center text-center">
-                            <div className="bg-yellow-50 text-yellow-600 rounded-full p-6 mb-6">
-                                <UserGroupIcon className="w-16 h-16" />
-                            </div>
-                            <h3 className="text-3xl font-bold text-slate-800 mb-2">25 Years</h3>
-                            <p className="text-slate-500 font-medium">Of literary excellence</p>
-                        </div>
+                {/* Legacy Section */}
+                <section className="bg-[#0f1422] rounded-xl p-8 border border-slate-800 flex flex-col md:flex-row gap-8 items-center">
+                    <div className="md:w-1/3 text-center md:text-left">
+                        <span className="text-4xl font-bold text-white block">25+ Years</span>
+                        <span className="text-xs text-slate-400 mt-1 block">Of continuous literary service in Sri Lanka</span>
                     </div>
-                    <div className="md:w-1/2 order-1 md:order-2">
-                        <h2 className="text-3xl font-bold text-blue-900 mb-6 flex items-center gap-3">
-                            A Legacy Of
+                    <div className="md:w-2/3 border-t md:border-t-0 md:border-l border-slate-800 pt-6 md:pt-0 md:pl-8">
+                        <h2 className="text-xl font-bold text-white mb-3">
+                            A Quarter-Century of Cultural Impact
                         </h2>
-                        <p className="text-lg leading-relaxed text-slate-600">
-                            In 2024, the Colombo International Book Fair marked its 25th anniversary with a silver-jubilee edition that paid tribute to the initiators and past presidents who first envisioned a dedicated stage for Sri Lanka’s publishing industry and reading public. The ceremonial opening, graced by these founders, transformed the occasion into both a celebration of achievement and a moment of gratitude for the leadership that shaped the fair’s enduring character.
+                        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            The Colombo International Book Fair was founded to create a dedicated platform for Sri Lanka’s publishing industry and reading community. Over the past 25 years, it has transformed into the island's premier annual cultural event, uniting international authors, academic presses, and over one million readers.
                         </p>
                     </div>
                 </section>
 
-                {/* Section 2: Scale and Spirit */}
-                <section className="flex flex-col md:flex-row gap-12 items-center bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100">
-                    <div className="md:w-1/2">
-                        <h2 className="text-3xl font-bold text-blue-900 mb-6">
-                            CIBF 2025 : Scale and Spirit
-                        </h2>
-                        <p className="text-lg leading-relaxed text-slate-600 mb-6">
-                            The 26th edition, CIBF 2025, carried this momentum into ten vibrant days in September, transforming BMICH into a bustling city of books within its 4,500 square meters.
-                        </p>
-                        <p className="text-lg leading-relaxed text-slate-600">
-                            Encompassing 12 halls and hosting 450 booths, the fair featured 70 leading local publishers, alongside 32 international publishers represented through local distributors. The event was powered by 18 publishing sponsors and 8 non-publishing partners, all contributing to the success of this major cultural gathering.
+                {/* Scale and Footprint */}
+                <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-[#0f1422] rounded-xl p-6 border border-slate-800">
+                        <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-indigo-400">
+                            <MapPinIcon className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-base font-bold text-white mb-2">BMICH Colombo</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                            Hosted across 8 expansive exhibition wings at the Bandaranaike Memorial International Conference Hall.
                         </p>
                     </div>
-                    <div className="md:w-1/2 flex justify-center">
-                        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-                            <div className="bg-blue-50 rounded-2xl p-6 text-center border border-blue-100">
-                                <h4 className="text-4xl font-extrabold text-blue-700">12</h4>
-                                <p className="text-blue-900/70 font-medium mt-1">Halls</p>
-                            </div>
-                            <div className="bg-indigo-50 rounded-2xl p-6 text-center border border-indigo-100">
-                                <h4 className="text-4xl font-extrabold text-indigo-700">450</h4>
-                                <p className="text-indigo-900/70 font-medium mt-1">Booths</p>
-                            </div>
-                            <div className="bg-emerald-50 rounded-2xl p-6 text-center border border-emerald-100">
-                                <h4 className="text-4xl font-extrabold text-emerald-700">70</h4>
-                                <p className="text-emerald-900/70 font-medium mt-1">Local Publishers</p>
-                            </div>
-                            <div className="bg-purple-50 rounded-2xl p-6 text-center border border-purple-100">
-                                <h4 className="text-4xl font-extrabold text-purple-700">10</h4>
-                                <p className="text-purple-900/70 font-medium mt-1">Vibrant Days</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
 
-                {/* Section 3: Looking Ahead */}
-                <section className="bg-gradient-to-br from-blue-900 to-indigo-900 rounded-3xl p-8 md:p-16 text-white text-center shadow-lg relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400"></div>
-                    <h2 className="text-3xl md:text-5xl font-bold mb-8">Looking ahead to CIBF 2026</h2>
-
-                    <div className="flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 mb-10">
-                        <div className="flex items-center gap-4 bg-white/10 px-6 py-4 rounded-xl backdrop-blur-sm border border-white/20">
-                            <CalendarDaysIcon className="w-8 h-8 text-blue-300" />
-                            <div className="text-left">
-                                <p className="text-blue-100 text-sm font-medium">Mark your calendar</p>
-                                <p className="font-semibold text-lg">25th Sep - 4th Oct 2026</p>
-                            </div>
+                    <div className="bg-[#0f1422] rounded-xl p-6 border border-slate-800">
+                        <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-indigo-400">
+                            <UserGroupIcon className="w-5 h-5" />
                         </div>
-                        <div className="flex items-center gap-4 bg-white/10 px-6 py-4 rounded-xl backdrop-blur-sm border border-white/20">
-                            <MapPinIcon className="w-8 h-8 text-indigo-300" />
-                            <div className="text-left">
-                                <p className="text-indigo-100 text-sm font-medium">Location</p>
-                                <p className="font-semibold text-lg">BMICH, Colombo 7</p>
-                            </div>
-                        </div>
+                        <h3 className="text-base font-bold text-white mb-2">1,000,000+ Footfall</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                            Attracting a diverse audience of school groups, university students, academics, and general readers across 10 days.
+                        </p>
                     </div>
 
-                    <p className="max-w-3xl mx-auto text-lg md:text-xl text-blue-50 leading-relaxed font-light">
-                        The journey continues with CIBF 2026. Visitors and exhibitors are invited to reserve these dates, not only to engage in the bustling atmosphere of the exhibition, but also to experience their profession and passion in a refreshed environment that encourages networking, discovery, and collaboration.
-                    </p>
+                    <div className="bg-[#0f1422] rounded-xl p-6 border border-slate-800">
+                        <div className="w-10 h-10 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center mb-4 text-indigo-400">
+                            <CalendarDaysIcon className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-base font-bold text-white mb-2">September 18–27, 2026</h3>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                            10 consecutive exhibition days open daily from 9:00 AM to 7:00 PM for the public.
+                        </p>
+                    </div>
                 </section>
 
             </div>

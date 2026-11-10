@@ -1,17 +1,15 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
-import AuthService from "../../services/auth.service";
-import { CreditCardIcon, BanknotesIcon, LockClosedIcon, ArrowPathIcon, ChevronLeftIcon } from "@heroicons/react/24/outline";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import api from "../../services/api";
+import { CreditCardIcon, BanknotesIcon, LockClosedIcon, ArrowPathIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 
 const PaymentSelection = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { stalls } = location.state || { stalls: [] };
+  const { stalls = [] } = location.state || {};
   const [loading, setLoading] = useState(false);
 
-  // Alert Modal State
   const [alertConfig, setAlertConfig] = useState({
     isOpen: false,
     title: "",
@@ -25,106 +23,100 @@ const PaymentSelection = () => {
   const handlePay = async () => {
     setLoading(true);
     try {
-      const user = AuthService.getCurrentUser();
+      const totalAmount = stalls.reduce((sum, s) => sum + s.price, 0);
       const payload = {
         stallIds: stalls.map(s => s.id),
-        paymentMethod: "CASH_ON_DATE",
-        totalAmount: stalls.reduce((sum, s) => sum + s.price, 0)
+        paymentMethod: "CASH_ON_DATE"
       };
 
-      const res = await axios.post("http://localhost:8080/api/vendor-publishers/reservations", payload, {
-        headers: { Authorization: `Bearer ${user.token}` }
-      });
+      const res = await api.post("/vendor-publishers/reservations", payload);
 
       navigate("/booking-confirmation", {
         state: {
           reservationId: res.data.reservationCode,
           qrCodeImage: res.data.qrCodeImage,
           stalls: stalls,
-          totalAmount: payload.totalAmount
+          totalAmount
         }
       });
 
     } catch (err) {
-      const errorMessage = err.response?.data || err.message;
-
-      // Mock Bypass for Backend Limit
-      // If backend says limit exceeded, but we know user cancelled some
-      if (typeof errorMessage === "string" && errorMessage.includes("Limit Exceeded")) {
-        const paidIds = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-
-        // If current active + new selection <= 3, allow mock success
-        if (paidIds.length + stalls.length <= 3) {
-          console.log("Intercepted Limit Exceeded error. Bypassing for session-based demo.");
-
-          navigate("/booking-confirmation", {
-            state: {
-              reservationId: "MOCK-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
-              qrCodeImage: null, // No real QR for mock
-              stalls: stalls,
-              totalAmount: stalls.reduce((sum, s) => sum + s.price, 0)
-            }
-          });
-          return;
-        }
-      }
-
-      showAlert("Payment Error", typeof errorMessage === "string" ? errorMessage : "Payment failed. Please try again.");
+      const errorMessage = err.response?.data?.message || err.response?.data || err.message;
+      showAlert("Reservation Error", typeof errorMessage === "string" ? errorMessage : "Reservation failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white p-0 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100">
-        <div className="bg-white p-6 border-b border-slate-100 flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-50 rounded-full transition text-slate-400 hover:text-slate-700">
-            <ChevronLeftIcon className="w-5 h-5" />
+  if (stalls.length === 0) {
+    return (
+      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center p-4 font-sans text-slate-100">
+        <div className="bg-[#0f1422] border border-slate-800 rounded-xl shadow-xl w-full max-w-md p-6 text-center">
+          <h1 className="text-lg font-bold text-white">No Stalls Selected</h1>
+          <p className="mt-1 text-xs text-slate-400">Choose at least one stall before proceeding.</p>
+          <button
+            type="button"
+            onClick={() => navigate("/map")}
+            className="mt-5 w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium text-xs sm:text-sm transition shadow-sm"
+          >
+            Explore Floor Plan
           </button>
-          <h2 className="text-xl font-bold text-slate-800">Select Payment Method</h2>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center p-4 font-sans text-slate-100">
+      <div className="bg-[#0f1422] rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-slate-800">
+        <div className="p-5 border-b border-slate-800 flex items-center gap-3">
+          <button onClick={() => navigate(-1)} className="p-1 text-slate-400 hover:text-white transition">
+            <ArrowLeftIcon className="w-4 h-4" />
+          </button>
+          <div>
+            <h2 className="text-base font-bold text-white tracking-tight">Select Payment Method</h2>
+            <p className="text-xs text-slate-400">Choose how you will settle the reservation fee</p>
+          </div>
         </div>
 
-        <div className="p-6 space-y-4">
-          <p className="text-sm text-slate-500 mb-2">Choose how you'd like to pay</p>
+        <div className="p-5 space-y-3">
+          {/* Cash Option (Active) */}
+          <div className="border border-indigo-500/80 bg-[#0b0f19] rounded-lg p-3.5 flex items-center gap-3.5 cursor-pointer transition">
+            <div className="p-2.5 rounded-lg bg-indigo-950/60 text-indigo-400 border border-indigo-800/60">
+              <BanknotesIcon className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-white text-sm">Cash on Date</h3>
+              <p className="text-xs text-slate-400">Pay at the BMICH Secretariat on event morning</p>
+            </div>
+            <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+          </div>
 
           {/* Card Option (Disabled) */}
-          <div className="relative border-2 border-slate-100 rounded-xl p-4 flex items-center gap-4 opacity-50 cursor-not-allowed grayscale">
-            <div className="bg-slate-100 p-3 rounded-lg">
-              <CreditCardIcon className="w-6 h-6 text-slate-400" />
+          <div className="border border-slate-800/80 rounded-lg p-3.5 flex items-center gap-3.5 opacity-40 cursor-not-allowed bg-[#0b0f19]/40">
+            <div className="p-2.5 rounded-lg bg-slate-900 text-slate-500">
+              <CreditCardIcon className="w-5 h-5" />
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-slate-700">Credit / Debit Card</h3>
-              <p className="text-xs text-slate-400">Temporarily Unavailable</p>
+              <h3 className="font-semibold text-slate-300 text-sm">Online Card Payment</h3>
+              <p className="text-xs text-slate-500">Temporarily unavailable for direct checkout</p>
             </div>
-            <LockClosedIcon className="w-5 h-5 text-slate-300" />
-          </div>
-
-          {/* Cash Option (Active) */}
-          <div className="relative border-2 border-blue-600 bg-blue-50/30 rounded-xl p-4 flex items-center gap-4 cursor-pointer ring-4 ring-blue-50 transition">
-            <div className="bg-blue-100 p-3 rounded-lg text-blue-600">
-              <BanknotesIcon className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-slate-800">Cash on Date</h3>
-              <p className="text-xs text-slate-500">Pay at the venue counter</p>
-            </div>
-            <div className="w-5 h-5 rounded-full border-4 border-blue-600"></div>
+            <LockClosedIcon className="w-4 h-4 text-slate-500" />
           </div>
         </div>
 
-        <div className="p-6 border-t border-slate-100 bg-slate-50">
+        <div className="p-5 border-t border-slate-800 bg-[#0b0f19]">
           <button
             onClick={handlePay}
-            disabled={loading}
-            className="w-full py-4 bg-blue-600 text-white rounded-xl font-bold shadow-lg shadow-blue-200 hover:bg-blue-700 hover:shadow-xl transition transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled={loading || stalls.length === 0}
+            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm shadow-sm"
           >
             {loading ? (
               <>
-                <ArrowPathIcon className="w-5 h-5 animate-spin" /> Processing...
+                <ArrowPathIcon className="w-4 h-4 animate-spin" /> Confirming Reservation...
               </>
             ) : (
-              "Confirm Payment"
+              "Confirm & Generate Pass"
             )}
           </button>
         </div>
@@ -141,4 +133,5 @@ const PaymentSelection = () => {
     </div>
   );
 };
+
 export default PaymentSelection;

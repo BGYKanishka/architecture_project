@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, QrCodeIcon } from "@heroicons/react/24/outline";
 
 const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
     const scannerRef = useRef(null);
@@ -8,7 +8,6 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
 
     useEffect(() => {
         if (isOpen) {
-            // Small timeout to ensure DOM is ready
             setTimeout(() => {
                 if (!html5QrCode.current && scannerRef.current) {
                     html5QrCode.current = new Html5Qrcode("reader");
@@ -21,7 +20,6 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                                 qrbox: { width: 250, height: 250 },
                             },
                             (decodedText) => {
-                                // Ignore "-C-" cancelled ones if they happen to scan them by accident or just let backend handle it
                                 if (html5QrCode.current) {
                                     html5QrCode.current.stop()
                                         .then(() => {
@@ -32,18 +30,14 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
                                         .catch(err => console.error("Failed to stop scanner", err));
                                 }
                             },
-                            (errorMessage) => {
-                                // Ignore scan errors, it throws them constantly when no QR is in frame
-                            }
+                            () => {}
                         )
                         .catch((err) => {
                             console.error("Error starting scanner", err);
-                            // Handle permission denied or no camera
                         });
                 }
             }, 100);
         } else {
-            // Cleanup on close
             if (html5QrCode.current) {
                 html5QrCode.current
                     .stop()
@@ -65,22 +59,25 @@ const QRScannerModal = ({ isOpen, onClose, onScanSuccess }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-                <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h2 className="font-bold text-slate-800 text-lg">Scan QR Code</h2>
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black/75 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div className="bg-[#0f1422] border border-slate-800 rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+                <div className="p-4 border-b border-slate-800 flex justify-between items-center bg-[#0b0f19]">
+                    <div className="flex items-center gap-2">
+                        <QrCodeIcon className="w-5 h-5 text-indigo-400" />
+                        <h2 className="font-semibold text-white text-base">Scan Attendee QR Pass</h2>
+                    </div>
                     <button
                         onClick={onClose}
-                        className="p-1 rounded-full text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
                     >
-                        <XMarkIcon className="w-6 h-6" />
+                        <XMarkIcon className="w-5 h-5" />
                     </button>
                 </div>
 
-                <div className="p-4 bg-black">
-                    <div id="reader" ref={scannerRef} className="w-full text-white overflow-hidden rounded-xl border-2 border-slate-700"></div>
-                    <p className="text-center text-slate-400 text-sm mt-4">
-                        Position the QR code within the frame to scan.
+                <div className="p-5 bg-[#0b0f19]">
+                    <div id="reader" ref={scannerRef} className="w-full text-white overflow-hidden rounded-lg border border-slate-700"></div>
+                    <p className="text-center text-slate-400 text-xs mt-4">
+                        Center the QR ticket code inside the frame to scan automatically.
                     </p>
                 </div>
             </div>

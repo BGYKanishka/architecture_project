@@ -1,1 +1,98 @@
 @import "tailwindcss";
+
+@theme {
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-200: #bfdbfe;
+  --color-blue-300: #93c5fd;
+  --color-blue-400: #60a5fa;
+  --color-blue-500: #3b82f6;
+  --color-blue-600: #2563eb;
+  --color-blue-700: #1d4ed8;
+  --color-blue-800: #1e40af;
+  --color-blue-900: #1e3a8a;
+  --color-blue-950: #172554;
+
+  --color-indigo-50: #eef2ff;
+  --color-indigo-100: #e0e7ff;
+  --color-indigo-200: #c7d2fe;
+  --color-indigo-300: #a5b4fc;
+  --color-indigo-400: #818cf8;
+  --color-indigo-500: #6366f1;
+  --color-indigo-600: #4f46e5;
+  --color-indigo-700: #4338ca;
+  --color-indigo-800: #3730a3;
+  --color-indigo-900: #312e81;
+  --color-indigo-950: #1e1b4b;
+
+  --color-slate-50: #f8fafc;
+  --color-slate-100: #f1f5f9;
+  --color-slate-200: #e2e8f0;
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #64748b;
+  --color-slate-600: #475569;
+  --color-slate-700: #334155;
+  --color-slate-800: #1e293b;
+  --color-slate-900: #0f172a;
+  --color-slate-950: #020617;
+
+  --font-sans: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --animate-fade-in: fade-in 0.3s ease-out forwards;
+  --animate-slide-up: slide-up 0.4s ease-out forwards;
+  --animate-zoom-in: zoom-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes zoom-in {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+@layer base {
+  body {
+    @apply antialiased text-slate-100 bg-[#080b14];
+    color-scheme: dark;
+    background-color: #080b14;
+    color: #f1f5f9;
+  }
+  
+  /* Smooth transitions for interactive elements */
+  button, a {
+    @apply transition-all duration-300;
+  }
+
+  button:active {
+    @apply scale-[0.98];
+  }
+
+  input, select, textarea {
+    @apply transition-all duration-200;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-[#080b14]/85 backdrop-blur-xl border border-slate-800/70 shadow-2xl;
+  }
+  .glass-card {
+    @apply bg-[#0d1322]/85 backdrop-blur-xl border border-slate-800/80 shadow-xl;
+  }
+  .card-dark {
+    @apply bg-[#0d1322] border border-slate-800/80 rounded-2xl;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400;
+  }
+  .bg-gradient-primary {
+    @apply bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-800;
+  }
+}

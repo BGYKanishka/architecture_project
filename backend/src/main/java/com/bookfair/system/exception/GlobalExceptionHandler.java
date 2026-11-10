@@ -2,6 +2,9 @@ package com.bookfair.system.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +14,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
@@ -26,8 +30,25 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
     Map<String, String> error = new HashMap<>();
-    error.put("error", ex.getMessage());
+    error.put("error", "BAD_REQUEST");
+    error.put("message", ex.getMessage());
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(IllegalStateException.class)
+  public ResponseEntity<Map<String, String>> handleIllegalStateException(IllegalStateException ex) {
+    Map<String, String> error = new HashMap<>();
+    error.put("error", "CONFLICT");
+    error.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(ResponseStatusException.class)
+  public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
+    Map<String, String> error = new HashMap<>();
+    error.put("error", ex.getStatusCode().toString());
+    error.put("message", ex.getReason() == null ? "Request failed." : ex.getReason());
+    return ResponseEntity.status(ex.getStatusCode()).body(error);
   }
 
   @ExceptionHandler(org.springframework.http.converter.HttpMessageNotWritableException.class)
@@ -48,14 +69,15 @@ public class GlobalExceptionHandler {
 
     if (isClientAbort) {
       // Suppress stack trace for expected client disconnects
-      System.out.println("WARN: Client connection aborted during response writing. (Stack trace suppressed)");
+      logger.debug("Client disconnected while the server was writing a response.");
       return null; // Return null to stop processing response
     }
 
     // For real errors, print stack trace
-    ex.printStackTrace();
+    logger.error("Failed to write API response", ex);
     Map<String, String> error = new HashMap<>();
-    error.put("error", "Error writing JSON output: " + ex.getMessage());
+    error.put("error", "INTERNAL_SERVER_ERROR");
+    error.put("message", "An unexpected error occurred.");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
   }
 
@@ -72,9 +94,10 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
-    ex.printStackTrace(); // Log stack trace
+    logger.error("Unhandled API exception", ex);
     Map<String, String> error = new HashMap<>();
-    error.put("error", "An unexpected error occurred: " + ex.getMessage());
+    error.put("error", "INTERNAL_SERVER_ERROR");
+    error.put("message", "An unexpected error occurred.");
     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
   }
 }

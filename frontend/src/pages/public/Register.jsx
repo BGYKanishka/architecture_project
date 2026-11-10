@@ -1,22 +1,23 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import backgroundImg from "../../assets/background.jpg";
+import { ArrowLeftIcon, BookOpenIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 
 const Register = () => {
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    role: "VENDOR",
     contactNumber: "",
     businessName: "",
-    role: "vendor",
   });
-
-  const [message, setMessage] = useState("");
   const [successful, setSuccessful] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const onChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,6 +27,7 @@ const Register = () => {
     e.preventDefault();
     setMessage("");
     setSuccessful(false);
+    setLoading(true);
 
     AuthService.register(
       formData.name,
@@ -36,172 +38,197 @@ const Register = () => {
       formData.businessName
     ).then(
       () => {
-        setMessage("Registration successful! Please login.");
+        setMessage("Account registered successfully! Redirecting to sign in...");
         setSuccessful(true);
+        setLoading(false);
         setTimeout(() => {
           navigate("/login");
-        }, 2000);
+        }, 1500);
       },
       (error) => {
         const resMessage =
-          (error.response && error.response.data && error.response.data.message) ||
+          (error.response &&
+            error.response.data &&
+            (error.response.data.message || error.response.data.error)) ||
+          (typeof error.response?.data === "string" ? error.response.data : null) ||
           error.message ||
-          error.toString();
+          "Registration failed. Please check your information.";
 
         setMessage(resMessage);
         setSuccessful(false);
+        setLoading(false);
       }
     );
   };
 
   return (
-    <div
-      className="relative flex items-center justify-center min-h-screen p-4 overflow-hidden"
-      style={{
-        background:
-          "linear-gradient(to right,      #eff6ff  0%, #eff6ff 50%, #0f1d45 50%, #0f1d45 100%)",
-      }}
-    >
-      <div className="absolute top-[-80px] left-[-80px] w-[300px] h-[300px] rounded-full border-[40px] border-blue-300/40"></div>
-      <div className="absolute top-[15%] left-[5%] w-[180px] h-[180px] rounded-full bg-blue-300/30"></div>
-      <div className="absolute bottom-[-60px] right-[-60px] w-[250px] h-[250px] rounded-full border-[35px] border-indigo-300/30"></div>
-      <div className="absolute bottom-[10%] left-[15%] w-[80px] h-[80px] rounded-full bg-blue-300/20"></div>
-      <div className="absolute top-[40%] right-[3%] w-[100px] h-[100px] rounded-full bg-indigo-300/25"></div>
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0b0f19] text-slate-100 font-sans">
+      {/* Top Navigation - Natural link */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition"
+        >
+          <ArrowLeftIcon className="w-3.5 h-3.5" />
+          <span>Back to Home</span>
+        </Link>
+      </div>
 
-      {/* Combined Card Container */}
-      <div className="relative z-10 flex w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-4xl bg-[#0f1422] rounded-2xl overflow-hidden border border-slate-800 shadow-2xl flex my-8">
 
-        {/* Left Side - Background Image Panel */}
-        <div className="relative w-1/2 min-h-[600px] hidden md:block">
+        {/* Left Side: Brand & Visuals */}
+        <div className="relative w-1/2 min-h-[620px] hidden md:block overflow-hidden">
           <img
             src={backgroundImg}
-            alt="Book Fair Background"
-            className="absolute inset-0 w-full h-full object-cover"
+            alt="CIBF Exhibition"
+            className="absolute inset-0 w-full h-full object-cover opacity-60"
           />
-          {/* Gradient Overlay */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(circle at center, rgba(29,78,216,0.45) 40%, rgba(30,64,175,0.15) 70%, transparent 100%)",
-            }}
-          ></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0f1422] via-[#0f1422]/80 to-transparent" />
 
-          {/* Overlay Content */}
-          <div className="relative z-10 flex flex-col justify-center h-full p-10 text-white">
-            <h2 className="text-4xl font-extrabold leading-tight mb-12 drop-shadow-lg">
-              Join the
-              <br />
-              Book Fair 2026
-            </h2>
-            <p className="text-base font-bold text-blue-100 max-w-xs leading-relaxed">
-              Register as a publisher or vendor and secure your stall at CIBF 2026.
+          <div className="relative z-10 flex flex-col justify-between h-full p-8 text-white">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+                <BookOpenIcon className="w-4 h-4" />
+              </div>
+              <span className="font-bold text-xs tracking-wider uppercase text-slate-300">
+                CIBF 2026
+              </span>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-2">Publisher Registration</p>
+              <h2 className="text-2xl font-bold leading-tight mb-3 text-white">
+                Exhibit at South Asia’s Biggest Book Fair
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Register your publishing house or book store to secure stall reservations, select your preferred halls, and reach over 1,000,000 visitors.
+              </p>
+            </div>
+
+            <p className="text-xs text-slate-400">
+              September 18 – 27, 2026 • BMICH Colombo
             </p>
           </div>
         </div>
 
-        {/* Right Side - Registration Form */}
-        <div className="flex items-center justify-center w-full md:w-1/2 p-8">
-          <div className="w-full max-w-sm space-y-6">
+        {/* Right Side: Registration Form */}
+        <div className="flex items-center justify-center w-full md:w-1/2 p-8 sm:p-10">
+          <div className="w-full max-w-sm space-y-5">
 
-            {/* HEADER */}
-            <div className="text-center">
-              <h2 className="text-3xl font-extrabold text-gray-900">
-                Registration
-              </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                For Vendors & Publishers
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                Create Account
+              </h1>
+              <p className="text-xs text-slate-400 mt-1">
+                Register as a publisher to book and manage stalls.
               </p>
-              <div className="mt-4 w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
             </div>
 
-            <form className="mt-6 space-y-4" onSubmit={handleRegister}>
-
-              {/* Full Name */}
+            <form className="space-y-3.5" onSubmit={handleRegister}>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Representative Name
+                </label>
                 <input
-                  name="name"
                   type="text"
-                  required
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
+                  name="name"
+                  placeholder="e.g. Johnathan Silva"
+                  className="w-full px-3.5 py-2 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition"
                   value={formData.name}
                   onChange={onChange}
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email Address</label>
-                <input
-                  name="email"
-                  type="email"
                   required
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                  value={formData.email}
-                  onChange={onChange}
                 />
               </div>
 
-              {/* Password */}
               <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Business / Publishing House
+                </label>
                 <input
-                  name="password"
-                  type="password"
-                  required
-                  minLength="6"
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                  value={formData.password}
-                  onChange={onChange}
-                />
-              </div>
-
-              {/* Contact Number */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Contact Number</label>
-                <input
-                  name="contactNumber"
                   type="text"
-                  required
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
-                  value={formData.contactNumber}
-                  onChange={onChange}
-                />
-              </div>
-
-              {/* Business Name */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Business / Publisher Name</label>
-                <input
                   name="businessName"
-                  type="text"
-                  required
-                  className="w-full px-4 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm"
+                  placeholder="e.g. Ceylon Book House"
+                  className="w-full px-3.5 py-2 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition"
                   value={formData.businessName}
                   onChange={onChange}
+                  required
                 />
               </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="publisher@domain.com"
+                  className="w-full px-3.5 py-2 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition"
+                  value={formData.email}
+                  onChange={onChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Contact Number
+                </label>
+                <input
+                  type="tel"
+                  name="contactNumber"
+                  placeholder="+94 77 123 4567"
+                  className="w-full px-3.5 py-2 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition"
+                  value={formData.contactNumber}
+                  onChange={onChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  placeholder="Minimum 6 characters"
+                  className="w-full px-3.5 py-2 border border-slate-700 bg-slate-900 rounded-lg focus:outline-none focus:border-indigo-500 text-white placeholder-slate-500 text-sm transition"
+                  value={formData.password}
+                  onChange={onChange}
+                  required
+                />
+              </div>
+
+              {message && (
+                <div
+                  className={`p-3 text-xs rounded-lg border font-medium flex items-center gap-2 ${
+                    successful
+                      ? "bg-emerald-950/70 text-emerald-300 border-emerald-800/60"
+                      : "bg-rose-950/70 text-rose-300 border-rose-800/60"
+                  }`}
+                >
+                  {successful && <CheckCircleIcon className="w-4 h-4 text-emerald-400 shrink-0" />}
+                  <span>{message}</span>
+                </div>
+              )}
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors font-medium"
+                disabled={loading || successful}
+                className="w-full py-2.5 text-white bg-indigo-600 hover:bg-indigo-500 font-medium rounded-lg text-sm transition shadow-sm disabled:opacity-60"
               >
-                Register
+                {loading ? "Creating Account..." : "Create Account"}
               </button>
             </form>
 
-            {/* Message Display */}
-            {message && (
-              <div className={`text-center text-sm p-2 rounded ${successful ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
-                {message}
-              </div>
-            )}
-
-            <div className="text-center">
-              <Link to="/login" className="font-medium text-sm text-blue-600 hover:text-blue-500 hover:underline">
-                Already have an account? Sign in
-              </Link>
+            <div className="text-center pt-2 border-t border-slate-800">
+              <p className="text-xs text-slate-400">
+                Already registered?{" "}
+                <Link to="/login" className="font-semibold text-indigo-400 hover:text-indigo-300 ml-1">
+                  Sign in here
+                </Link>
+              </p>
             </div>
 
           </div>

@@ -7,95 +7,111 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-[#1a202c] text-white pt-12 pb-6 font-sans w-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1.5fr_1.5fr_1.2fr] gap-8 lg:gap-12 max-w-400 mx-auto px-8 mb-8">
+    <footer className="bg-[#05070d] text-slate-300 pt-16 pb-8 font-sans w-full border-t border-slate-800/80">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr_1.5fr_1.5fr_1.2fr] gap-8 lg:gap-12 max-w-7xl mx-auto px-6 sm:px-8 mb-12">
 
         {/* Column 1: Logo and Branding */}
         <div className="flex flex-col">
-          <div className="bg-blue-800 p-2 rounded-lg text-white w-fit mb-4">
-            <BookOpenIcon className="w-8 h-8" />
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-2.5 rounded-xl text-white w-fit mb-4 shadow-lg shadow-indigo-600/20">
+            <BookOpenIcon className="w-7 h-7" />
           </div>
-          <h3 className="text-[1.8rem] font-normal leading-tight">
+          <h3 className="text-2xl font-black text-white leading-tight">
             Colombo International <br />
-            <span className="font-extrabold font-sans text-3xl block mt-1">Book Fair</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-indigo-300 block mt-1">
+              Book Fair 2026
+            </span>
           </h3>
-          <p className="text-white flex items-center gap-2 mt-5 font-medium">
-            <FaMapMarkerAlt className="text-[#ff4d4d] text-xl" /> <span>Colombo - Sri Lanka.</span>
+          <p className="text-slate-400 flex items-center gap-2 mt-4 text-sm font-medium">
+            <FaMapMarkerAlt className="text-rose-500 text-base shrink-0" /> 
+            <span>BMICH, Colombo, Sri Lanka</span>
+          </p>
+          <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+            Organized annually by the Sri Lanka Book Publishers’ Association (SLBPA).
           </p>
         </div>
 
         {/* Column 2: Quick Links */}
         <div>
-          <h4 className="mb-4 text-xl font-semibold tracking-wide">Quick Links</h4>
-          <ul className="list-none p-0">
-            <li className="mb-3.5"><Link to="/" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Home</Link></li>
-            <li className="mb-3.5"><Link to="/about" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">About</Link></li>
-            <li className="mb-3.5"><a href="/event" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Event</a></li>
-            <li className="mb-3.5"><a href="/gallery" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Photo Gallery</a></li>
-            <li className="mb-3.5"><Link to="/map" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Map</Link></li>
-            <li className="mb-3.5"><a href="/contact" className="text-slate-300 no-underline text-base transition-colors duration-300 hover:text-white">Contact</a></li>
+          <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Quick Links</h4>
+          <ul className="space-y-2.5 text-sm">
+            <li><Link to="/" className="text-slate-400 hover:text-white transition-colors">Home</Link></li>
+            <li><Link to="/map" className="text-slate-400 hover:text-white transition-colors">Live Floor Plan</Link></li>
+            <li><Link to="/about" className="text-slate-400 hover:text-white transition-colors">About CIBF</Link></li>
+            <li><Link to="/help" className="text-slate-400 hover:text-white transition-colors">Exhibitor Guidelines</Link></li>
+            <li><Link to="/login" className="text-slate-400 hover:text-white transition-colors">Publisher Sign In</Link></li>
+            <li><Link to="/register" className="text-slate-400 hover:text-white transition-colors">Register as Vendor</Link></li>
           </ul>
         </div>
 
         {/* Column 3: Contact Info */}
         <div>
-          <h4 className="mb-4 text-xl font-semibold tracking-wide">Have a Question?</h4>
-          <div className="flex gap-4 mb-3 items-start">
-            <FaMapMarkerAlt className="text-blue-500 text-xl min-w-[20px] mt-1" />
-            <p className="m-0 text-[0.95rem] leading-relaxed text-slate-300">SLBPA<br />No: 83 New Parliament Rd, Battaramulla, Sri Lanka.</p>
-          </div>
-          <div className="flex gap-4 mb-3 items-start">
-            <FaPhoneAlt className="text-blue-500 text-xl min-w-[20px] mt-1" />
-            <p className="m-0 text-[0.95rem] leading-relaxed text-slate-300">+94 112 785 480</p>
-          </div>
-          <div className="flex gap-4 mb-3 items-start">
-            <FaEnvelope className="text-blue-500 text-xl min-w-[20px] mt-1" />
-            <p className="m-0 text-[0.95rem] leading-relaxed text-slate-300">srilankabookpublishers@gmail.com</p>
+          <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Organizer Contact</h4>
+          <div className="space-y-3 text-xs text-slate-400 leading-relaxed">
+            <div className="flex gap-3 items-start">
+              <FaMapMarkerAlt className="text-indigo-400 text-sm mt-0.5 shrink-0" />
+              <p className="m-0">SLBPA Headquarters<br />No: 83 New Parliament Rd, Battaramulla, Sri Lanka.</p>
+            </div>
+            <div className="flex gap-3 items-center">
+              <FaPhoneAlt className="text-indigo-400 text-sm shrink-0" />
+              <p className="m-0 font-mono">+94 112 785 480</p>
+            </div>
+            <div className="flex gap-3 items-center">
+              <FaEnvelope className="text-indigo-400 text-sm shrink-0" />
+              <p className="m-0">srilankabookpublishers@gmail.com</p>
+            </div>
           </div>
         </div>
 
         {/* Column 4: Event Details */}
         <div>
-          <h4 className="mb-4 text-xl font-semibold tracking-wide">Event Details</h4>
-          <div className="flex gap-4 mb-3 items-start">
-            <FaCalendarAlt className="text-blue-500 text-xl min-w-[20px] mt-1" />
-            <p className="m-0 text-[0.95rem] leading-relaxed text-slate-300">25<sup>th</sup> September to 04<sup>th</sup> October 2026</p>
-          </div>
-          <div className="flex gap-4 mb-3 items-start">
-            <FaClock className="text-blue-500 text-xl min-w-[20px] mt-1" />
-            <p className="m-0 text-[0.95rem] leading-relaxed text-slate-300">9.00 AM to 9.00 PM</p>
-          </div>
-          <div className="flex gap-4 mb-3 items-start">
-            <FaMapMarkerAlt className="text-blue-500 text-xl min-w-[20px] mt-1" />
-            <p className="m-0 text-[0.95rem] leading-relaxed text-slate-300">BMICH, Bauddhaloka Mawatha, Colombo 07.</p>
+          <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Fair Schedule</h4>
+          <div className="space-y-3 text-xs text-slate-400">
+            <div className="flex gap-3 items-start">
+              <FaCalendarAlt className="text-indigo-400 text-sm mt-0.5 shrink-0" />
+              <p className="m-0">September 18 – 27, 2026<br /><span className="text-indigo-400 font-semibold">10 Consecutive Days</span></p>
+            </div>
+            <div className="flex gap-3 items-start">
+              <FaClock className="text-indigo-400 text-sm mt-0.5 shrink-0" />
+              <p className="m-0">9:00 AM – 7:00 PM Daily</p>
+            </div>
+            <div className="flex gap-3 items-start">
+              <FaMapMarkerAlt className="text-indigo-400 text-sm mt-0.5 shrink-0" />
+              <p className="m-0">BMICH, Bauddhaloka Mawatha, Colombo 07</p>
+            </div>
           </div>
         </div>
 
-        {/* Column 5: Socials & Map */}
+        {/* Column 5: Socials */}
         <div>
-          <h4 className="mb-4 text-xl font-semibold tracking-wide">Follow Us</h4>
-          <div className="flex gap-3 mb-5">
-            <a href="https://www.facebook.com/ColomboInternationalBookFair" className="bg-blue-700 w-9 h-9 flex items-center justify-center rounded-md text-white transition-colors duration-300 hover:bg-blue-600"><FaFacebookF /></a>
-            <a href="https://en.wikipedia.org/wiki/Colombo_International_Book_Fair" className="bg-blue-700 w-9 h-9 flex items-center justify-center rounded-md text-white transition-colors duration-300 hover:bg-blue-600"><FaWordpress /></a>
+          <h4 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Community</h4>
+          <div className="flex gap-2.5 mb-5">
+            <a
+              href="https://www.facebook.com/ColomboInternationalBookFair"
+              target="_blank"
+              rel="noreferrer"
+              className="bg-slate-900 border border-slate-800 hover:border-indigo-500 w-9 h-9 flex items-center justify-center rounded-xl text-slate-300 hover:text-white transition-all shadow-sm"
+            >
+              <FaFacebookF size={14} />
+            </a>
+            <a
+              href="https://en.wikipedia.org/wiki/Colombo_International_Book_Fair"
+              target="_blank"
+              rel="noreferrer"
+              className="bg-slate-900 border border-slate-800 hover:border-indigo-500 w-9 h-9 flex items-center justify-center rounded-xl text-slate-300 hover:text-white transition-all shadow-sm"
+            >
+              <FaWordpress size={14} />
+            </a>
           </div>
-          {/* Map Preview */}
-          <div className="w-full rounded-lg overflow-hidden relative border border-slate-600 shadow-md">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15843.46879268393!2d79.87052968715833!3d6.901682399999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ae2597f9d09a467%3A0xee0b9455e960eba5!2sBandaranaike%20Memorial%20International%20Conference%20Hall!5e0!3m2!1sen!2slk!4v1700000000000!5m2!1sen!2slk"
-              width="100%"
-              height="150"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="BMICH Map"
-            ></iframe>
+          <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 text-[11px] text-slate-400">
+            <span className="font-bold text-white block mb-0.5">Need Help with Stalls?</span>
+            Direct questions to the Fair Secretariat desk at BMICH.
           </div>
         </div>
       </div>
 
-      <div className="text-center pt-4 border-t border-slate-700 text-slate-400 text-sm">
-        <p>Copyright ©{currentYear} All rights reserved.</p>
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-6 border-t border-slate-800/70 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <p>© {currentYear} Colombo International Book Fair. All rights reserved.</p>
+        <p className="text-slate-500">Powered by Modular Spring Boot & React Digital Architecture</p>
       </div>
     </footer>
   );
