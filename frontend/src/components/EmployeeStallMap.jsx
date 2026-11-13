@@ -2,7 +2,6 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import employeeService from "../services/employee/service";
 import HallShapeWrapper from "./HallShapeWrapper";
-import EmployeeHeader from "./common/EmployeeHeader";
 
 const hallLayouts = {
     "Hall A": [
@@ -151,8 +150,6 @@ const EmployeeStallMap = ({ hallName }) => {
 
     return (
         <div className="flex flex-col min-h-screen bg-[#0b0f19] text-slate-100 font-sans">
-            <EmployeeHeader />
-
             <div className="flex flex-1 overflow-hidden relative">
                 {/* Hover Card Overlay */}
                 {hoveredStall && (
@@ -166,10 +163,6 @@ const EmployeeStallMap = ({ hallName }) => {
                             </div>
                         ) : (() => {
                             const status = getStatusStyle(hoveredStall);
-                            const qrData = encodeURIComponent(
-                                `STALL:${hoveredStall.stallCode}|PRICE:${hoveredStall.price}|FLOOR:${hoveredStall.floorName}`
-                            );
-
                             return (
                                 <div className="w-[300px] bg-[#0f1422] border border-slate-800 rounded-xl shadow-2xl p-4 select-none space-y-3">
                                     <div className="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -187,9 +180,6 @@ const EmployeeStallMap = ({ hallName }) => {
                                         <div>
                                             <p className="text-slate-400 text-[11px]">Publisher</p>
                                             <p className="font-medium text-white">{hoveredStall.vendorName || "Unassigned"}</p>
-                                            {hoveredStall.vendorEmail && (
-                                                <p className="text-slate-400 text-[11px]">{hoveredStall.vendorEmail}</p>
-                                            )}
                                         </div>
 
                                         <div className="flex justify-between items-center pt-2 border-t border-slate-800">
@@ -197,20 +187,6 @@ const EmployeeStallMap = ({ hallName }) => {
                                             <span className="text-slate-200 font-semibold">LKR {(hoveredStall.price || 0).toLocaleString()}</span>
                                         </div>
 
-                                        <div className="pt-2 border-t border-slate-800 flex items-center gap-2.5">
-                                            <div className="p-1 bg-white rounded shrink-0">
-                                                <img
-                                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=48x48&margin=1&data=${qrData}`}
-                                                    alt={`QR ${hoveredStall.stallCode}`}
-                                                    width={44}
-                                                    height={44}
-                                                    className="block"
-                                                />
-                                            </div>
-                                            <p className="text-[10px] text-slate-400 leading-tight">
-                                                Scannable token for attendee entrance check-in.
-                                            </p>
-                                        </div>
                                     </div>
                                 </div>
                             );

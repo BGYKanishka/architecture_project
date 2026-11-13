@@ -3,15 +3,16 @@
 CREATE TABLE users (
                        id SERIAL PRIMARY KEY,
                        name VARCHAR(100) NOT NULL,
-                       email VARCHAR(100) UNIQUE NOT NULL,
+                       email VARCHAR(254) NOT NULL,
                        contact_number VARCHAR(20),
-                       password VARCHAR(255) NOT NULL,
+                       cognito_sub VARCHAR(64) UNIQUE,
                        business_name VARCHAR(100),
                        role VARCHAR(20) NOT NULL
                            CHECK (role IN ('VENDOR', 'EMPLOYEE', 'ADMIN')),
                        enabled BOOLEAN DEFAULT TRUE,
                        created_at TIMESTAMP DEFAULT NOW()
 );
+CREATE UNIQUE INDEX users_email_lower_uq ON users (LOWER(email));
 CREATE TABLE floors (
                     id SERIAL PRIMARY KEY,
                     floor_name VARCHAR(10) UNIQUE NOT NULL

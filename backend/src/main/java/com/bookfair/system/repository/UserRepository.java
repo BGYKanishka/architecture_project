@@ -14,11 +14,17 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByEmailIgnoreCase(String email);
+
+    Optional<User> findByCognitoSub(String cognitoSub);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT u FROM User u WHERE u.id = :id")
     Optional<User> findByIdForUpdate(@Param("id") Long id);
 
     Boolean existsByEmail(String email);
+
+    boolean existsByEmailIgnoreCase(String email);
 
     List<User> findByRole(String role);
 

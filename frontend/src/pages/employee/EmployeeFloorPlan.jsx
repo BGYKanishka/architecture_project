@@ -1,8 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import employeeService from "../../services/employee/service";
 import HallMap from "../../components/HallMap";
-import EmployeeHeader from "../../components/common/EmployeeHeader";
 
 const EmployeeFloorPlan = () => {
     const navigate = useNavigate();
@@ -42,8 +41,6 @@ const EmployeeFloorPlan = () => {
 
     return (
         <div className="min-h-screen bg-[#0b0f19] text-slate-100 flex flex-col">
-            <EmployeeHeader />
-
             <div className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
                 {/* Header info */}
                 <div className="bg-[#0f1422] border border-slate-800 rounded-xl p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">

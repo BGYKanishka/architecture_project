@@ -162,11 +162,9 @@ const Reservations = () => {
                             className="w-16 h-16 object-contain"
                           />
                         ) : (
-                          <img
-                            src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${stall.reservationCode}`}
-                            alt="QR Code"
-                            className="w-16 h-16 object-contain"
-                          />
+                          <div className="w-16 h-16 flex items-center justify-center text-[10px] text-slate-500 text-center">
+                            QR unavailable
+                          </div>
                         )}
                       </div>
                       <div>

@@ -20,7 +20,7 @@ const ROLES = ["ALL", "VENDOR", "EMPLOYEE", "ADMIN"];
 const PAGE_SIZE = 10;
 
 const EMPTY_FORM = {
-    name: "", email: "", password: "", role: "VENDOR",
+    name: "", email: "", role: "VENDOR",
     contactNumber: "", businessName: "", enabled: true,
 };
 
@@ -47,7 +47,6 @@ export default function AdminUsers() {
     const [modal, setModal] = useState(null);
     const [editTarget, setEditTarget] = useState(null);
     const [form, setForm] = useState(EMPTY_FORM);
-    const [showPw, setShowPw] = useState(false);
     const [formErr, setFormErr] = useState("");
     const [saving, setSaving] = useState(false);
 
@@ -85,7 +84,6 @@ export default function AdminUsers() {
     const openAdd = () => {
         setForm(EMPTY_FORM);
         setFormErr("");
-        setShowPw(false);
         setModal("add");
     };
     const openEdit = (u) => {
@@ -93,14 +91,12 @@ export default function AdminUsers() {
         setForm({
             name: u.name || "",
             email: u.email || "",
-            password: "",
             role: u.role || "VENDOR",
             contactNumber: u.contactNumber || "",
             businessName: u.businessName || "",
             enabled: u.enabled !== false,
         });
         setFormErr("");
-        setShowPw(false);
         setModal("edit");
     };
     const closeModal = () => { setModal(null); setEditTarget(null); };
@@ -116,8 +112,8 @@ export default function AdminUsers() {
         setSaving(true);
         try {
             if (modal === "add") {
-                if (!form.password) { setFormErr("Password is required."); setSaving(false); return; }
-                await createAdminUser(form);
+                const { enabled, ...newUser } = form;
+                await createAdminUser(newUser);
             } else {
                 await updateAdminUser(editTarget.id, form);
             }
@@ -367,29 +363,11 @@ export default function AdminUsers() {
                                 </div>
                             </div>
 
-                            <div>
-                                <label className="block text-xs font-medium text-slate-300 mb-1">
-                                    Password {modal === "edit" && <span className="text-slate-500">(leave blank to keep current)</span>}
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        name="password"
-                                        type={showPw ? "text" : "password"}
-                                        value={form.password}
-                                        onChange={handleFormChange}
-                                        required={modal === "add"}
-                                        placeholder={modal === "edit" ? "••••••••" : ""}
-                                        className="w-full bg-[#0b0f19] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white pr-14 focus:outline-none focus:border-indigo-500"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPw(v => !v)}
-                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-indigo-400 hover:text-indigo-300"
-                                    >
-                                        {showPw ? "Hide" : "Show"}
-                                    </button>
-                                </div>
-                            </div>
+                            {modal === "add" && (
+                                <p className="text-[11px] text-slate-400">
+                                    The user signs in through Cognito with this verified email. Their app role is set here.
+                                </p>
+                            )}
 
                             <div className="grid grid-cols-2 gap-3">
                                 <div>

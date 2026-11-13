@@ -13,7 +13,6 @@ public class UserProfileUpdateRequest {
   private String contactNumber;
 
   @Size(max = 100, message = "Business name must be under 100 characters")
-  @Size(max = 100, message = "Business name must be under 100 characters")
   private String businessName;
 
   private java.util.List<String> genres;

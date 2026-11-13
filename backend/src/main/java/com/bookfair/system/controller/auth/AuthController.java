@@ -1,37 +1,66 @@
 package com.bookfair.system.controller.auth;
 
-import com.bookfair.system.dto.request.LoginRequest;
-import com.bookfair.system.dto.request.SignupRequest;
-import com.bookfair.system.service.AuthService;
-import jakarta.validation.Valid;
+import com.bookfair.system.dto.UserProfileResponse;
+import com.bookfair.system.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
+import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
+    private final UserService userService;
+    private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        try {
-            return ResponseEntity.ok(authService.authenticateUser(loginRequest));
-        } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
-        }
+    @Value("${app.cognito.domain}")
+    private String cognitoDomain;
+
+    @Value("${app.cognito.client-id}")
+    private String cognitoClientId;
+
+    @Value("${app.public-url}")
+    private String appPublicUrl;
+
+    @GetMapping("/me")
+    public ResponseEntity<UserProfileResponse> currentUser(@AuthenticationPrincipal OidcUser principal) {
+        return ResponseEntity.ok(userService.getUserProfileByCognitoSub(principal.getSubject()));
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        try {
-            return ResponseEntity.ok(authService.registerUser(signUpRequest));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @GetMapping("/csrf")
+    public ResponseEntity<Map<String, String>> csrfToken(CsrfToken csrfToken) {
+        return ResponseEntity.ok(Map.of("token", csrfToken.getToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(
+            Authentication authentication,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+        logoutHandler.logout(request, response, authentication);
+
+        String domain = cognitoDomain.replaceAll("/+$", "");
+        String logoutUrl = UriComponentsBuilder.fromUriString(domain + "/logout")
+                .queryParam("client_id", cognitoClientId)
+                .queryParam("logout_uri", appPublicUrl)
+                .build()
+                .encode()
+                .toUriString();
+        return ResponseEntity.ok(Map.of("logoutUrl", logoutUrl));
     }
 }

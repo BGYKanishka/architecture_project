@@ -145,25 +145,7 @@ public class EmployeePanelController {
                     .ifPresent(rs -> {
                         Reservation reservation = rs.getReservation();
                         dto.setVendorName(reservation.getUser().getName());
-                        dto.setVendorEmail(reservation.getUser().getEmail());
-                        dto.setVendorContact(reservation.getUser().getContactNumber());
                         dto.setBusinessName(reservation.getUser().getBusinessName());
-
-                        // Generate QR data string (JSON format)
-                        String qrData = String.format(
-                                "{\"stall\":\"%s\",\"vendor\":\"%s\",\"contact\":\"%s\",\"resId\":\"%d\"}",
-                                stall.getStallCode(),
-                                reservation.getUser().getName(),
-                                reservation.getUser().getEmail(),
-                                reservation.getId());
-                        dto.setQrCodeData(qrData);
-
-                        paymentRepository.findByReservationId(reservation.getId()).ifPresent(payment -> {
-                            dto.setPaymentStatus(payment.getPaymentStatus());
-                            dto.setPaymentAmount(payment.getAmount());
-                            dto.setPaymentDate(payment.getPaymentDate());
-                            dto.setPaymentMethod(payment.getPaymentMethod());
-                        });
                     });
         }
         return dto;

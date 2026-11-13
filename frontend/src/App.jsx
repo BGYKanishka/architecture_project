@@ -1,11 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/login";
 import Register from "./pages/public/Register";
 import Dashboard from "./pages/user/Dashboard";
 import Map from "./pages/user/Map";
-import Footer from "./components/common/footer";
-import Header from "./components/common/Header";
 import MainLayout from "./layouts/MainLayout";
 import EmployeeLayout from "./layouts/EmployeeLayout";
 import AdminLayout from "./layouts/AdminLayout";
@@ -27,11 +25,12 @@ import AdminStalls from "./pages/admin/AdminStalls";
 import AdminReservations from "./pages/admin/AdminReservations";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminProtectedRoute from "./components/routing/AdminProtectedRoute.jsx";
-import EmployeeHeader from "./components/common/EmployeeHeader";
+import CognitoCallback from "./pages/public/CognitoCallback.jsx";
 import { useEffect, useState } from "react";
 
 function AppContent() {
   const [user, setUser] = useState(() => AuthService.getCurrentUser());
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = () => {
@@ -40,10 +39,12 @@ function AppContent() {
     };
 
     window.addEventListener("user-updated", fetchUser);
-    window.addEventListener("storage", fetchUser);
+    AuthService.fetchCurrentUser()
+      .then(setUser)
+      .catch(() => setUser(null))
+      .finally(() => setAuthLoading(false));
     return () => {
       window.removeEventListener("user-updated", fetchUser);
-      window.removeEventListener("storage", fetchUser);
     };
   }, []);
 
@@ -53,6 +54,7 @@ function AppContent() {
         {/* ── Public / Blank Layout routes ── */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/auth/callback" element={<CognitoCallback />} />
 
         {/* ── Main Layout routes (User/Public with Header & Footer) ── */}
         <Route element={<MainLayout user={user} />}>
@@ -67,12 +69,13 @@ function AppContent() {
           <Route path="/payment-selection" element={<PaymentSelection />} />
           <Route path="/booking-confirmation" element={<BookingConfirmation />} />
           <Route path="/help" element={<HelpCenter />} />
-          <Route path="/employee" element={<Navigate to="/employee/floor-plan" replace />} />
           <Route path="/genres" element={<GenreSelection />} />
         </Route>
 
+        <Route path="/employee" element={<Navigate to="/employee/floor-plan" replace />} />
+
         {/* ── Admin routes ── */}
-        <Route element={<AdminProtectedRoute />}>
+        <Route element={<AdminProtectedRoute user={user} authLoading={authLoading} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/stalls" element={<AdminStalls />} />
@@ -87,7 +90,7 @@ function AppContent() {
           <Route
             path="/employee/floor-plan"
             element={
-              <EmployeeRoute>
+                <EmployeeRoute user={user} authLoading={authLoading}>
                 <EmployeeFloorPlan />
               </EmployeeRoute>
             }
@@ -95,7 +98,7 @@ function AppContent() {
           <Route
             path="/employee/floor-plan/:hallName"
             element={
-              <EmployeeRoute>
+                <EmployeeRoute user={user} authLoading={authLoading}>
                 <EmployeeDashboard />
               </EmployeeRoute>
             }

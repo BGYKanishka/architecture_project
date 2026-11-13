@@ -4,6 +4,7 @@ import com.bookfair.system.dto.UserProfileResponse;
 import com.bookfair.system.dto.request.AdminCreateUserRequest;
 import com.bookfair.system.dto.request.AdminUpdateUserRequest;
 import com.bookfair.system.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,7 +36,7 @@ public class AdminUserController {
     /** POST /api/admin/users */
     @PostMapping
     public ResponseEntity<UserProfileResponse> createUser(
-            @RequestBody AdminCreateUserRequest request) {
+            @Valid @RequestBody AdminCreateUserRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
@@ -43,7 +44,7 @@ public class AdminUserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserProfileResponse> updateUser(
             @PathVariable Long id,
-            @RequestBody AdminUpdateUserRequest request) {
+            @Valid @RequestBody AdminUpdateUserRequest request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
     }
 

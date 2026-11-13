@@ -72,16 +72,10 @@ const BookingConfirmation = () => {
                   alt="QR Code"
                   className="w-40 h-40 object-contain"
                 />
-              ) : reservationId ? (
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${reservationId}`}
-                  alt="QR Code"
-                  className="w-40 h-40 object-contain"
-                />
               ) : (
                 <div className="w-40 h-40 flex items-center justify-center bg-slate-100 text-slate-400">
                   <QrCodeIcon className="w-10 h-10" />
-                  <span className="text-xs ml-2">QR Error</span>
+                  <span className="text-xs ml-2">QR unavailable</span>
                 </div>
               )}
             </div>

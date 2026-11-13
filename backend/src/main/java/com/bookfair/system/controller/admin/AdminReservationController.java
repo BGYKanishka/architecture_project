@@ -17,7 +17,7 @@ public class AdminReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminReservationResponse>> getAllReservations() {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }

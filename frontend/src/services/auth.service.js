@@ -1,53 +1,43 @@
-
 import api from "./api";
 
-const register = (name, email, password, contactNumber, businessName) => {
-  return api.post("/auth/signup", {
-    name,
-    email,
-    password,
-    contactNumber,
-    businessName,
-  });
-};
-
-const login = (email, password) => {
-  return api
-    .post("/auth/signin", {
-      email,
-      password,
-    })
-    .then((response) => {
-      if (response.data.token) {
-        // Save user data + token in browser storage
-        localStorage.setItem("user", JSON.stringify(response.data));
-        localStorage.setItem("token", response.data.token);
-        window.dispatchEvent(new Event("user-updated"));
-      }
-      return response.data;
-    });
-};
-
-const logout = () => {
-  localStorage.removeItem("user");
-  localStorage.removeItem("token");
-  window.dispatchEvent(new Event("user-updated"));
-};
+const USER_KEY = "user";
 
 const getCurrentUser = () => {
   try {
-    const raw = localStorage.getItem("user");
+    const raw = sessionStorage.getItem(USER_KEY);
     return raw ? JSON.parse(raw) : null;
-  } catch (e) {
+  } catch {
     return null;
   }
 };
 
-const AuthService = {
-  register,
-  login,
-  logout,
-  getCurrentUser,
+const fetchCurrentUser = async () => {
+  await api.get("/auth/csrf");
+  const response = await api.get("/auth/me");
+  sessionStorage.setItem(USER_KEY, JSON.stringify(response.data));
+  window.dispatchEvent(new Event("user-updated"));
+  return response.data;
 };
+
+const login = () => {
+  window.location.assign("/oauth2/authorization/cognito");
+};
+
+const register = login;
+
+const logout = async () => {
+  let logoutUrl = "/login";
+  try {
+    await api.get("/auth/csrf");
+    const response = await api.post("/auth/logout");
+    logoutUrl = response.data.logoutUrl || logoutUrl;
+  } finally {
+    sessionStorage.removeItem(USER_KEY);
+    window.dispatchEvent(new Event("user-updated"));
+    window.location.assign(logoutUrl);
+  }
+};
+
+const AuthService = { login, register, logout, getCurrentUser, fetchCurrentUser };
 
 export default AuthService;

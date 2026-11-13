@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import api from "../../services/api";
 import {
@@ -15,7 +15,6 @@ import VerificationResultModal from "../VerificationResultModal";
 
 const EmployeeHeader = ({ user }) => {
     const navigate = useNavigate();
-    const location = useLocation();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 

@@ -23,14 +23,14 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(nullable = false, length = 254)
     private String email;
 
     @Column(name = "contact_number", length = 20)
     private String contactNumber;
 
-    @Column(nullable = false)
-    private String password;
+    @Column(name = "cognito_sub", unique = true, length = 64)
+    private String cognitoSub;
 
     @Column(name = "business_name", length = 100)
     private String businessName;

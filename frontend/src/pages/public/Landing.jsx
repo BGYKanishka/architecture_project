@@ -3,16 +3,91 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import {
   MapPinIcon,
-  CalendarDaysIcon,
   BuildingOffice2Icon,
   UserGroupIcon,
   ShieldCheckIcon,
   ArrowRightIcon,
-  CheckCircleIcon,
   QrCodeIcon,
   TicketIcon,
   CheckIcon,
 } from "@heroicons/react/24/outline";
+
+const BookFairIllustration = () => (
+  <svg
+    viewBox="0 0 620 540"
+    className="h-auto w-full overflow-visible"
+    role="img"
+    aria-labelledby="book-fair-illustration-title"
+  >
+    <title id="book-fair-illustration-title">A floating open book above a stack of books</title>
+    <defs>
+      <radialGradient id="book-glow">
+        <stop offset="0" stopColor="#4f46e5" stopOpacity="0.34" />
+        <stop offset="1" stopColor="#4f46e5" stopOpacity="0" />
+      </radialGradient>
+      <linearGradient id="page-left" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#ffffff" />
+        <stop offset="1" stopColor="#cbd5e1" />
+      </linearGradient>
+      <linearGradient id="page-right" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#f8fafc" />
+        <stop offset="1" stopColor="#dbeafe" />
+      </linearGradient>
+      <linearGradient id="cover-teal" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#22d3ee" />
+        <stop offset="1" stopColor="#4f46e5" />
+      </linearGradient>
+      <filter id="book-shadow" x="-30%" y="-30%" width="160%" height="180%">
+        <feDropShadow dx="0" dy="18" stdDeviation="15" floodColor="#020617" floodOpacity="0.48" />
+      </filter>
+    </defs>
+
+    <ellipse cx="314" cy="278" rx="270" ry="250" fill="url(#book-glow)" />
+    <circle cx="130" cy="185" r="3" fill="#a5b4fc" className="book-sparkle book-sparkle-one" />
+    <circle cx="500" cy="180" r="4" fill="#67e8f9" className="book-sparkle book-sparkle-two" />
+    <path d="M102 285h22m-11-11v22M496 302h18m-9-9v18" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" opacity=".7" />
+    <ellipse cx="314" cy="443" rx="205" ry="35" fill="#020617" opacity=".42" />
+
+    <g className="book-stack-float" filter="url(#book-shadow)">
+      {/* Bottom book */}
+      <path d="m119 376 278-26 86 39-279 31z" fill="#f1f5f9" />
+      <path d="m204 420 279-31v42l-279 32z" fill="#d84967" />
+      <path d="m119 376 85 44v43l-85-46z" fill="#a92f52" />
+      <path d="m217 426 245-28" stroke="#fda4af" strokeWidth="2" opacity=".65" />
+
+      {/* Middle book */}
+      <path d="m145 329 270-25 74 34-269 30z" fill="#f8fafc" />
+      <path d="m220 368 269-30v38l-269 31z" fill="#0f766e" />
+      <path d="m145 329 75 39v38l-75-41z" fill="#115e59" />
+      <path d="m233 374 235-26" stroke="#99f6e4" strokeWidth="2" opacity=".7" />
+
+      {/* Top book */}
+      <path d="m181 285 244-23 66 31-245 28z" fill="#f8fafc" />
+      <path d="m246 321 245-28v34l-245 29z" fill="#4f46e5" />
+      <path d="m181 285 65 36v35l-65-38z" fill="#3730a3" />
+      <path d="m259 326 216-24" stroke="#c7d2fe" strokeWidth="2" opacity=".8" />
+    </g>
+
+    <g className="open-book-float" filter="url(#book-shadow)">
+      {/* Cover and page edges */}
+      <path d="M162 216c60-22 112-10 158 31 47-41 99-53 158-31l-18 93c-53-18-98-8-140 27-42-35-87-45-140-27z" fill="url(#cover-teal)" />
+      <path d="M174 211c55-19 103-7 146 31v82c-43-32-88-41-132-25z" fill="#cbd5e1" />
+      <path d="M450 211c-55-19-103-7-146 31v82c43-32 88-41 132-25z" fill="#cbd5e1" />
+
+      {/* Pages */}
+      <g className="book-page-left">
+        <path d="M310 232c-40-34-91-49-151-38l17 89c51-9 94 1 134 31z" fill="url(#page-left)" stroke="#fff" strokeWidth="2" />
+        <path d="M185 220c39-4 77 7 108 26M190 238c36-2 70 8 100 25M194 256c33 0 63 9 91 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" opacity=".7" />
+      </g>
+      <g className="book-page-right">
+        <path d="M310 232c40-34 91-49 151-38l-17 89c-51-9-94 1-134 31z" fill="url(#page-right)" stroke="#fff" strokeWidth="2" />
+        <path d="M435 220c-39-4-77 7-108 26M430 238c-36-2-70 8-100 25M426 256c-33 0-63 9-91 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" opacity=".7" />
+      </g>
+      <path d="M310 232v83" stroke="#818cf8" strokeWidth="5" strokeLinecap="round" />
+      <path d="M310 232c-3 33-3 58 0 83" stroke="#4338ca" strokeWidth="2" opacity=".7" />
+    </g>
+  </svg>
+);
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -101,69 +176,74 @@ const Landing = () => {
     <div className="min-h-screen bg-[#0b0f19] text-slate-100 font-sans">
 
       {/* ── HERO SECTION ── */}
-      <section className="border-b border-slate-800/80 py-20 sm:py-28">
+      <section className="border-b border-slate-800/80 py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl">
-            {/* Clean kicker text (NO pill frame around words) */}
-            <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-indigo-400 mb-4">
-              September 18–27, 2026 • BMICH Colombo
-            </p>
+          <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1.15fr)_minmax(21rem,0.85fr)] lg:gap-14">
+            <div>
+              <p className="text-xs sm:text-sm font-semibold uppercase tracking-wider text-indigo-400 mb-4">
+                September 18–27, 2026 • BMICH Colombo
+              </p>
 
-            <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
-              South Asia’s Premier Book Fair. <br />
-              <span className="text-slate-400">Reserve Your Stall Online.</span>
-            </h1>
+              <h1 className="text-4xl sm:text-5xl xl:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
+                South Asia’s Premier Book Fair. <br />
+                <span className="text-slate-400">Reserve Your Stall Online.</span>
+              </h1>
 
-            <p className="text-base sm:text-lg text-slate-300 mb-8 leading-relaxed">
-              Connect with over 1,000,000 passionate book buyers, institutions, and distributors. Browse live hall availability, pick your locations on the interactive map, and confirm your space in minutes.
-            </p>
+              <p className="text-base sm:text-lg text-slate-300 mb-8 leading-relaxed max-w-2xl">
+                Connect with over 1,000,000 passionate book buyers, institutions, and distributors. Browse live hall availability, pick your locations on the interactive map, and confirm your space in minutes.
+              </p>
 
-            <div className="flex flex-wrap items-center gap-4">
-              <Link
-                to="/map"
-                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-3 rounded-lg text-sm transition shadow-sm"
-              >
-                <MapPinIcon className="w-4 h-4" />
-                <span>Explore Floor Plan</span>
-                <ArrowRightIcon className="w-4 h-4 ml-1" />
-              </Link>
-
-              {currentUser ? (
+              <div className="flex flex-wrap items-center gap-4">
                 <Link
-                  to="/dashboard"
-                  className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition"
+                  to="/map"
+                  className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-6 py-3 rounded-lg text-sm transition shadow-sm"
                 >
-                  <BuildingOffice2Icon className="w-4 h-4 text-slate-400" />
-                  <span>Go to Dashboard</span>
+                  <MapPinIcon className="w-4 h-4" />
+                  <span>Explore Floor Plan</span>
+                  <ArrowRightIcon className="w-4 h-4 ml-1" />
                 </Link>
-              ) : (
-                <Link
-                  to="/register"
-                  className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition"
-                >
-                  <span>Publisher Sign Up</span>
-                </Link>
-              )}
+
+                {currentUser ? (
+                  <Link
+                    to="/dashboard"
+                    className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition"
+                  >
+                    <BuildingOffice2Icon className="w-4 h-4 text-slate-400" />
+                    <span>Go to Dashboard</span>
+                  </Link>
+                ) : (
+                  <Link
+                    to="/register"
+                    className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition"
+                  >
+                    <span>Publisher Sign Up</span>
+                  </Link>
+                )}
+              </div>
+
             </div>
 
-            {/* Scale stats bar - clean and natural */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-12 mt-12 border-t border-slate-800/80">
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-white">1,000,000+</p>
-                <p className="text-xs text-slate-400 mt-1">Expected Visitors</p>
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-white">400+</p>
-                <p className="text-xs text-slate-400 mt-1">Publishers & Imprints</p>
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-white">8 Halls</p>
-                <p className="text-xs text-slate-400 mt-1">BMICH Exhibition Wings</p>
-              </div>
-              <div>
-                <p className="text-2xl sm:text-3xl font-bold text-white">10 Days</p>
-                <p className="text-xs text-slate-400 mt-1">Exhibition Duration</p>
-              </div>
+            <div className="relative mx-auto w-full max-w-[34rem] lg:max-w-none" aria-hidden="true">
+              <BookFairIllustration />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8 sm:pt-10 mt-14 border-t border-slate-800/80">
+            <div>
+              <p className="text-2xl sm:text-3xl font-bold text-white">1,000,000+</p>
+              <p className="text-xs text-slate-400 mt-1">Expected Visitors</p>
+            </div>
+            <div>
+              <p className="text-2xl sm:text-3xl font-bold text-white">400+</p>
+              <p className="text-xs text-slate-400 mt-1">Publishers & Imprints</p>
+            </div>
+            <div>
+              <p className="text-2xl sm:text-3xl font-bold text-white">8 Halls</p>
+              <p className="text-xs text-slate-400 mt-1">BMICH Exhibition Wings</p>
+            </div>
+            <div>
+              <p className="text-2xl sm:text-3xl font-bold text-white">10 Days</p>
+              <p className="text-xs text-slate-400 mt-1">Exhibition Duration</p>
             </div>
           </div>
         </div>

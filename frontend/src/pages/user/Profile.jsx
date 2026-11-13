@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import UserService from "../../services/user.service";
-import { UserCircleIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon, PencilSquareIcon, CheckIcon, XMarkIcon, KeyIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, BriefcaseIcon, EnvelopeIcon, PhoneIcon, ShieldCheckIcon, PencilSquareIcon, CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -16,20 +16,6 @@ const Profile = () => {
   });
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-
-  // Change Password State
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: ""
-  });
-  const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" });
-  const [showPasswords, setShowPasswords] = useState({
-    current: false,
-    new: false,
-    confirm: false
-  });
 
   useEffect(() => {
     fetchProfile();
@@ -83,11 +69,11 @@ const Profile = () => {
       .then((response) => {
         setProfile(response.data);
 
-        // Update localStorage to sync header
-        const user = JSON.parse(localStorage.getItem("user"));
+        // Update the non-sensitive display profile used by the header.
+        const user = JSON.parse(sessionStorage.getItem("user"));
         if (user) {
           user.name = response.data.name;
-          localStorage.setItem("user", JSON.stringify(user));
+          sessionStorage.setItem("user", JSON.stringify(user));
 
           window.dispatchEvent(new Event("user-updated"));
         }
@@ -101,71 +87,6 @@ const Profile = () => {
         console.error("Error updating profile:", err);
         setSaveMessage("Failed to update profile.");
         setSaveLoading(false);
-      });
-  };
-
-  // Password Change Logic
-  const handlePasswordChange = (e) => {
-    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
-  };
-
-  const togglePasswordVisibility = (field) => {
-    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
-  };
-
-  const submitPasswordChange = (e) => {
-    e.preventDefault();
-    setPasswordMessage({ type: "", text: "" });
-
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordMessage({ type: "error", text: "New passwords do not match!" });
-      return;
-    }
-
-    if (passwordForm.newPassword.length < 6) {
-      setPasswordMessage({ type: "error", text: "Password must be at least 6 characters." });
-      return;
-    }
-
-    UserService.changePassword({
-      currentPassword: passwordForm.currentPassword,
-      newPassword: passwordForm.newPassword
-    })
-      .then(() => {
-        setPasswordMessage({ type: "success", text: "Password changed successfully!" });
-        setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-        setShowPasswords({ current: false, new: false, confirm: false }); // Reset visibility
-        setTimeout(() => {
-          setIsPasswordModalOpen(false);
-          setPasswordMessage({ type: "", text: "" });
-        }, 2000);
-      })
-      .catch((err) => {
-        console.error("Change Password Error:", err);
-        let msg = "Failed to change password.";
-
-        if (err.response && err.response.data) {
-          const data = err.response.data;
-          if (typeof data === 'string') {
-            msg = data;
-          } else if (typeof data === 'object') {
-            // Check if it's a validation error map (field: message)
-            const keys = Object.keys(data);
-            if (keys.length > 0) {
-              // If there's an "error" key, use it
-              if (data.error) {
-                msg = data.error;
-              } else if (data.message) {
-                msg = data.message;
-              } else {
-                // Otherwise it's likely validation errors, just take the first one
-                msg = `${keys[0]}: ${data[keys[0]]}`;
-              }
-            }
-          }
-        }
-
-        setPasswordMessage({ type: "error", text: msg });
       });
   };
 
@@ -259,14 +180,10 @@ const Profile = () => {
             </div>
 
             <div className="mt-8 flex flex-wrap justify-end gap-3 pt-4 border-t border-slate-800">
-              {/* Change Password Button */}
               {!isEditing && (
-                <button
-                  onClick={() => setIsPasswordModalOpen(true)}
-                  className="mr-auto flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-medium transition"
-                >
-                  <KeyIcon className="w-4 h-4 text-indigo-400" /> Change Password
-                </button>
+                <p className="mr-auto self-center text-[11px] text-slate-500">
+                  Password and recovery are managed by Cognito. Use “Forgot password” on the sign-in page to reset it.
+                </p>
               )}
 
               {isEditing ? (
@@ -298,119 +215,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-
-      {/* Change Password Modal */}
-      {isPasswordModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-          <div className="bg-[#0f1422] border border-slate-800 rounded-xl shadow-xl w-full max-w-md p-6 text-slate-100">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-white">Change Password</h3>
-              <button onClick={() => setIsPasswordModalOpen(false)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800">
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={submitPasswordChange} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Current Password</label>
-                <div className="relative">
-                  <input
-                    type={showPasswords.current ? "text" : "password"}
-                    name="currentPassword"
-                    required
-                    className="w-full bg-[#0b0f19] border border-slate-800 text-white rounded-lg px-3.5 py-2 pr-10 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs"
-                    value={passwordForm.currentPassword}
-                    onChange={handlePasswordChange}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => togglePasswordVisibility('current')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
-                  >
-                    {showPasswords.current ? (
-                      <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">New Password</label>
-                <div className="relative">
-                  <input
-                    type={showPasswords.new ? "text" : "password"}
-                    name="newPassword"
-                    required
-                    minLength={6}
-                    className="w-full bg-[#0b0f19] border border-slate-800 text-white rounded-lg px-3.5 py-2 pr-10 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs"
-                    value={passwordForm.newPassword}
-                    onChange={handlePasswordChange}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => togglePasswordVisibility('new')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
-                  >
-                    {showPasswords.new ? (
-                      <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Confirm New Password</label>
-                <div className="relative">
-                  <input
-                    type={showPasswords.confirm ? "text" : "password"}
-                    name="confirmPassword"
-                    required
-                    minLength={6}
-                    className="w-full bg-[#0b0f19] border border-slate-800 text-white rounded-lg px-3.5 py-2 pr-10 focus:ring-1 focus:ring-indigo-500 focus:outline-none text-xs"
-                    value={passwordForm.confirmPassword}
-                    onChange={handlePasswordChange}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => togglePasswordVisibility('confirm')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200"
-                  >
-                    {showPasswords.confirm ? (
-                      <EyeSlashIcon className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" aria-hidden="true" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {passwordMessage.text && (
-                <div className={`text-xs p-3 rounded-lg font-medium ${passwordMessage.type === "error" ? "bg-rose-500/10 border border-rose-500/20 text-rose-300" : "bg-emerald-500/10 border border-emerald-500/20 text-emerald-300"}`}>
-                  {passwordMessage.text}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsPasswordModalOpen(false)}
-                  className="px-4 py-2 text-slate-400 font-medium hover:text-white rounded-lg transition text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-500 transition text-xs"
-                >
-                  Update Password
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
     </div>
   );

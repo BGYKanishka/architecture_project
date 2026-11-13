@@ -25,7 +25,7 @@ public class AdminStallController {
      * Returns all stalls with status labels and vendor info for reserved ones.
      */
     @GetMapping("/availability")
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<StallAvailabilityResponse>> getStallAvailability() {
         return ResponseEntity.ok(stallService.getStallAvailability());
     }
@@ -48,7 +48,7 @@ public class AdminStallController {
     // ── Legacy endpoints (kept for backward compatibility) ─────
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'EMPLOYEE')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<StallResponse>> getAllStalls() {
         List<Stall> stalls = stallService.getAllStalls();
         List<StallResponse> response = stalls.stream().map(stall -> new StallResponse(

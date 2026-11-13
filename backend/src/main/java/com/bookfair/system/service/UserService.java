@@ -3,7 +3,6 @@ package com.bookfair.system.service;
 import com.bookfair.system.dto.UserProfileResponse;
 import com.bookfair.system.dto.request.AdminCreateUserRequest;
 import com.bookfair.system.dto.request.AdminUpdateUserRequest;
-import com.bookfair.system.dto.request.ChangePasswordRequest;
 import com.bookfair.system.dto.request.UserProfileUpdateRequest;
 import com.bookfair.system.entity.Genre;
 import com.bookfair.system.entity.User;
@@ -13,7 +12,6 @@ import com.bookfair.system.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashSet;
@@ -28,7 +26,6 @@ public class UserService {
 
   private final UserRepository userRepository;
   private final GenreRepository genreRepository;
-  private final PasswordEncoder passwordEncoder;
   private final ReservationRepository reservationRepository;
 
   /** Thrown when a user cannot be deleted due to FK-linked reservations. */
@@ -48,16 +45,16 @@ public class UserService {
   // ─── User self-service ─────────────────────────────────────
 
   @Transactional(readOnly = true)
-  public UserProfileResponse getUserProfile(String email) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+  public UserProfileResponse getUserProfileByCognitoSub(String cognitoSub) {
+    User user = userRepository.findByCognitoSub(cognitoSub)
+        .orElseThrow(() -> new UsernameNotFoundException("Cognito user profile not found."));
     return toProfileResponse(user);
   }
 
   @Transactional
-  public UserProfileResponse updateProfile(String email, UserProfileUpdateRequest request) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+  public UserProfileResponse updateProfileByCognitoSub(String cognitoSub, UserProfileUpdateRequest request) {
+    User user = userRepository.findByCognitoSub(cognitoSub)
+        .orElseThrow(() -> new UsernameNotFoundException("Cognito user profile not found."));
 
     if (request.getName() != null && !request.getName().isEmpty())
       user.setName(request.getName());
@@ -88,17 +85,6 @@ public class UserService {
     return toProfileResponse(user);
   }
 
-  public void changePassword(String email, ChangePasswordRequest request) {
-    User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-
-    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword()))
-      throw new IllegalArgumentException("Incorrect current password");
-
-    user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-    userRepository.save(user);
-  }
-
   public List<UserProfileResponse> getEmployees() {
     return userRepository.findByRole("EMPLOYEE").stream()
         .map(this::toAdminResponse)
@@ -124,13 +110,13 @@ public class UserService {
 
   @Transactional
   public UserProfileResponse createUser(AdminCreateUserRequest request) {
-    if (userRepository.existsByEmail(request.getEmail()))
-      throw new IllegalArgumentException("Email already in use: " + request.getEmail());
+    String email = request.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
+    if (userRepository.existsByEmailIgnoreCase(email))
+      throw new IllegalArgumentException("Email already in use.");
 
     User user = User.builder()
         .name(request.getName())
-        .email(request.getEmail())
-        .password(passwordEncoder.encode(request.getPassword()))
+        .email(email)
         .role(request.getRole().toUpperCase())
         .contactNumber(request.getContactNumber())
         .businessName(request.getBusinessName())
@@ -146,9 +132,12 @@ public class UserService {
         .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
 
     if (request.getEmail() != null && !request.getEmail().equalsIgnoreCase(user.getEmail())) {
-      if (userRepository.existsByEmail(request.getEmail()))
-        throw new IllegalArgumentException("Email already in use: " + request.getEmail());
-      user.setEmail(request.getEmail());
+      if (user.getCognitoSub() != null)
+        throw new IllegalArgumentException("Change this user's email in Cognito and verify the new address first.");
+      String email = request.getEmail().trim().toLowerCase(java.util.Locale.ROOT);
+      if (userRepository.existsByEmailIgnoreCase(email))
+        throw new IllegalArgumentException("Email already in use.");
+      user.setEmail(email);
     }
     if (request.getName() != null && !request.getName().isBlank())
       user.setName(request.getName());
@@ -160,9 +149,6 @@ public class UserService {
       user.setRole(request.getRole().toUpperCase());
     if (request.getEnabled() != null)
       user.setEnabled(request.getEnabled());
-    if (request.getPassword() != null && !request.getPassword().isBlank())
-      user.setPassword(passwordEncoder.encode(request.getPassword()));
-
     return toAdminResponse(userRepository.save(user));
   }
 
@@ -202,7 +188,7 @@ public class UserService {
   private UserProfileResponse toProfileResponse(User user) {
     List<String> genreNames = (user.getGenres() == null) ? List.of()
         : user.getGenres().stream()
-        .map(Genre::getName)
+        .map(genre -> genre.getName())
         .collect(Collectors.toList());
 
     return UserProfileResponse.builder()

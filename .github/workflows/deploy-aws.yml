@@ -1,0 +1,114 @@
+name: Build and deploy to AWS
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_region:
+        description: AWS Region
+        type: choice
+        required: true
+        default: ap-southeast-2
+        options:
+          - ap-southeast-2
+      aws_account_id:
+        description: 12-digit AWS account ID
+        type: string
+        required: true
+      aws_deploy_role_arn:
+        description: IAM role ARN trusted for this repository's GitHub OIDC identity
+        type: string
+        required: true
+      bookfair_ec2_instance_id:
+        description: EC2 instance ID managed by Systems Manager
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cibf-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build, publish, deploy
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AWS_REGION: ${{ inputs.aws_region }}
+      AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
+      ECR_REGISTRY: ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
+      EC2_INSTANCE_ID: ${{ inputs.bookfair_ec2_instance_id }}
+      IMAGE_TAG: ${{ github.sha }}
+    steps:
+      - name: Check deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "${GITHUB_REF}" == "refs/heads/main" ]] || { echo "Deploy only from main." >&2; exit 1; }
+          [[ "${IMAGE_TAG}" =~ ^[0-9a-f]{40}$ ]]
+          [[ "${AWS_ACCOUNT_ID}" =~ ^[0-9]{12}$ ]]
+          [[ "${EC2_INSTANCE_ID}" =~ ^i-[0-9a-f]+$ ]]
+          [[ "${AWS_REGION}" == "ap-southeast-2" ]]
+
+      - name: Check out source
+        uses: actions/checkout@v7.0.1
+
+      - name: Assume the GitHub deployment role with OIDC
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ inputs.aws_deploy_role_arn }}
+          aws-region: ${{ inputs.aws_region }}
+          allowed-account-ids: ${{ inputs.aws_account_id }}
+
+      - name: Sign in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2.1.7
+
+      - name: Build and push immutable images
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! aws ecr describe-images --repository-name cibf-backend --image-ids "imageTag=${IMAGE_TAG}" >/dev/null 2>&1; then
+            docker build --pull -f backend/Dockerfile -t "${ECR_REGISTRY}/cibf-backend:${IMAGE_TAG}" backend
+            docker push "${ECR_REGISTRY}/cibf-backend:${IMAGE_TAG}"
+          fi
+          if ! aws ecr describe-images --repository-name cibf-frontend --image-ids "imageTag=${IMAGE_TAG}" >/dev/null 2>&1; then
+            docker build --pull -f frontend/Dockerfile -t "${ECR_REGISTRY}/cibf-frontend:${IMAGE_TAG}" frontend
+            docker push "${ECR_REGISTRY}/cibf-frontend:${IMAGE_TAG}"
+          fi
+
+      - name: Deploy the image through Systems Manager
+        shell: bash
+        run: |
+          set -euo pipefail
+          parameters="{\"commands\":[\"sudo /opt/bookfair/aws-deploy.sh ${IMAGE_TAG}\"]}"
+          command_id=$(aws ssm send-command \
+            --region "${AWS_REGION}" \
+            --instance-ids "${EC2_INSTANCE_ID}" \
+            --document-name AWS-RunShellScript \
+            --parameters "${parameters}" \
+            --comment "Deploy CIBF ${IMAGE_TAG}" \
+            --query 'Command.CommandId' \
+            --output text)
+          if ! aws ssm wait command-executed \
+            --region "${AWS_REGION}" \
+            --command-id "${command_id}" \
+            --instance-id "${EC2_INSTANCE_ID}"; then
+            aws ssm get-command-invocation \
+              --region "${AWS_REGION}" \
+              --command-id "${command_id}" \
+              --instance-id "${EC2_INSTANCE_ID}" \
+              --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
+              --output yaml
+            exit 1
+          fi
+          aws ssm get-command-invocation \
+            --region "${AWS_REGION}" \
+            --command-id "${command_id}" \
+            --instance-id "${EC2_INSTANCE_ID}" \
+            --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
+            --output yaml
+

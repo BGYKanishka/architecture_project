@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,16 +21,5 @@ public class EmployeeStallDetailsDto {
 
     // Reservation Details
     private String vendorName;
-    private String vendorEmail;
-    private String vendorContact;
     private String businessName;
-
-    // QR Code Data
-    private String qrCodeData;
-
-    // Payment Details
-    private String paymentStatus; // PENDING, PAID, FAILED
-    private Double paymentAmount;
-    private LocalDateTime paymentDate;
-    private String paymentMethod;
 }

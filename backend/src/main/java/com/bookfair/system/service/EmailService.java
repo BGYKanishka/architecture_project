@@ -1,6 +1,5 @@
 package com.bookfair.system.service;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +17,17 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
-    @Value("${spring.mail.username}")
+    @Value("${app.mail.from:${spring.mail.username:}}")
     private String fromEmail;
 
     @Async
     public void sendReservationEmail(String toEmail, String userName, String mobileNumber, String paymentStatus,
             String qrCodeBase64, String stallDetails) {
+        if (fromEmail == null || fromEmail.trim().isEmpty()) {
+            System.err.println("⚠️ Email skipped: Sender address is not configured (APP_MAIL_FROM / SPRING_MAIL_USERNAME is empty).");
+            return;
+        }
+
         try {
             MimeMessage message = mailSender.createMimeMessage();
             // 'true' = multipart (needed for attachments/images)
@@ -100,8 +104,8 @@ public class EmailService {
             mailSender.send(message);
             System.out.println("✅ Email sent successfully to: " + toEmail);
 
-        } catch (MessagingException e) {
-            System.err.println("❌ Failed to send email: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
         }
     }
 }

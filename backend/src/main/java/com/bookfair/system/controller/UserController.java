@@ -7,7 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 @RestController
 @RequestMapping("/api/user")
@@ -17,25 +18,15 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping("/profile")
-  public ResponseEntity<UserProfileResponse> getUserProfile(Principal principal) {
-    String email = principal.getName();
-    UserProfileResponse userProfile = userService.getUserProfile(email);
+  public ResponseEntity<UserProfileResponse> getUserProfile(@AuthenticationPrincipal OidcUser principal) {
+    UserProfileResponse userProfile = userService.getUserProfileByCognitoSub(principal.getSubject());
     return ResponseEntity.ok(userProfile);
   }
 
   @PutMapping("/profile")
-  public ResponseEntity<UserProfileResponse> updateProfile(Principal principal,
-      @RequestBody com.bookfair.system.dto.request.UserProfileUpdateRequest request) {
-    String email = principal.getName();
-    UserProfileResponse userProfile = userService.updateProfile(email, request);
+  public ResponseEntity<UserProfileResponse> updateProfile(@AuthenticationPrincipal OidcUser principal,
+      @Valid @RequestBody com.bookfair.system.dto.request.UserProfileUpdateRequest request) {
+    UserProfileResponse userProfile = userService.updateProfileByCognitoSub(principal.getSubject(), request);
     return ResponseEntity.ok(userProfile);
-  }
-
-  @PostMapping("/change-password")
-  public ResponseEntity<?> changePassword(Principal principal,
-      @Valid @RequestBody com.bookfair.system.dto.request.ChangePasswordRequest request) {
-    String email = principal.getName();
-    userService.changePassword(email, request);
-    return ResponseEntity.ok("Password changed successfully");
   }
 }
