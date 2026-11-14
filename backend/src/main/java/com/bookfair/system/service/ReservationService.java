@@ -10,6 +10,7 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -147,7 +149,7 @@ public class ReservationService {
                     .build();
 
         } catch (Exception e) {
-            System.err.println("QR/Email Error: " + e.getMessage());
+            log.error("QR or Email delivery error during reservation creation for user ID {}: {}", userId, e.getMessage(), e);
             return ReservationResponse.builder()
                     .reservationCode(qrToken)
                     .message("Booking Success (Email Failed)")
@@ -253,7 +255,7 @@ public class ReservationService {
             try {
                 qrCodeImage = generateQRCodeImage(code);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Failed to generate QR code for reservation code {}: {}", code, e.getMessage(), e);
             }
 
             return ReservationResponse.builder()

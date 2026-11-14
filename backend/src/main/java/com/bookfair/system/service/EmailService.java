@@ -2,6 +2,7 @@ package com.bookfair.system.service;
 
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -24,7 +26,7 @@ public class EmailService {
     public void sendReservationEmail(String toEmail, String userName, String mobileNumber, String paymentStatus,
             String qrCodeBase64, String stallDetails) {
         if (fromEmail == null || fromEmail.trim().isEmpty()) {
-            System.err.println("⚠️ Email skipped: Sender address is not configured (APP_MAIL_FROM / SPRING_MAIL_USERNAME is empty).");
+            log.warn("Email skipped: Sender address is not configured (APP_MAIL_FROM / SPRING_MAIL_USERNAME is empty).");
             return;
         }
 
@@ -102,10 +104,10 @@ public class EmailService {
             helper.addInline("qrImage", imageResource, "image/png");
 
             mailSender.send(message);
-            System.out.println("✅ Email sent successfully to: " + toEmail);
+            log.info("Email sent successfully to: {}", toEmail);
 
         } catch (Exception e) {
-            System.err.println("❌ Failed to send email to " + toEmail + ": " + e.getMessage());
+            log.error("Failed to send reservation email to {}: {}", toEmail, e.getMessage(), e);
         }
     }
 }

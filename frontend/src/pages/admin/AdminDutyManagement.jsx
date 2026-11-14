@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getAllDuties, createDuty, updateDuty, deleteDuty, getAllEmployees } from "../../services/admin/admin.duty.service";
 import { Link } from "react-router-dom";
 import AdminHeader from "../../components/common/AdminHeader";
+import ConfirmationModal from "../../components/common/ConfirmationModal";
 import {
     ArrowLeftIcon,
     PlusIcon,
@@ -16,6 +17,12 @@ export default function AdminDutyManagement() {
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({ description: "", startTime: "", endTime: "", status: "ASSIGNED", assignedToId: "" });
     const [editingId, setEditingId] = useState(null);
+
+    // Modal state for alerts and delete confirmation
+    const [alertConfig, setAlertConfig] = useState({ isOpen: false, title: "", message: "", isAlert: true });
+    const [deleteTarget, setDeleteTarget] = useState(null);
+
+    const showAlert = (title, message) => setAlertConfig({ isOpen: true, title, message, isAlert: true });
 
     useEffect(() => {
         fetchData();
@@ -37,7 +44,7 @@ export default function AdminDutyManagement() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.assignedToId) {
-            alert("Please select an employee");
+            showAlert("Employee Required", "Please select an employee before assigning a duty.");
             return;
         }
 
@@ -52,7 +59,7 @@ export default function AdminDutyManagement() {
             fetchData();
         } catch (error) {
             console.error("Failed to save duty:", error);
-            alert("Failed to save duty");
+            showAlert("Save Failed", "Failed to save duty. Please try again.");
         }
     };
 
@@ -67,13 +74,18 @@ export default function AdminDutyManagement() {
         });
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to remove this duty assignment?")) return;
+    const handleDeleteClick = (duty) => setDeleteTarget(duty);
+
+    const confirmDelete = async () => {
+        if (!deleteTarget) return;
         try {
-            await deleteDuty(id);
+            await deleteDuty(deleteTarget.id);
+            setDeleteTarget(null);
             fetchData();
         } catch (error) {
             console.error("Failed to delete duty:", error);
+            showAlert("Delete Failed", "Could not remove the duty assignment. Please try again.");
+            setDeleteTarget(null);
         }
     };
 
@@ -214,7 +226,7 @@ export default function AdminDutyManagement() {
                                                 Edit
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(duty.id)}
+                                                onClick={() => handleDeleteClick(duty)}
                                                 className="px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/30 hover:bg-rose-500/20 font-medium"
                                             >
                                                 Delete
@@ -227,6 +239,27 @@ export default function AdminDutyManagement() {
                     </table>
                 </div>
             </div>
+
+            {/* Alert modal */}
+            <ConfirmationModal
+                isOpen={alertConfig.isOpen}
+                onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                confirmText="Got it"
+                isAlert={true}
+            />
+
+            {/* Delete confirmation modal */}
+            <ConfirmationModal
+                isOpen={!!deleteTarget}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={confirmDelete}
+                title="Remove Duty Assignment"
+                message={`Are you sure you want to remove the duty "${deleteTarget?.description}"?`}
+                confirmText="Yes, Remove"
+                cancelText="Keep"
+            />
         </div>
     );
 }

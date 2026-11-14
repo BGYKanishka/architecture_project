@@ -28,7 +28,7 @@ public class AuthController {
     private final UserService userService;
     private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
-    @Value("${app.cognito.domain}")
+    @Value("${app.cognito.domain:}")
     private String cognitoDomain;
 
     @Value("${app.cognito.client-id}")
@@ -53,6 +53,11 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response) {
         logoutHandler.logout(request, response, authentication);
+
+        if (cognitoDomain.isBlank()) {
+            String loginUrl = appPublicUrl.replaceAll("/+$", "") + "/login";
+            return ResponseEntity.ok(Map.of("logoutUrl", loginUrl));
+        }
 
         String domain = cognitoDomain.replaceAll("/+$", "");
         String logoutUrl = UriComponentsBuilder.fromUriString(domain + "/logout")

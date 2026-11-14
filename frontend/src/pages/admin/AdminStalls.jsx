@@ -252,7 +252,7 @@ export default function AdminStalls() {
             setStalls(prev => prev.map(s => s.id === id ? updated : s));
             setSelected(updated);
         } catch {
-            // Error handling
+            setError("Failed to update stall. Please try again.");
         } finally {
             setToggling(false);
         }

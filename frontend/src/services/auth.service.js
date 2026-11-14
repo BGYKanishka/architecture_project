@@ -23,7 +23,9 @@ const login = () => {
   window.location.assign("/oauth2/authorization/cognito");
 };
 
-const register = login;
+const register = () => {
+  window.location.assign("/oauth2/authorization/cognito?prompt=signup");
+};
 
 const logout = async () => {
   let logoutUrl = "/login";

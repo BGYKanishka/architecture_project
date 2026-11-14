@@ -212,12 +212,13 @@ const Landing = () => {
                     <span>Go to Dashboard</span>
                   </Link>
                 ) : (
-                  <Link
-                    to="/register"
-                    className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition"
+                  <button
+                    type="button"
+                    onClick={() => AuthService.register()}
+                    className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition cursor-pointer"
                   >
                     <span>Publisher Sign Up</span>
-                  </Link>
+                  </button>
                 )}
               </div>
 
@@ -266,11 +267,10 @@ const Landing = () => {
             {stallTiers.map((tier) => (
               <div
                 key={tier.size}
-                className={`rounded-xl p-6 sm:p-8 flex flex-col justify-between transition-all ${
-                  tier.popular
+                className={`rounded-xl p-6 sm:p-8 flex flex-col justify-between transition-all ${tier.popular
                     ? "bg-[#101726] border-2 border-indigo-500/80 shadow-xl"
                     : "bg-[#0f1422] border border-slate-800"
-                }`}
+                  }`}
               >
                 <div>
                   <div className="flex items-center justify-between mb-4">
@@ -304,11 +304,10 @@ const Landing = () => {
 
                 <Link
                   to="/map"
-                  className={`w-full py-2.5 rounded-lg text-center font-medium text-xs sm:text-sm transition-colors ${
-                    tier.popular
+                  className={`w-full py-2.5 rounded-lg text-center font-medium text-xs sm:text-sm transition-colors ${tier.popular
                       ? "bg-indigo-600 hover:bg-indigo-500 text-white"
                       : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80"
-                  }`}
+                    }`}
                 >
                   View Available Stalls
                 </Link>
@@ -449,12 +448,13 @@ const Landing = () => {
               >
                 Browse Stalls
               </Link>
-              <Link
-                to="/login"
-                className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-medium px-5 py-2.5 rounded-lg text-sm transition"
+              <button
+                type="button"
+                onClick={() => AuthService.login()}
+                className="bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 font-medium px-5 py-2.5 rounded-lg text-sm transition cursor-pointer"
               >
                 Sign In
-              </Link>
+              </button>
             </div>
           </div>
         </div>

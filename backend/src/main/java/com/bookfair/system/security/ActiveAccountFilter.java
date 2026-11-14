@@ -34,6 +34,7 @@ public class ActiveAccountFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         return "/api/auth/csrf".equals(path)
                 || "/api/auth/logout".equals(path)
+                || "/api/stalls".equals(path)
                 || path.startsWith("/api/stalls/");
     }
 

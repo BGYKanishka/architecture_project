@@ -1,50 +1,35 @@
-# Database Configuration
+# Database
 
-This directory contains the database schema and seed data for the **Book Fair System**.
+PostgreSQL schema and initial inventory for the CIBF platform.
 
-## 📊 Database Details
-- **System**: PostgreSQL
-- **Default Database Name**: `bookfair_db`
-- **Default Port**: `5432`
+## Files
 
-## 📁 Files
+- `schema.sql` creates application tables and a case-insensitive unique index for user email addresses.
+- `seed.sql` inserts the initial floors, stalls, and genres. Review inventory and prices before using it for an event.
+- `migrations/V1__cognito_auth.sql` upgrades an existing local-password database for Cognito sign-in. It adds the Cognito subject, expands email length, enforces case-insensitive email uniqueness, and drops the old password-hash column.
 
-- **`schema.sql`**: Contains the Data Definition Language (DDL) statements to create the necessary database tables. This includes:
-  - `users`
-  - `floors`
-  - `stall_types`
-  - `stalls`
-  - `genres`
-  - `user_genres`
-  - `reservations`
-  - `reservation_stalls`
-  - `payments`
-  
-- **`seed.sql`**: Contains initial sample data (Data Manipulation Language - DML) to populate the database for testing and development. It inserts:
-  - Floor definitions (A, B, C, D, E, F, G, MainBuilding)
-  - Stall types (SMALL, MEDIUM, LARGE) with corresponding pricing
-  - Dozens of stalls mapped to their respective floors and types
-  - Pre-defined book genres
+## Fresh database
 
-## ⚙️ Setup Instructions
+Create the database, then run the schema and seed scripts once:
 
-1. Ensure PostgreSQL is installed and running on your system.
-2. Open your preferred PostgreSQL client (like `psql` or pgAdmin) and create a new database:
-   ```sql
-   CREATE DATABASE bookfair_db;
-   ```
-3. Run the `schema.sql` script to create the tables. Using the command line:
-   ```bash
-   psql -U postgres -d bookfair_db -f schema.sql
-   ```
-4. Run the `seed.sql` script to populate the database with initial data:
-   ```bash
-   psql -U postgres -d bookfair_db -f seed.sql
-   ```
-5. **Important**: Verify that your database credentials (username and password) match the configuration defined in the backend's `application.properties` file:
-   ```properties
-   # backend/src/main/resources/application.properties
-   spring.datasource.url=jdbc:postgresql://localhost:5432/bookfair_db
-   spring.datasource.username=postgres
-   spring.datasource.password=your_password_here
-   ```
+```bash
+createdb -U postgres bookfair_db
+psql -U postgres -d bookfair_db -f database/schema.sql
+psql -U postgres -d bookfair_db -f database/seed.sql
+```
+
+Do not add passwords, Cognito client secrets, or production users to seed files. The first administrator is provisioned as a row with a verified Cognito email through the secure database operator path.
+
+## Existing local-password database
+
+Take and verify a database backup first. Check for duplicate emails ignoring case:
+
+```sql
+SELECT lower(email), count(*) FROM users GROUP BY lower(email) HAVING count(*) > 1;
+```
+
+Resolve any duplicates, then run `database/migrations/V1__cognito_auth.sql` once with a migration account. Dropping password hashes is irreversible without restoring the backup. Existing users link to their application roles when they first sign in with Cognito using the same verified email.
+
+## Runtime database access
+
+Configure the connection with `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, and `SPRING_DATASOURCE_PASSWORD`. AWS runtime uses a dedicated least-privilege database role and TLS certificate verification; do not use the RDS master credentials for the application.

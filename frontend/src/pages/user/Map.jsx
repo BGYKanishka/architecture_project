@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import StallMap from "../../components/StallMap";
 import { useState } from "react";

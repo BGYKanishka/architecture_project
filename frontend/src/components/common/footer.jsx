@@ -2,6 +2,7 @@ import React from 'react';
 import { FaFacebookF, FaWordpress, FaMapMarkerAlt, FaPhoneAlt, FaEnvelope, FaCalendarAlt, FaClock } from 'react-icons/fa';
 import { BookOpenIcon } from "@heroicons/react/24/outline";
 import { Link } from 'react-router-dom';
+import AuthService from '../../services/auth.service';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -22,7 +23,7 @@ const Footer = () => {
             </span>
           </h3>
           <p className="text-slate-400 flex items-center gap-2 mt-4 text-sm font-medium">
-            <FaMapMarkerAlt className="text-rose-500 text-base shrink-0" /> 
+            <FaMapMarkerAlt className="text-rose-500 text-base shrink-0" />
             <span>BMICH, Colombo, Sri Lanka</span>
           </p>
           <p className="text-xs text-slate-500 mt-2 leading-relaxed">
@@ -38,8 +39,8 @@ const Footer = () => {
             <li><Link to="/map" className="text-slate-400 hover:text-white transition-colors">Live Floor Plan</Link></li>
             <li><Link to="/about" className="text-slate-400 hover:text-white transition-colors">About CIBF</Link></li>
             <li><Link to="/help" className="text-slate-400 hover:text-white transition-colors">Exhibitor Guidelines</Link></li>
-            <li><Link to="/login" className="text-slate-400 hover:text-white transition-colors">Publisher Sign In</Link></li>
-            <li><Link to="/register" className="text-slate-400 hover:text-white transition-colors">Register as Vendor</Link></li>
+            <li><button type="button" onClick={() => AuthService.login()} className="text-slate-400 hover:text-white transition-colors cursor-pointer text-left">Publisher Sign In</button></li>
+            <li><button type="button" onClick={() => AuthService.register()} className="text-slate-400 hover:text-white transition-colors cursor-pointer text-left">Register as Vendor</button></li>
           </ul>
         </div>
 

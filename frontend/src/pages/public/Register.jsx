@@ -1,15 +1,12 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import AuthService from "../../services/auth.service";
-import { ArrowLeftIcon, BookOpenIcon, ShieldCheckIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 
 export default function Register() {
-  const [loading, setLoading] = useState(false);
-
-  const startRegistration = () => {
-    setLoading(true);
+  useEffect(() => {
     AuthService.register();
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0b0f19] text-slate-100 font-sans">
@@ -31,22 +28,21 @@ export default function Register() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-white tracking-tight">Create an account</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">Opening Registration…</h1>
         <p className="text-sm text-slate-400 mt-2">
-          Create and verify your account through the secure Cognito sign-up page. You can add your business details after signing in.
+          Redirecting directly to the secure registration page…
         </p>
 
-        <button
-          onClick={startRegistration}
-          disabled={loading}
-          className="mt-7 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white py-3 rounded-lg text-sm font-semibold transition"
-        >
-          <ShieldCheckIcon className="w-4 h-4" />
-          {loading ? "Opening secure sign-up…" : "Continue to sign up"}
-        </button>
+        <div className="mt-8 flex items-center justify-center gap-2 text-indigo-400 text-sm">
+          <svg className="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          <span>Redirecting to Cognito…</span>
+        </div>
 
-        <p className="text-xs text-slate-500 mt-5 text-center">
-          Already registered? <Link to="/login" className="text-indigo-300 hover:text-white">Sign in</Link>
+        <p className="text-xs text-slate-500 mt-6 text-center">
+          Passwords and authentication are handled securely by Amazon Cognito.
         </p>
       </div>
     </div>

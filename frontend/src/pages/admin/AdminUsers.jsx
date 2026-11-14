@@ -40,6 +40,7 @@ function RoleBadge({ role }) {
 export default function AdminUsers() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [loadError, setLoadError] = useState("");
     const [roleFilter, setRoleFilter] = useState("ALL");
     const [search, setSearch] = useState("");
     const [page, setPage] = useState(1);
@@ -55,12 +56,13 @@ export default function AdminUsers() {
 
     const load = async () => {
         setLoading(true);
+        setLoadError("");
         try {
             const data = await getAdminUsers(roleFilter === "ALL" ? "" : roleFilter);
             setUsers(data);
             setPage(1);
         } catch {
-            // Error handling
+            setLoadError("Failed to load users. Please check backend connection.");
         } finally {
             setLoading(false);
         }
@@ -154,7 +156,7 @@ export default function AdminUsers() {
             await toggleAdminUserEnabled(u.id);
             load();
         } catch {
-            // Error handling
+            setLoadError("Failed to update user status. Please try again.");
         }
     };
 
@@ -188,6 +190,12 @@ export default function AdminUsers() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+
+                {loadError && (
+                    <div className="bg-rose-950/40 border border-rose-800/60 rounded-lg px-4 py-3 text-xs text-rose-300">
+                        {loadError}
+                    </div>
+                )}
 
                 {/* Filters Row */}
                 <div className="flex flex-wrap gap-3 items-center justify-between">

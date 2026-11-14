@@ -77,19 +77,14 @@ const hallDoors = {
   ]
 };
 
+const POLL_INTERVAL_MS = 15000; // 15 seconds — avoids hammering the backend
+
 const StallMap = () => {
   const navigate = useNavigate();
   const { hallName } = useParams();
   const [stalls, setStalls] = useState([]);
+  const [myReservedIds, setMyReservedIds] = useState(new Set());
   const [selectedStalls, setSelectedStalls] = useState([]);
-  const [paidReservations, setPaidReservations] = useState(() => {
-    const saved = localStorage.getItem("paidReservations");
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [cancelledReservations, setCancelledReservations] = useState(() => {
-    const saved = localStorage.getItem("cancelledReservations");
-    return saved ? JSON.parse(saved) : [];
-  });
   const [reservationCount, setReservationCount] = useState(0);
 
   const [alertConfig, setAlertConfig] = useState({
@@ -102,62 +97,35 @@ const StallMap = () => {
     setAlertConfig({ isOpen: true, title, message });
   };
 
+  const view = hallName ? "hall" : "map";
+
+  // Single polling loop — fetches stalls + reservation count together
   useEffect(() => {
-    const fetchCount = () => {
+    const fetchAll = () => {
+      StallService.getAllStalls()
+        .then((res) => { if (Array.isArray(res.data)) setStalls(res.data); })
+        .catch((err) => console.error("Error loading stalls:", err));
+
       StallService.getReservationCount()
         .then((res) => setReservationCount(res.data))
         .catch((err) => console.error("Error fetching reservation count:", err));
-    };
 
-    fetchCount();
-    const intervalId = setInterval(fetchCount, 3000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  useEffect(() => {
-    const syncStates = () => {
-      setPaidReservations(JSON.parse(localStorage.getItem("paidReservations") || "[]"));
-      setCancelledReservations(JSON.parse(localStorage.getItem("cancelledReservations") || "[]"));
-    };
-    window.addEventListener("paidReservationsUpdated", syncStates);
-    window.addEventListener("cancelledReservationsUpdated", syncStates);
-    return () => {
-      window.removeEventListener("paidReservationsUpdated", syncStates);
-      window.removeEventListener("cancelledReservationsUpdated", syncStates);
-    };
-  }, []);
-
-  const view = hallName ? "hall" : "map";
-  const activeHall = hallName || null;
-
-  useEffect(() => {
-    const fetchStalls = () => {
-      StallService.getAllStalls()
+      StallService.getMyReservations()
         .then((res) => {
           if (Array.isArray(res.data)) {
-            setStalls(res.data);
-            const localPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-            const validatedPaid = localPaid.filter((paidItem) => {
-              const paidId = typeof paidItem === 'object' ? paidItem.id : paidItem;
-              const stall = res.data.find((s) => s.id === paidId);
-              if (stall && !stall.reserved) return false;
-              return true;
-            });
-
-            if (validatedPaid.length !== localPaid.length) {
-              localStorage.setItem("paidReservations", JSON.stringify(validatedPaid));
-              setPaidReservations(validatedPaid);
-              window.dispatchEvent(new Event("paidReservationsUpdated"));
-            }
-          } else {
-            setStalls([]);
+            setMyReservedIds(new Set(res.data.map((r) => r.id)));
           }
         })
-        .catch((err) => console.error("Error loading stalls:", err));
+        .catch(() => {}); // best-effort; unauthenticated visitors get empty set
     };
 
-    fetchStalls();
-    const intervalId = setInterval(fetchStalls, 3000);
+    fetchAll();
+
+    // Pause polling when the tab is hidden to reduce backend load
+    const intervalId = setInterval(() => {
+      if (!document.hidden) fetchAll();
+    }, POLL_INTERVAL_MS);
+
     return () => clearInterval(intervalId);
   }, []);
 
@@ -182,9 +150,8 @@ const StallMap = () => {
       showAlert("Stall Unavailable", "This stall has been disabled by the administrator.");
       return;
     }
-    const isActuallyReserved = stall.reserved && !cancelledReservations.includes(stall.id);
-    const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
-    if (isActuallyReserved || isPaid) return;
+    const isOccupied = stall.reserved || myReservedIds.has(stall.id);
+    if (isOccupied) return;
 
     if (selectedStalls.includes(stall.id)) {
       setSelectedStalls(selectedStalls.filter((id) => id !== stall.id));
@@ -199,10 +166,9 @@ const StallMap = () => {
     }
   };
 
-  const getSizeColor = (size, isReserved, isSelected, isPaid, isCancelled, isDisabled) => {
+  const getSizeColor = (size, isReserved, isSelected, isMine, isDisabled) => {
     if (isDisabled) return "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed opacity-40";
-    const isActuallyReserved = isReserved && !isCancelled;
-    if (isActuallyReserved || isPaid) return "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed";
+    if (isReserved || isMine) return "bg-slate-900 border-slate-800 text-slate-600 cursor-not-allowed";
     if (isSelected) return "bg-indigo-600 border-indigo-400 text-white z-50 scale-105 shadow-md";
 
     switch (size) {
@@ -213,13 +179,13 @@ const StallMap = () => {
     }
   };
 
-  const activeFloorStalls = activeHall
+  const activeFloorStalls = hallName
     ? stalls
-      .filter((s) => s.floorName === activeHall.replace("Hall ", ""))
+      .filter((s) => s.floorName === hallName.replace("Hall ", ""))
       .sort((a, b) => a.stallCode.localeCompare(b.stallCode))
     : [];
 
-  const currentLayout = hallLayouts[activeHall];
+  const currentLayout = hallLayouts[hallName];
 
   const handleConfirmReservation = () => {
     if (selectedStalls.length + reservationCount > 3) {
@@ -259,7 +225,7 @@ const StallMap = () => {
           {/* Header Bar */}
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800">
             <div>
-              <h2 className="text-xl font-bold text-white">{activeHall}</h2>
+              <h2 className="text-xl font-bold text-white">{hallName}</h2>
               <div className="flex gap-4 text-xs mt-1.5 text-slate-400">
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm"></span> Small (Rs 5k)</span>
                 <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-cyan-500 rounded-sm"></span> Medium (Rs 7.5k)</span>
@@ -272,7 +238,7 @@ const StallMap = () => {
             </button>
           </div>
 
-          <HallShapeWrapper hallName={activeHall}>
+          <HallShapeWrapper hallName={hallName}>
             {activeFloorStalls.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-slate-500 text-xs">No stalls configured for this hall.</p>
@@ -281,7 +247,7 @@ const StallMap = () => {
               <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-8'}`}>
 
                 {/* Render Doors */}
-                {hallDoors[activeHall]?.map((door, idx) => (
+                {hallDoors[hallName]?.map((door, idx) => (
                   <div
                     key={`door-${idx}`}
                     className="absolute px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-medium rounded shadow-sm z-30"
@@ -298,9 +264,8 @@ const StallMap = () => {
                 {activeFloorStalls.map((stall, index) => {
                   const pos = currentLayout && currentLayout[index] ? currentLayout[index] : {};
                   const isSelected = selectedStalls.includes(stall.id);
-                  const isPaid = paidReservations.some(item => (typeof item === 'object' && item !== null ? item.id : item) === stall.id);
-                  const isCancelled = cancelledReservations.includes(stall.id);
-                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isPaid, isCancelled, stall.disabled);
+                  const isMine = myReservedIds.has(stall.id);
+                  const colorClass = getSizeColor(stall.size, stall.reserved, isSelected, isMine, stall.disabled);
 
                   return (
                     <div
@@ -325,12 +290,12 @@ const StallMap = () => {
                       <span className="font-bold text-xs md:text-sm leading-none">
                         {stall.stallCode.split("-")[1]}
                       </span>
-                      {!stall.reserved && !isPaid && !stall.disabled && (
+                      {!stall.reserved && !isMine && !stall.disabled && (
                         <span className="text-[9px] font-mono mt-0.5 opacity-90">
                           {stall.price / 1000}k
                         </span>
                       )}
-                      {(stall.reserved && !isCancelled || isPaid) && !stall.disabled && (
+                      {(stall.reserved || isMine) && !stall.disabled && (
                         <span className="text-[8px] font-semibold mt-0.5 text-slate-500">SOLD</span>
                       )}
                       {stall.disabled && (

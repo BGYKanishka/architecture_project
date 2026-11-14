@@ -74,11 +74,10 @@ const Header = ({ user }) => {
               <Link
                 key={link.to}
                 to={link.to}
-                className={`text-sm font-medium transition-colors py-1 relative ${
-                  active
+                className={`text-sm font-medium transition-colors py-1 relative ${active
                     ? "text-white font-semibold"
                     : "text-slate-400 hover:text-slate-200"
-                }`}
+                  }`}
               >
                 {link.label}
                 {active && (
@@ -162,18 +161,20 @@ const Header = ({ user }) => {
             </>
           ) : (
             <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 transition"
+              <button
+                type="button"
+                onClick={() => AuthService.login()}
+                className="text-xs sm:text-sm font-medium text-slate-300 hover:text-white px-3 py-1.5 transition cursor-pointer"
               >
                 Sign In
-              </Link>
-              <Link
-                to="/register"
-                className="text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 rounded-lg transition shadow-sm"
+              </button>
+              <button
+                type="button"
+                onClick={() => AuthService.register()}
+                className="text-xs sm:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 rounded-lg transition shadow-sm cursor-pointer"
               >
                 Register
-              </Link>
+              </button>
             </div>
           )}
         </div>
@@ -189,11 +190,10 @@ const Header = ({ user }) => {
                 key={link.to}
                 to={link.to}
                 onClick={() => setIsMenuOpen(false)}
-                className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${
-                  active
+                className={`block px-3 py-2 rounded-lg text-sm font-medium transition ${active
                     ? "bg-slate-800 text-white font-semibold"
                     : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>
@@ -202,20 +202,26 @@ const Header = ({ user }) => {
 
           {!isLoggedIn && (
             <div className="pt-3 mt-3 border-t border-slate-800 flex gap-2">
-              <Link
-                to="/login"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 rounded-lg"
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  AuthService.login();
+                }}
+                className="flex-1 text-center py-2 text-xs font-semibold text-slate-300 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg transition cursor-pointer"
               >
                 Sign In
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setIsMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-semibold text-white bg-indigo-600 rounded-lg"
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  AuthService.register();
+                }}
+                className="flex-1 text-center py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition cursor-pointer"
               >
                 Register
-              </Link>
+              </button>
             </div>
           )}
         </div>

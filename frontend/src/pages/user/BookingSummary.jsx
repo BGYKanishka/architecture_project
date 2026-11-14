@@ -1,4 +1,3 @@
-import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeftIcon, CreditCardIcon } from "@heroicons/react/24/outline";
 

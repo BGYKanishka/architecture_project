@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { CheckCircleIcon, ArrowRightIcon, QrCodeIcon } from "@heroicons/react/24/outline";
 
@@ -7,28 +7,12 @@ const BookingConfirmation = () => {
   const navigate = useNavigate();
   const { reservationId, qrCodeImage, stalls, totalAmount } = location.state || {};
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (reservationId && stalls && stalls.length > 0) {
-      const existingPaid = JSON.parse(localStorage.getItem("paidReservations") || "[]");
-
-      const newPaidObjects = stalls.map(s => ({
-        id: s.id,
-        reservationId: reservationId,
-        qrCodeImage: qrCodeImage
-      }));
-
-      const existingIds = new Set(existingPaid.map(item => item.id || item));
-      const filteredNew = newPaidObjects.filter(item => !existingIds.has(item.id));
-
-      const updatedPaid = [...existingPaid, ...filteredNew];
-      localStorage.setItem("paidReservations", JSON.stringify(updatedPaid));
-
-      localStorage.setItem("selectedStalls", "[]");
-
+      // Clear the stall selection cart — the booking is complete
       window.dispatchEvent(new Event("selectedStallsUpdated"));
-      window.dispatchEvent(new Event("paidReservationsUpdated"));
     }
-  }, [reservationId, stalls, qrCodeImage]);
+  }, [reservationId, stalls]);
 
   if (!reservationId) return (
     <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center font-sans text-slate-100 p-4">

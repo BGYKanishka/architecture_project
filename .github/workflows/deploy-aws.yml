@@ -14,10 +14,6 @@ on:
         description: 12-digit AWS account ID
         type: string
         required: true
-      aws_deploy_role_arn:
-        description: IAM role ARN trusted for this repository's GitHub OIDC identity
-        type: string
-        required: true
       bookfair_ec2_instance_id:
         description: EC2 instance ID managed by Systems Manager
         type: string
@@ -36,7 +32,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     env:
       AWS_REGION: ${{ inputs.aws_region }}
       AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
@@ -55,17 +50,17 @@ jobs:
           [[ "${AWS_REGION}" == "ap-southeast-2" ]]
 
       - name: Check out source
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@v4
 
-      - name: Assume the GitHub deployment role with OIDC
-        uses: aws-actions/configure-aws-credentials@v6.3.0
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ inputs.aws_deploy_role_arn }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ inputs.aws_region }}
-          allowed-account-ids: ${{ inputs.aws_account_id }}
 
       - name: Sign in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2.1.7
+        uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push immutable images
         shell: bash
@@ -111,4 +106,3 @@ jobs:
             --instance-id "${EC2_INSTANCE_ID}" \
             --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
             --output yaml
-

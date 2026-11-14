@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import { ArrowLeftIcon, BookOpenIcon, LockClosedIcon } from "@heroicons/react/24/outline";
@@ -12,6 +12,12 @@ const Login = () => {
     setLoading(true);
     AuthService.login();
   };
+
+  useEffect(() => {
+    if (!loginFailed) {
+      startLogin();
+    }
+  }, [loginFailed]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0b0f19] text-slate-100 font-sans">
@@ -33,31 +39,36 @@ const Login = () => {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-white tracking-tight">Sign in</h1>
+        <h1 className="text-2xl font-bold text-white tracking-tight">
+          {loginFailed ? "Sign-in Failed" : "Signing In…"}
+        </h1>
         <p className="text-sm text-slate-400 mt-2">
-          Continue to the secure Colombo International Book Fair sign-in page.
+          {loginFailed
+            ? "Sign-in could not be completed. Check your account permissions or try again."
+            : "Redirecting directly to the secure sign-in page…"}
         </p>
 
-        {loginFailed && (
-          <p className="mt-5 text-sm text-rose-300" role="alert">
-            Sign-in could not be completed. Check your account or try again.
-          </p>
+        {loginFailed ? (
+          <button
+            onClick={startLogin}
+            disabled={loading}
+            className="mt-7 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white py-3 rounded-lg text-sm font-semibold transition cursor-pointer"
+          >
+            <LockClosedIcon className="w-4 h-4" />
+            {loading ? "Opening secure sign-in…" : "Retry Sign In"}
+          </button>
+        ) : (
+          <div className="mt-8 flex items-center justify-center gap-2 text-indigo-400 text-sm">
+            <svg className="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            <span>Redirecting to Cognito…</span>
+          </div>
         )}
 
-        <button
-          onClick={startLogin}
-          disabled={loading}
-          className="mt-7 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white py-3 rounded-lg text-sm font-semibold transition"
-        >
-          <LockClosedIcon className="w-4 h-4" />
-          {loading ? "Opening secure sign-in…" : "Continue to sign in"}
-        </button>
-
-        <p className="text-xs text-slate-500 mt-5 text-center">
-          New publishers can choose “Sign up” on the secure sign-in page.
-        </p>
-        <p className="text-xs text-slate-500 mt-3 text-center">
-          Passwords and recovery are handled by Amazon Cognito.
+        <p className="text-xs text-slate-500 mt-6 text-center">
+          Passwords and authentication are handled securely by Amazon Cognito.
         </p>
       </div>
     </div>

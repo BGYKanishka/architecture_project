@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
-import api from "../../services/api";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import StallService from "../../services/stall.service";
 import { CreditCardIcon, BanknotesIcon, LockClosedIcon, ArrowPathIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import ConfirmationModal from "../../components/common/ConfirmationModal";
 
@@ -29,7 +29,7 @@ const PaymentSelection = () => {
         paymentMethod: "CASH_ON_DATE"
       };
 
-      const res = await api.post("/vendor-publishers/reservations", payload);
+      const res = await StallService.reserveStalls(payload.stallIds);
 
       navigate("/booking-confirmation", {
         state: {
