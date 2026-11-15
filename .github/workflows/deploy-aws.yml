@@ -1,6 +1,9 @@
 name: Build and deploy to AWS
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       aws_region:
@@ -14,15 +17,17 @@ on:
         description: 12-digit AWS account ID
         type: string
         required: true
+        default: "744264411889"
       bookfair_ec2_instance_id:
-        description: Primary EC2 Instance ID (e.g. Node 1)
+        description: Primary EC2 Instance ID (Node 1)
         type: string
         required: true
+        default: "i-0fb5b0b8e9355ca49"
       bookfair_ec2_instance_id_2:
-        description: Secondary EC2 Instance ID (e.g. Node 2 - optional)
+        description: Secondary EC2 Instance ID (Node 2 - optional)
         type: string
         required: false
-        default: ""
+        default: "i-039e842e3b7fa3c82"
 
 permissions:
   contents: read
@@ -38,11 +43,11 @@ jobs:
     permissions:
       contents: read
     env:
-      AWS_REGION: ${{ inputs.aws_region }}
-      AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
-      ECR_REGISTRY: ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
-      EC2_INSTANCE_ID_1: ${{ inputs.bookfair_ec2_instance_id }}
-      EC2_INSTANCE_ID_2: ${{ inputs.bookfair_ec2_instance_id_2 }}
+      AWS_REGION: ${{ inputs.aws_region || 'ap-southeast-2' }}
+      AWS_ACCOUNT_ID: ${{ inputs.aws_account_id || '744264411889' }}
+      ECR_REGISTRY: ${{ (inputs.aws_account_id || '744264411889') }}.dkr.ecr.${{ (inputs.aws_region || 'ap-southeast-2') }}.amazonaws.com
+      EC2_INSTANCE_ID_1: ${{ inputs.bookfair_ec2_instance_id || 'i-0fb5b0b8e9355ca49' }}
+      EC2_INSTANCE_ID_2: ${{ inputs.bookfair_ec2_instance_id_2 || 'i-039e842e3b7fa3c82' }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Check deployment configuration
@@ -66,7 +71,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.aws_region }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Sign in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2

@@ -250,13 +250,13 @@ const EmployeeStallMap = ({ hallName }) => {
 
                     {/* Hall Shape Canvas */}
                     <div className="w-full max-w-5xl bg-[#0f1422] rounded-xl border border-slate-800 p-6 min-h-[580px] flex items-center justify-center relative shadow-lg">
-                        <HallShapeWrapper hallName={hallName}>
+                        <HallShapeWrapper key={hallName} hallName={hallName}>
                             {activeFloorStalls.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-full text-slate-500">
                                     <p className="text-xs">No stalls configured for {hallName}.</p>
                                 </div>
                             ) : (
-                                <div className="w-full h-full relative">
+                                <div key={hallName} className="w-full h-full relative">
                                     {hallDoors[hallName]?.map((door, idx) => (
                                         <div
                                             key={`door-${idx}`}
@@ -293,7 +293,7 @@ const EmployeeStallMap = ({ hallName }) => {
                                                         }
                                                         : {}
                                                 }
-                                                className={`rounded-lg flex flex-col items-center justify-center transition border cursor-pointer ${colorClass}`}
+                                                className={`rounded-lg flex flex-col items-center justify-center transition-colors border cursor-pointer ${colorClass}`}
                                             >
                                                 <span className="font-bold text-xs md:text-sm leading-none pointer-events-none">
                                                     {stall.stallCode?.includes("-")

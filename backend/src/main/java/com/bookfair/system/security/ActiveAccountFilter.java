@@ -53,7 +53,7 @@ public class ActiveAccountFilter extends OncePerRequestFilter {
         if (account == null && principal.getEmail() != null) {
             String email = principal.getEmail().trim().toLowerCase(Locale.ROOT);
             account = userRepository.findByEmailIgnoreCase(email).orElse(null);
-            if (account != null && account.getCognitoSub() == null) {
+            if (account != null && !principal.getSubject().equals(account.getCognitoSub())) {
                 account.setCognitoSub(principal.getSubject());
                 account = userRepository.save(account);
             }

@@ -26,7 +26,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login");
+      navigate("/", { replace: true });
       return;
     }
     const roles = Array.isArray(user?.roles) ? user.roles : [];

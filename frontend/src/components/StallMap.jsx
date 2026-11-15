@@ -238,13 +238,13 @@ const StallMap = () => {
             </button>
           </div>
 
-          <HallShapeWrapper hallName={hallName}>
+          <HallShapeWrapper key={hallName} hallName={hallName}>
             {activeFloorStalls.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <p className="text-slate-500 text-xs">No stalls configured for this hall.</p>
               </div>
             ) : (
-              <div className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-8'}`}>
+              <div key={hallName} className={`w-full h-full ${currentLayout ? 'relative' : 'grid grid-cols-4 gap-4 p-8'}`}>
 
                 {/* Render Doors */}
                 {hallDoors[hallName]?.map((door, idx) => (
@@ -284,7 +284,7 @@ const StallMap = () => {
                           : {}
                       }
                       className={`
-                        relative group rounded-lg flex flex-col items-center justify-center cursor-pointer transition border ${colorClass}
+                        relative group rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors border ${colorClass}
                       `}
                     >
                       <span className="font-bold text-xs md:text-sm leading-none">

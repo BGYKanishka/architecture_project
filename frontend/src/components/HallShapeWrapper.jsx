@@ -51,11 +51,11 @@ const HallShapeWrapper = ({ hallName, children }) => {
   const shapeStyle = getShapeStyle();
 
   return (
-    <div className="w-full flex justify-center py-6 animate-fade-in">
+    <div className="w-full flex justify-center py-6">
       {shapeStyle.type === "octagon" ? (
         // Octagon with Fake Border via Nesting
         <div
-          className="relative transition-all duration-500 flex items-center justify-center shadow-2xl"
+          className="relative flex items-center justify-center shadow-2xl"
           style={{
             width: "100%",
             maxWidth: "800px",
@@ -87,7 +87,7 @@ const HallShapeWrapper = ({ hallName, children }) => {
         </div>
       ) : (
         <div
-          className="relative transition-all duration-500 shadow-2xl"
+          className="relative shadow-2xl"
           style={{
             width: "100%",
             maxWidth: "800px",

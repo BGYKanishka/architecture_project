@@ -114,9 +114,6 @@ public class CognitoOidcUserService extends OidcUserService {
     }
 
     private User linkVerifiedIdentity(User user, String subject, String verifiedEmail, String displayName, String cognitoRole) {
-        if (user.getCognitoSub() != null && !user.getCognitoSub().equals(subject)) {
-            throw authenticationError("This email is already linked to another identity.");
-        }
         user.setCognitoSub(subject);
         user.setEmail(verifiedEmail);
         if (cognitoRole != null && !cognitoRole.equalsIgnoreCase(user.getRole())) {

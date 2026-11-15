@@ -32,10 +32,10 @@ export default function CognitoCallback() {
           <div className="mt-4 space-y-3">
             <p className="text-sm text-rose-300">{error}</p>
             <button
-              onClick={() => navigate("/login", { replace: true })}
+              onClick={() => navigate("/", { replace: true })}
               className="text-sm text-indigo-300 hover:text-white"
             >
-              Return to sign in
+              Return to home
             </button>
           </div>
         )}

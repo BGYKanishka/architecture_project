@@ -1,6 +1,9 @@
 import { Navigate, Outlet } from "react-router-dom";
+import AuthService from "../../services/auth.service";
 
-export default function AdminProtectedRoute({ children, user, authLoading }) {
+export default function AdminProtectedRoute({ children, user: propUser, authLoading }) {
+    const user = propUser || AuthService.getCurrentUser();
+
     if (authLoading && !user) {
         return (
             <div className="flex items-center justify-center min-h-screen bg-[#0b0f19] text-slate-400 text-xs">
@@ -10,7 +13,7 @@ export default function AdminProtectedRoute({ children, user, authLoading }) {
     }
 
     if (!user) {
-        return <Navigate to="/login" replace />;
+        return <Navigate to="/" replace />;
     }
 
     const roles = Array.isArray(user?.roles) ? user.roles : [];
