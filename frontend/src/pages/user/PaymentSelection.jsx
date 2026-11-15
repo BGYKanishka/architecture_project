@@ -29,7 +29,7 @@ const PaymentSelection = () => {
         paymentMethod: "CASH_ON_DATE"
       };
 
-      const res = await StallService.reserveStalls(payload.stallIds);
+      const res = await StallService.reserveStalls(payload.stallIds, payload.paymentMethod);
 
       navigate("/booking-confirmation", {
         state: {
@@ -41,8 +41,20 @@ const PaymentSelection = () => {
       });
 
     } catch (err) {
-      const errorMessage = err.response?.data?.message || err.response?.data || err.message;
-      showAlert("Reservation Error", typeof errorMessage === "string" ? errorMessage : "Reservation failed. Please try again.");
+      let errorMessage = err.response?.data?.message;
+      if (!errorMessage && typeof err.response?.data === "object") {
+        const values = Object.values(err.response.data).filter((v) => typeof v === "string");
+        if (values.length > 0) {
+          errorMessage = values.join(", ");
+        }
+      }
+      if (!errorMessage && typeof err.response?.data === "string") {
+        errorMessage = err.response.data;
+      }
+      if (!errorMessage && err.message) {
+        errorMessage = err.message;
+      }
+      showAlert("Reservation Error", errorMessage || "Reservation failed. Please try again.");
     } finally {
       setLoading(false);
     }

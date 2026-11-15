@@ -7,7 +7,6 @@ import EmployeeStallMap from "../../components/EmployeeStallMap";
  */
 const EmployeeDashboard = () => {
     const { hallName: urlHall } = useParams();
-    const navigate = useNavigate();
     const hallName = urlHall ? decodeURIComponent(urlHall) : "Hall A";
 
     return <EmployeeStallMap hallName={hallName} />;

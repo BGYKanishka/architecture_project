@@ -34,15 +34,10 @@ public class EmployeePanelController {
     private final ReservationRepository reservationRepository;
 
     @GetMapping("/stalls")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
     @Transactional(readOnly = true)
     public ResponseEntity<List<EmployeeStallDetailsDto>> getAllStallsForEmployee() {
-        List<Stall> allStalls = stallRepository.findAll();
-        // Reservation and Payment fetching logic is inside the stream now or can be
-        // optimized.
-        // For simplicity and to match the existing pattern, let's keep it.
-        // Note: The previous implementation fetched all reservations and payments which
-        // might be inefficient but acceptable for now.
+        List<Stall> allStalls = stallRepository.findAllWithFloors();
 
         List<EmployeeStallDetailsDto> stallDtos = allStalls.stream().map(this::mapToDto).collect(Collectors.toList());
 
@@ -50,7 +45,7 @@ public class EmployeePanelController {
     }
 
     @GetMapping("/stalls/{stallId}")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
     @Transactional(readOnly = true)
     public ResponseEntity<EmployeeStallDetailsDto> getStallDetails(
             @PathVariable Long stallId) {
@@ -60,7 +55,7 @@ public class EmployeePanelController {
     }
 
     @GetMapping("/qr/{token}")
-    @PreAuthorize("hasRole('EMPLOYEE')")
+    @PreAuthorize("hasAnyRole('EMPLOYEE', 'ADMIN')")
     @Transactional(readOnly = true)
     public ResponseEntity<QrVerificationResponse> verifyQrCode(@PathVariable String token) {
         return reservationRepository.findByQrCodeTokenWithUser(token)

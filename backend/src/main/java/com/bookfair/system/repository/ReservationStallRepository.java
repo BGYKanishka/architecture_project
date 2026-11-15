@@ -41,6 +41,13 @@ public interface ReservationStallRepository extends JpaRepository<ReservationSta
        @Query("SELECT COUNT(rs) FROM ReservationStall rs WHERE rs.reservation.id = :reservationId")
        long countByReservationId(@Param("reservationId") Long reservationId);
 
+       @Query("SELECT rs FROM ReservationStall rs " +
+                     "JOIN FETCH rs.stall s " +
+                     "JOIN FETCH rs.reservation r " +
+                     "JOIN FETCH r.user u " +
+                     "WHERE r.status IN :statuses")
+       List<ReservationStall> findAllActiveWithUser(@Param("statuses") List<String> statuses);
+
        @Query("SELECT rs FROM ReservationStall rs JOIN FETCH rs.stall JOIN FETCH rs.reservation")
        List<ReservationStall> findAllWithStallsAndReservations();
 

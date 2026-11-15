@@ -27,6 +27,14 @@ const Dashboard = () => {
   useEffect(() => {
     if (!user) {
       navigate("/login");
+      return;
+    }
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
+    const roleUpper = String(user?.role || "").toUpperCase();
+    if (roles.includes("ROLE_ADMIN") || roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN") {
+      navigate("/admin/dashboard", { replace: true });
+    } else if (roles.includes("ROLE_EMPLOYEE") || roleUpper === "EMPLOYEE" || roleUpper === "ROLE_EMPLOYEE") {
+      navigate("/employee/floor-plan", { replace: true });
     }
   }, [user, navigate]);
 

@@ -10,6 +10,8 @@ import {
     UsersIcon,
     BuildingStorefrontIcon,
     ClipboardDocumentListIcon,
+    UserCircleIcon,
+    GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 
 const AdminHeader = () => {
@@ -110,10 +112,32 @@ const AdminHeader = () => {
                                     <p className="text-[11px] text-slate-400">Administrator</p>
                                     <p className="text-xs font-bold text-white truncate">{username}</p>
                                 </div>
-                                <div className="pt-1 mt-1">
+                                <div className="pt-1">
+                                    <button
+                                        onClick={() => {
+                                            setIsProfileOpen(false);
+                                            navigate("/profile");
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+                                    >
+                                        <UserCircleIcon className="w-4 h-4 text-slate-400" />
+                                        <span>Profile Settings</span>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setIsProfileOpen(false);
+                                            navigate("/");
+                                        }}
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+                                    >
+                                        <GlobeAltIcon className="w-4 h-4 text-slate-400" />
+                                        <span>Public Fair Site</span>
+                                    </button>
+                                </div>
+                                <div className="pt-1 mt-1 border-t border-slate-800">
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 font-medium transition"
+                                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 font-medium transition cursor-pointer"
                                     >
                                         <ArrowLeftOnRectangleIcon className="w-4 h-4" />
                                         <span>Sign Out</span>

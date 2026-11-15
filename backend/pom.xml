@@ -17,6 +17,7 @@
         <java.version>17</java.version>
         <assertj.version>3.27.7</assertj.version>
         <json-smart.version>2.6.1</json-smart.version>
+        <lombok.version>1.18.46</lombok.version>
     </properties>
     <dependencies>
         <dependency>

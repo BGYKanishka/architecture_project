@@ -3,8 +3,14 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 
 const destinationFor = (user) => {
-  if (user?.role === "ADMIN" || user?.role === "ROLE_ADMIN") return "/admin/dashboard";
-  if (user?.role === "EMPLOYEE" || user?.role === "ROLE_EMPLOYEE") return "/employee/floor-plan";
+  const roles = Array.isArray(user?.roles) ? user.roles : [];
+  const roleUpper = String(user?.role || "").toUpperCase();
+  if (roles.includes("ROLE_ADMIN") || roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN") {
+    return "/admin/dashboard";
+  }
+  if (roles.includes("ROLE_EMPLOYEE") || roleUpper === "EMPLOYEE" || roleUpper === "ROLE_EMPLOYEE") {
+    return "/employee/floor-plan";
+  }
   return "/dashboard";
 };
 

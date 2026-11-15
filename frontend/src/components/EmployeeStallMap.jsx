@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import employeeService from "../services/employee/service";
 import HallShapeWrapper from "./HallShapeWrapper";
@@ -296,7 +296,9 @@ const EmployeeStallMap = ({ hallName }) => {
                                                 className={`rounded-lg flex flex-col items-center justify-center transition border cursor-pointer ${colorClass}`}
                                             >
                                                 <span className="font-bold text-xs md:text-sm leading-none pointer-events-none">
-                                                    {String(stall.stallCode.split("-")[1]).padStart(2, "0")}
+                                                    {stall.stallCode?.includes("-")
+                                                        ? String(stall.stallCode.split("-")[1]).padStart(2, "0")
+                                                        : stall.stallCode || ""}
                                                 </span>
                                                 {isDisabled ? (
                                                     <span className="text-[7px] font-bold mt-0.5 text-slate-500 tracking-wider pointer-events-none">OFF</span>

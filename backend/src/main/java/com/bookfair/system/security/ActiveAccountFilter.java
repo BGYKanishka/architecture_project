@@ -2,6 +2,7 @@ package com.bookfair.system.security;
 
 import com.bookfair.system.entity.User;
 import com.bookfair.system.repository.UserRepository;
+import com.bookfair.system.security.cognito.CognitoOidcUserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,9 +34,7 @@ public class ActiveAccountFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
         return "/api/auth/csrf".equals(path)
-                || "/api/auth/logout".equals(path)
-                || "/api/stalls".equals(path)
-                || path.startsWith("/api/stalls/");
+                || "/api/auth/logout".equals(path);
     }
 
     @Override
@@ -51,6 +50,22 @@ public class ActiveAccountFilter extends OncePerRequestFilter {
         }
 
         User account = userRepository.findByCognitoSub(principal.getSubject()).orElse(null);
+        if (account == null && principal.getEmail() != null) {
+            String email = principal.getEmail().trim().toLowerCase(Locale.ROOT);
+            account = userRepository.findByEmailIgnoreCase(email).orElse(null);
+            if (account != null && account.getCognitoSub() == null) {
+                account.setCognitoSub(principal.getSubject());
+                account = userRepository.save(account);
+            }
+        }
+
+        // Sync role if Cognito token specifies cognito:groups or custom:role
+        String cognitoRole = CognitoOidcUserService.extractRoleFromCognito(principal);
+        if (account != null && cognitoRole != null && !cognitoRole.equalsIgnoreCase(account.getRole())) {
+            account.setRole(cognitoRole);
+            account = userRepository.save(account);
+        }
+
         String role = account == null || account.getRole() == null
                 ? ""
                 : account.getRole().toUpperCase(Locale.ROOT);

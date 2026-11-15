@@ -4,8 +4,11 @@ const getAllStalls = () => {
   return api.get("/stalls");
 };
 
-const reserveStalls = (stallIds) => {
-  return api.post("/vendor-publishers/reservations", { stallIds });
+const reserveStalls = (stallIds, paymentMethod = "CASH_ON_DATE") => {
+  const payload = Array.isArray(stallIds)
+    ? { stallIds, paymentMethod }
+    : { paymentMethod: "CASH_ON_DATE", ...stallIds };
+  return api.post("/vendor-publishers/reservations", payload);
 };
 
 const getReservationCount = () => {

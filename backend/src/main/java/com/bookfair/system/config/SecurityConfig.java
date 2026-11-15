@@ -70,8 +70,8 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/stalls", "/api/stalls/**").permitAll()
                                                 .requestMatchers("/error").permitAll()
                                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                                .requestMatchers("/api/vendor-publishers/**").hasRole("VENDOR")
-                                                .requestMatchers("/api/employee/**").hasRole("EMPLOYEE")
+                                                .requestMatchers("/api/vendor-publishers/**").hasAnyRole("VENDOR", "EMPLOYEE", "ADMIN")
+                                                .requestMatchers("/api/employee/**").hasAnyRole("EMPLOYEE", "ADMIN")
                                                 .anyRequest().authenticated())
                                 .oauth2Login(oauth -> oauth
                                                 .authorizationEndpoint(authorization -> authorization

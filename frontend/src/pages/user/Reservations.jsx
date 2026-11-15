@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import AuthService from "../../services/auth.service";
 import StallService from "../../services/stall.service";
 import {
   TrashIcon,
@@ -27,6 +28,21 @@ const Reservations = () => {
   const showAlert = (title, message) => {
     setAlertConfig({ isOpen: true, title, message });
   };
+
+  useEffect(() => {
+    const user = AuthService.getCurrentUser();
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
+    const roleUpper = String(user?.role || "").toUpperCase();
+    if (roles.includes("ROLE_ADMIN") || roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN") {
+      navigate("/admin/reservations", { replace: true });
+    } else if (roles.includes("ROLE_EMPLOYEE") || roleUpper === "EMPLOYEE" || roleUpper === "ROLE_EMPLOYEE") {
+      navigate("/employee/floor-plan", { replace: true });
+    }
+  }, [navigate]);
 
   useEffect(() => {
     const fetchPaidDetails = async () => {

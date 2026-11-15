@@ -14,7 +14,9 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -46,13 +48,20 @@ public class CognitoOidcUserService extends OidcUserService {
         final String displayName = rawDisplayName != null && rawDisplayName.length() > 100
                 ? rawDisplayName.substring(0, 100)
                 : rawDisplayName;
+
+        String cognitoRole = extractRoleFromCognito(cognitoUser);
+
         User user = userRepository.findByCognitoSub(subject).orElse(null);
         if (user != null) {
             updateVerifiedEmail(user, normalizedEmail);
+            if (cognitoRole != null && !cognitoRole.equalsIgnoreCase(user.getRole())) {
+                user.setRole(cognitoRole);
+                user = userRepository.save(user);
+            }
         } else {
             user = userRepository.findByEmailIgnoreCase(normalizedEmail)
-                    .map(existing -> linkVerifiedIdentity(existing, subject, normalizedEmail, displayName))
-                    .orElseGet(() -> createVendor(subject, normalizedEmail, displayName));
+                    .map(existing -> linkVerifiedIdentity(existing, subject, normalizedEmail, displayName, cognitoRole))
+                    .orElseGet(() -> createUser(subject, normalizedEmail, displayName, cognitoRole != null ? cognitoRole : "VENDOR"));
         }
 
         if (!Boolean.TRUE.equals(user.getEnabled())) {
@@ -69,12 +78,50 @@ public class CognitoOidcUserService extends OidcUserService {
         return new DefaultOidcUser(authorities, cognitoUser.getIdToken(), cognitoUser.getUserInfo(), "sub");
     }
 
-    private User linkVerifiedIdentity(User user, String subject, String verifiedEmail, String displayName) {
+    public static String extractRoleFromCognito(OidcUser cognitoUser) {
+        if (cognitoUser == null) {
+            return null;
+        }
+
+        // 1. Check cognito:groups claim (e.g. ["EMPLOYEE"], ["ADMIN"], ["VENDOR"])
+        Object groupsClaim = cognitoUser.getClaim("cognito:groups");
+        if (groupsClaim instanceof Collection<?> list) {
+            for (Object item : list) {
+                String val = String.valueOf(item).toUpperCase(Locale.ROOT).replace("ROLE_", "").trim();
+                if (VALID_ROLES.contains(val)) {
+                    return val;
+                }
+            }
+        } else if (groupsClaim instanceof String groupStr) {
+            String val = groupStr.toUpperCase(Locale.ROOT).replace("ROLE_", "").trim();
+            if (VALID_ROLES.contains(val)) {
+                return val;
+            }
+        }
+
+        // 2. Check custom:role or role claim
+        for (String claimKey : List.of("custom:role", "role", "user_role")) {
+            String claimVal = cognitoUser.getClaimAsString(claimKey);
+            if (claimVal != null) {
+                String val = claimVal.toUpperCase(Locale.ROOT).replace("ROLE_", "").trim();
+                if (VALID_ROLES.contains(val)) {
+                    return val;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private User linkVerifiedIdentity(User user, String subject, String verifiedEmail, String displayName, String cognitoRole) {
         if (user.getCognitoSub() != null && !user.getCognitoSub().equals(subject)) {
             throw authenticationError("This email is already linked to another identity.");
         }
         user.setCognitoSub(subject);
         user.setEmail(verifiedEmail);
+        if (cognitoRole != null && !cognitoRole.equalsIgnoreCase(user.getRole())) {
+            user.setRole(cognitoRole);
+        }
         if ((user.getName() == null || user.getName().isBlank())) {
             user.setName(displayName == null || displayName.isBlank()
                     ? verifiedEmail.substring(0, verifiedEmail.indexOf('@'))
@@ -95,12 +142,12 @@ public class CognitoOidcUserService extends OidcUserService {
         }
     }
 
-    private User createVendor(String subject, String email, String name) {
+    private User createUser(String subject, String email, String name, String role) {
         User user = User.builder()
                 .cognitoSub(subject)
                 .email(email)
                 .name(name == null || name.isBlank() ? email.substring(0, email.indexOf('@')) : name)
-                .role("VENDOR")
+                .role(VALID_ROLES.contains(role) ? role : "VENDOR")
                 .enabled(true)
                 .build();
         return userRepository.save(user);

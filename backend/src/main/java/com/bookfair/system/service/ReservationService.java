@@ -55,7 +55,10 @@ public class ReservationService {
         if (request.getStallIds().stream().anyMatch(stallId -> stallId == null || stallId <= 0)) {
             throw new IllegalArgumentException("Stall IDs must be positive values.");
         }
-        if (!"CASH_ON_DATE".equals(request.getPaymentMethod())) {
+        String paymentMethod = (request.getPaymentMethod() == null || request.getPaymentMethod().isBlank())
+                ? "CASH_ON_DATE"
+                : request.getPaymentMethod().trim().toUpperCase(Locale.ROOT);
+        if (!"CASH_ON_DATE".equals(paymentMethod)) {
             throw new IllegalArgumentException("Unsupported payment method.");
         }
 
@@ -122,7 +125,7 @@ public class ReservationService {
         Payment payment = new Payment();
         payment.setReservation(savedReservation);
         payment.setAmount(calculatedTotal);
-        payment.setPaymentMethod(request.getPaymentMethod());
+        payment.setPaymentMethod(paymentMethod);
         payment.setPaymentStatus(paymentStatus);
 
         paymentRepository.save(payment);

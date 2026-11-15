@@ -1,13 +1,26 @@
 import { Navigate, Outlet } from "react-router-dom";
 
-export default function AdminProtectedRoute({ user, authLoading }) {
-    if (authLoading) return null;
+export default function AdminProtectedRoute({ children, user, authLoading }) {
+    if (authLoading && !user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-[#0b0f19] text-slate-400 text-xs">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+            </div>
+        );
+    }
 
-    const roles = Array.isArray(user?.roles) ? user.roles : [];
-    const isAdmin = roles.includes("ROLE_ADMIN") || user?.role === "ADMIN" || user?.role === "ROLE_ADMIN";
-
-    if (!user || !isAdmin) {
+    if (!user) {
         return <Navigate to="/login" replace />;
     }
-    return <Outlet />;
+
+    const roles = Array.isArray(user?.roles) ? user.roles : [];
+    const roleUpper = String(user?.role || "").toUpperCase();
+    const isAdmin = roles.includes("ROLE_ADMIN") || roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN";
+
+    if (!isAdmin) {
+        const isEmployee = roles.includes("ROLE_EMPLOYEE") || roleUpper === "EMPLOYEE" || roleUpper === "ROLE_EMPLOYEE";
+        return <Navigate to={isEmployee ? "/employee/floor-plan" : "/dashboard"} replace />;
+    }
+
+    return children ? children : <Outlet />;
 }

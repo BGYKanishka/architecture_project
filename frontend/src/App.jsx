@@ -19,6 +19,7 @@ import About from "./pages/public/About";
 import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
 import EmployeeFloorPlan from "./pages/employee/EmployeeFloorPlan";
 import EmployeeRoute from "./components/routing/EmployeeRoute";
+import VendorRoute from "./components/routing/VendorRoute";
 import AdminDutyManagement from "./pages/admin/AdminDutyManagement";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminStalls from "./pages/admin/AdminStalls";
@@ -30,7 +31,7 @@ import { useEffect, useState } from "react";
 
 function AppContent() {
   const [user, setUser] = useState(() => AuthService.getCurrentUser());
-  const [authLoading, setAuthLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(() => !AuthService.getCurrentUser());
 
   useEffect(() => {
     const fetchUser = () => {
@@ -60,16 +61,20 @@ function AppContent() {
         <Route element={<MainLayout user={user} />}>
           <Route path="/" element={<Landing />} />
           <Route path="/about" element={<About />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/reservations" element={<Reservations />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/help" element={<HelpCenter />} />
           <Route path="/map" element={<Map />} />
           <Route path="/map/:hallName" element={<Map />} />
-          <Route path="/booking-summary" element={<BookingSummary />} />
-          <Route path="/payment-selection" element={<PaymentSelection />} />
-          <Route path="/booking-confirmation" element={<BookingConfirmation />} />
-          <Route path="/help" element={<HelpCenter />} />
-          <Route path="/genres" element={<GenreSelection />} />
+          <Route path="/profile" element={<Profile />} />
+
+          {/* ── Vendor-only routes ── */}
+          <Route element={<VendorRoute user={user} authLoading={authLoading} />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/reservations" element={<Reservations />} />
+            <Route path="/booking-summary" element={<BookingSummary />} />
+            <Route path="/payment-selection" element={<PaymentSelection />} />
+            <Route path="/booking-confirmation" element={<BookingConfirmation />} />
+            <Route path="/genres" element={<GenreSelection />} />
+          </Route>
         </Route>
 
         <Route path="/employee" element={<Navigate to="/employee/floor-plan" replace />} />
@@ -86,28 +91,15 @@ function AppContent() {
         </Route>
 
         {/* ── Employee routes ── */}
-        <Route element={<EmployeeLayout user={user} />}>
-          <Route
-            path="/employee/floor-plan"
-            element={
-                <EmployeeRoute user={user} authLoading={authLoading}>
-                <EmployeeFloorPlan />
-              </EmployeeRoute>
-            }
-          />
-          <Route
-            path="/employee/floor-plan/:hallName"
-            element={
-                <EmployeeRoute user={user} authLoading={authLoading}>
-                <EmployeeDashboard />
-              </EmployeeRoute>
-            }
-          />
-          {/* Legacy /employee/dashboard → redirect to floor plan */}
-          <Route
-            path="/employee/dashboard"
-            element={<Navigate to="/employee/floor-plan" replace />}
-          />
+        <Route element={<EmployeeRoute user={user} authLoading={authLoading} />}>
+          <Route element={<EmployeeLayout user={user} />}>
+            <Route path="/employee/floor-plan" element={<EmployeeFloorPlan />} />
+            <Route path="/employee/floor-plan/:hallName" element={<EmployeeDashboard />} />
+            <Route
+              path="/employee/dashboard"
+              element={<Navigate to="/employee/floor-plan" replace />}
+            />
+          </Route>
         </Route>
       </Routes>
     </div>

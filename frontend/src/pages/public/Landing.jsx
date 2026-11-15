@@ -92,6 +92,20 @@ const BookFairIllustration = () => (
 const Landing = () => {
   const navigate = useNavigate();
   const currentUser = AuthService.getCurrentUser();
+  const roles = Array.isArray(currentUser?.roles) ? currentUser.roles : [];
+  const roleUpper = String(currentUser?.role || "").toUpperCase();
+  const isAdmin = roles.includes("ROLE_ADMIN") || roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN";
+  const isEmployee = roles.includes("ROLE_EMPLOYEE") || roleUpper === "EMPLOYEE" || roleUpper === "ROLE_EMPLOYEE";
+
+  let portalLink = "/dashboard";
+  let portalLabel = "Go to Dashboard";
+  if (isAdmin) {
+    portalLink = "/admin/dashboard";
+    portalLabel = "Admin Panel";
+  } else if (isEmployee) {
+    portalLink = "/employee/floor-plan";
+    portalLabel = "Staff Portal";
+  }
 
   const stallTiers = [
     {
@@ -205,11 +219,11 @@ const Landing = () => {
 
                 {currentUser ? (
                   <Link
-                    to="/dashboard"
+                    to={portalLink}
                     className="inline-flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 font-medium px-6 py-3 rounded-lg text-sm transition"
                   >
                     <BuildingOffice2Icon className="w-4 h-4 text-slate-400" />
-                    <span>Go to Dashboard</span>
+                    <span>{portalLabel}</span>
                   </Link>
                 ) : (
                   <button

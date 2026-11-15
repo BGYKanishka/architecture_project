@@ -17,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/api/vendor-publishers/reservations")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('VENDOR')")
+@PreAuthorize("hasAnyRole('VENDOR', 'EMPLOYEE', 'ADMIN')")
 public class ReservationController {
 
     private final ReservationService reservationService;
@@ -53,8 +53,23 @@ public class ReservationController {
     }
 
     private Long userId(OidcUser currentUser) {
-        return userRepository.findByCognitoSub(currentUser.getSubject())
-                .map(user -> user.getId())
+        if (currentUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated.");
+        }
+        String sub = currentUser.getSubject();
+        String email = currentUser.getEmail();
+        return userRepository.findByCognitoSub(sub)
+                .or(() -> (email != null && !email.isBlank())
+                        ? userRepository.findByEmailIgnoreCase(email.trim().toLowerCase(java.util.Locale.ROOT))
+                                .map(user -> {
+                                    if (user.getCognitoSub() == null || user.getCognitoSub().isBlank()) {
+                                        user.setCognitoSub(sub);
+                                        return userRepository.save(user);
+                                    }
+                                    return user;
+                                })
+                        : java.util.Optional.empty())
+                .map(com.bookfair.system.entity.User::getId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account profile not found."));
     }
 }

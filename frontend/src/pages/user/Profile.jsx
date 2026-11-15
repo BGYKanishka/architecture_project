@@ -17,10 +17,6 @@ const Profile = () => {
   const [saveLoading, setSaveLoading] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
   const fetchProfile = () => {
     UserService.getProfile()
       .then((response) => {
@@ -38,6 +34,10 @@ const Profile = () => {
         setLoading(false);
       });
   };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleEditToggle = () => {
     if (isEditing) {

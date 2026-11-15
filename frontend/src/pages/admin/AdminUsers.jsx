@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import AdminHeader from "../../components/common/AdminHeader";
 import {
@@ -61,7 +61,7 @@ export default function AdminUsers() {
         return () => clearTimeout(timer);
     }, [actionNotice]);
 
-    const load = async () => {
+    const load = useCallback(async () => {
         setLoading(true);
         setLoadError("");
         try {
@@ -73,9 +73,9 @@ export default function AdminUsers() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [roleFilter]);
 
-    useEffect(() => { load(); }, [roleFilter]);
+    useEffect(() => { load(); }, [load]);
 
     const filtered = useMemo(() => {
         const q = search.toLowerCase().trim();
@@ -121,7 +121,7 @@ export default function AdminUsers() {
         setSaving(true);
         try {
             if (modal === "add") {
-                const { enabled, ...newUser } = form;
+                const { enabled: _unusedEnabled, ...newUser } = form;
                 await createAdminUser(newUser);
                 setActionNotice(`User "${newUser.name}" (${newUser.email}) created successfully! An invitation email has been sent.`);
             } else {

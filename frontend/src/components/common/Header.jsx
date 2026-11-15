@@ -8,6 +8,9 @@ import {
   XMarkIcon,
   BookOpenIcon,
   TicketIcon,
+  HomeIcon,
+  ShieldCheckIcon,
+  QrCodeIcon,
 } from "@heroicons/react/24/outline";
 
 const Header = ({ user }) => {
@@ -22,12 +25,27 @@ const Header = ({ user }) => {
   };
 
   const isLoggedIn = !!user;
+  const roles = Array.isArray(user?.roles) ? user.roles : [];
+  const roleUpper = String(user?.role || "").toUpperCase();
+  const isAdmin = roles.includes("ROLE_ADMIN") || roleUpper === "ADMIN" || roleUpper === "ROLE_ADMIN";
+  const isEmployee = roles.includes("ROLE_EMPLOYEE") || roleUpper === "EMPLOYEE" || roleUpper === "ROLE_EMPLOYEE";
+  const isVendor = isLoggedIn && !isAdmin && !isEmployee;
+
+  let portalLink = "/dashboard";
+  let portalLabel = "Dashboard";
+  if (isAdmin) {
+    portalLink = "/admin/dashboard";
+    portalLabel = "Admin Panel";
+  } else if (isEmployee) {
+    portalLink = "/employee/floor-plan";
+    portalLabel = "Staff Portal";
+  }
 
   const navLinks = [
     { to: "/", label: "Home", exact: true },
-    ...(isLoggedIn ? [{ to: "/dashboard", label: "Dashboard" }] : []),
-    { to: "/map", label: "Floor Plan & Stalls" },
-    ...(isLoggedIn ? [{ to: "/reservations", label: "My Bookings" }] : []),
+    ...(isLoggedIn ? [{ to: portalLink, label: portalLabel }] : []),
+    ...(isVendor || !isLoggedIn ? [{ to: "/map", label: "Floor Plan & Stalls" }] : []),
+    ...(isVendor ? [{ to: "/reservations", label: "My Bookings" }] : []),
     { to: "/about", label: "About Fair" },
     { to: "/help", label: "Help" },
   ];
@@ -66,7 +84,7 @@ const Header = ({ user }) => {
           </Link>
         </div>
 
-        {/* MIDDLE: Natural Desktop Nav Links (No pill capsule wrapper, no bubble buttons) */}
+        {/* MIDDLE: Desktop Nav Links */}
         <nav className="hidden lg:flex items-center gap-6">
           {navLinks.map((link) => {
             const active = isActive(link);
@@ -92,19 +110,41 @@ const Header = ({ user }) => {
         <div className="flex items-center gap-3">
           {isLoggedIn ? (
             <>
-              <Link
-                to="/reservations"
-                className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3 py-1.5 rounded-lg transition"
-              >
-                <TicketIcon className="w-4 h-4 text-indigo-400" />
-                <span>My Bookings</span>
-              </Link>
+              {isVendor && (
+                <Link
+                  to="/reservations"
+                  className="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-800 px-3 py-1.5 rounded-lg transition"
+                >
+                  <TicketIcon className="w-4 h-4 text-indigo-400" />
+                  <span>My Bookings</span>
+                </Link>
+              )}
+
+              {isEmployee && (
+                <Link
+                  to="/employee/floor-plan"
+                  className="hidden sm:flex items-center gap-2 text-xs font-semibold text-indigo-300 hover:text-white bg-indigo-950/50 hover:bg-indigo-900/60 border border-indigo-800/80 px-3 py-1.5 rounded-lg transition"
+                >
+                  <QrCodeIcon className="w-4 h-4 text-indigo-400" />
+                  <span>Staff Portal</span>
+                </Link>
+              )}
+
+              {isAdmin && (
+                <Link
+                  to="/admin/dashboard"
+                  className="hidden sm:flex items-center gap-2 text-xs font-semibold text-amber-300 hover:text-white bg-amber-950/40 hover:bg-amber-900/50 border border-amber-800/80 px-3 py-1.5 rounded-lg transition"
+                >
+                  <ShieldCheckIcon className="w-4 h-4 text-amber-400" />
+                  <span>Admin Panel</span>
+                </Link>
+              )}
 
               {/* User Menu */}
               <div className="relative">
                 <button
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="flex items-center gap-2.5 p-1 text-left rounded-lg hover:bg-slate-800/60 transition"
+                  className="flex items-center gap-2.5 p-1 text-left rounded-lg hover:bg-slate-800/60 transition cursor-pointer"
                 >
                   <div className="w-8 h-8 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center text-xs font-bold">
                     {(user?.name || user?.email)?.charAt(0).toUpperCase() || "U"}
@@ -119,36 +159,51 @@ const Header = ({ user }) => {
                     <div className="fixed inset-0 z-40" onClick={() => setIsProfileOpen(false)}></div>
                     <div className="absolute right-0 mt-2 w-56 bg-[#0f1422] border border-slate-800 rounded-xl shadow-2xl py-2 z-50 text-slate-200">
                       <div className="px-4 py-2.5 border-b border-slate-800">
-                        <p className="text-[11px] text-slate-400">Signed in as</p>
+                        <p className="text-[11px] text-slate-400">
+                          {isAdmin ? "Administrator" : isEmployee ? "Staff Member" : "Signed in as"}
+                        </p>
                         <p className="text-xs font-bold text-white truncate">{user?.name || user?.email}</p>
                       </div>
+
+                      <button
+                        onClick={() => {
+                          navigate(portalLink);
+                          setIsProfileOpen(false);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+                      >
+                        <HomeIcon className="w-4 h-4 text-slate-400" />
+                        <span>{portalLabel}</span>
+                      </button>
 
                       <button
                         onClick={() => {
                           navigate("/profile");
                           setIsProfileOpen(false);
                         }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition"
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition cursor-pointer"
                       >
                         <UserCircleIcon className="w-4 h-4 text-slate-400" />
                         <span>Profile Settings</span>
                       </button>
 
-                      <button
-                        onClick={() => {
-                          navigate("/reservations");
-                          setIsProfileOpen(false);
-                        }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition"
-                      >
-                        <TicketIcon className="w-4 h-4 text-slate-400" />
-                        <span>My Bookings</span>
-                      </button>
+                      {isVendor && (
+                        <button
+                          onClick={() => {
+                            navigate("/reservations");
+                            setIsProfileOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white transition cursor-pointer"
+                        >
+                          <TicketIcon className="w-4 h-4 text-slate-400" />
+                          <span>My Bookings</span>
+                        </button>
+                      )}
 
                       <div className="pt-1 mt-1 border-t border-slate-800">
                         <button
                           onClick={handleLogout}
-                          className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 font-medium transition"
+                          className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 font-medium transition cursor-pointer"
                         >
                           <ArrowLeftOnRectangleIcon className="w-4 h-4" />
                           <span>Sign Out</span>
