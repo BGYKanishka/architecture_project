@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Map;
 
@@ -60,12 +59,9 @@ public class AuthController {
         }
 
         String domain = cognitoDomain.replaceAll("/+$", "");
-        String logoutUrl = UriComponentsBuilder.fromUriString(domain + "/logout")
-                .queryParam("client_id", cognitoClientId)
-                .queryParam("logout_uri", appPublicUrl)
-                .build()
-                .encode()
-                .toUriString();
+        String cleanLogoutUri = appPublicUrl.replaceAll("/+$", "");
+        String encodedLogoutUri = java.net.URLEncoder.encode(cleanLogoutUri, java.nio.charset.StandardCharsets.UTF_8);
+        String logoutUrl = domain + "/logout?client_id=" + cognitoClientId + "&logout_uri=" + encodedLogoutUri;
         return ResponseEntity.ok(Map.of("logoutUrl", logoutUrl));
     }
 }

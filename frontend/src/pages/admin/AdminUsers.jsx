@@ -53,6 +53,13 @@ export default function AdminUsers() {
 
     const [confirmDelete, setConfirmDelete] = useState(null);
     const [deleteErr, setDeleteErr] = useState("");
+    const [actionNotice, setActionNotice] = useState("");
+
+    useEffect(() => {
+        if (!actionNotice) return;
+        const timer = setTimeout(() => setActionNotice(""), 6000);
+        return () => clearTimeout(timer);
+    }, [actionNotice]);
 
     const load = async () => {
         setLoading(true);
@@ -116,8 +123,10 @@ export default function AdminUsers() {
             if (modal === "add") {
                 const { enabled, ...newUser } = form;
                 await createAdminUser(newUser);
+                setActionNotice(`User "${newUser.name}" (${newUser.email}) created successfully! An invitation email has been sent.`);
             } else {
                 await updateAdminUser(editTarget.id, form);
+                setActionNotice(`User "${form.name}" updated successfully.`);
             }
             closeModal();
             load();
@@ -165,6 +174,21 @@ export default function AdminUsers() {
     return (
         <div className="min-h-screen bg-[#0b0f19] text-slate-100 pb-16">
             <AdminHeader />
+
+            {/* Action Notice */}
+            {actionNotice && (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                    <div className="bg-emerald-950/60 border border-emerald-800/70 text-emerald-300 text-xs px-4 py-3 rounded-xl flex items-center justify-between shadow-lg">
+                        <span className="font-medium">{actionNotice}</span>
+                        <button
+                            onClick={() => setActionNotice("")}
+                            className="text-emerald-400 hover:text-white font-bold ml-4 text-sm"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Page Title Bar */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4 flex items-center justify-between">
@@ -372,9 +396,9 @@ export default function AdminUsers() {
                             </div>
 
                             {modal === "add" && (
-                                <p className="text-[11px] text-slate-400">
-                                    The user signs in through Cognito with this verified email. Their app role is set here.
-                                </p>
+                                <div className="bg-indigo-950/40 border border-indigo-800/60 rounded-lg p-2.5 text-[11px] text-indigo-200/90 leading-relaxed">
+                                    📧 An invitation email will automatically be sent to this address with instructions to sign up and create their own password.
+                                </div>
                             )}
 
                             <div className="grid grid-cols-2 gap-3">

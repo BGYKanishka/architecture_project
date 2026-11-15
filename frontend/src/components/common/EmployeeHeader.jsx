@@ -27,9 +27,9 @@ const EmployeeHeader = ({ user }) => {
 
     const currentUser = user || AuthService.getCurrentUser();
 
-    const handleLogout = () => {
-        AuthService.logout();
-        navigate("/login");
+    const handleLogout = async () => {
+        setIsProfileOpen(false);
+        await AuthService.logout();
     };
 
     const handleScanSuccess = async (decodedText) => {

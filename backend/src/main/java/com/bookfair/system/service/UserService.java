@@ -27,6 +27,7 @@ public class UserService {
   private final UserRepository userRepository;
   private final GenreRepository genreRepository;
   private final ReservationRepository reservationRepository;
+  private final EmailService emailService;
 
   /** Thrown when a user cannot be deleted due to FK-linked reservations. */
   public static class UserHasReservationsException extends RuntimeException {
@@ -123,7 +124,12 @@ public class UserService {
         .enabled(true)
         .build();
 
-    return toAdminResponse(userRepository.save(user));
+    User savedUser = userRepository.save(user);
+
+    // Asynchronously notify user with instructions to sign up and set their password
+    emailService.sendAccountInvitationEmail(savedUser.getEmail(), savedUser.getName(), savedUser.getRole());
+
+    return toAdminResponse(savedUser);
   }
 
   @Transactional

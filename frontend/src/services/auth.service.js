@@ -28,11 +28,13 @@ const register = () => {
 };
 
 const logout = async () => {
-  let logoutUrl = "/login";
+  let logoutUrl = "/";
   try {
     await api.get("/auth/csrf");
     const response = await api.post("/auth/logout");
     logoutUrl = response.data.logoutUrl || logoutUrl;
+  } catch (err) {
+    console.error("Logout request failed:", err);
   } finally {
     sessionStorage.removeItem(USER_KEY);
     window.dispatchEvent(new Event("user-updated"));

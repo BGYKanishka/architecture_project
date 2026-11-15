@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import AuthService from "../../services/auth.service";
 import { ArrowLeftIcon, BookOpenIcon, LockClosedIcon } from "@heroicons/react/24/outline";
@@ -12,12 +12,6 @@ const Login = () => {
     setLoading(true);
     AuthService.login();
   };
-
-  useEffect(() => {
-    if (!loginFailed) {
-      startLogin();
-    }
-  }, [loginFailed]);
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#0b0f19] text-slate-100 font-sans">
@@ -40,34 +34,33 @@ const Login = () => {
         </div>
 
         <h1 className="text-2xl font-bold text-white tracking-tight">
-          {loginFailed ? "Sign-in Failed" : "Signing In…"}
+          {loginFailed ? "Sign-in Failed" : "Sign In"}
         </h1>
         <p className="text-sm text-slate-400 mt-2">
           {loginFailed
             ? "Sign-in could not be completed. Check your account permissions or try again."
-            : "Redirecting directly to the secure sign-in page…"}
+            : "Sign in with your verified Amazon Cognito credentials to access the portal."}
         </p>
 
-        {loginFailed ? (
-          <button
-            onClick={startLogin}
-            disabled={loading}
-            className="mt-7 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white py-3 rounded-lg text-sm font-semibold transition cursor-pointer"
-          >
-            <LockClosedIcon className="w-4 h-4" />
-            {loading ? "Opening secure sign-in…" : "Retry Sign In"}
-          </button>
-        ) : (
-          <div className="mt-8 flex items-center justify-center gap-2 text-indigo-400 text-sm">
-            <svg className="animate-spin h-5 w-5 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-            </svg>
-            <span>Redirecting to Cognito…</span>
-          </div>
-        )}
+        <button
+          onClick={startLogin}
+          disabled={loading}
+          className="mt-7 w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 text-white py-3 rounded-lg text-sm font-semibold transition cursor-pointer shadow-sm"
+        >
+          <LockClosedIcon className="w-4 h-4" />
+          {loading ? "Redirecting to Cognito…" : loginFailed ? "Retry Sign In" : "Sign In with Cognito"}
+        </button>
 
-        <p className="text-xs text-slate-500 mt-6 text-center">
+        <div className="mt-5 text-center">
+          <p className="text-xs text-slate-400">
+            First time or received an invitation?{" "}
+            <Link to="/register" className="text-indigo-400 hover:text-indigo-300 font-medium underline">
+              Create account / Set password
+            </Link>
+          </p>
+        </div>
+
+        <p className="text-xs text-slate-500 mt-5 text-center">
           Passwords and authentication are handled securely by Amazon Cognito.
         </p>
       </div>

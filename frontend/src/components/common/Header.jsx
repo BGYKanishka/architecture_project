@@ -16,9 +16,9 @@ const Header = ({ user }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    AuthService.logout();
-    navigate("/login");
+  const handleLogout = async () => {
+    setIsProfileOpen(false);
+    await AuthService.logout();
   };
 
   const isLoggedIn = !!user;

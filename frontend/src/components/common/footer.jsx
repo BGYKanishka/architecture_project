@@ -112,7 +112,6 @@ const Footer = () => {
 
       <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-6 border-t border-slate-800/70 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
         <p>© {currentYear} Colombo International Book Fair. All rights reserved.</p>
-        <p className="text-slate-500">Powered by Modular Spring Boot & React Digital Architecture</p>
       </div>
     </footer>
   );

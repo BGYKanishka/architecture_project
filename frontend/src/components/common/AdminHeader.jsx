@@ -22,9 +22,9 @@ const AdminHeader = () => {
     const username = user.email || "Admin";
     const role = (user.roles && user.roles.length > 0) ? user.roles[0] : "ADMIN";
 
-    const handleLogout = () => {
-        AuthService.logout();
-        navigate("/login");
+    const handleLogout = async () => {
+        setIsProfileOpen(false);
+        await AuthService.logout();
     };
 
     const navItems = [
