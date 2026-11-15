@@ -69,7 +69,7 @@ public class ReservationController {
                                     return user;
                                 })
                         : java.util.Optional.empty())
-                .map(com.bookfair.system.entity.User::getId)
+                .map(user -> user.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account profile not found."));
     }
 }

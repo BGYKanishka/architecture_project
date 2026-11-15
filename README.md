@@ -1,85 +1,168 @@
 # Colombo International Book Fair (CIBF) Platform
 
-A full-stack web application built for managing stall reservations and event operations at the Colombo International Book Fair (BMICH). The platform enables book publishers to browse live hall availability and reserve stalls, gate staff to validate attendee passes using camera QR scanning, and administrators to oversee reservations, stall inventory, and staff duties.
+A full-stack web application built for managing stall reservations and event operations at the Colombo International Book Fair (BMICH). The platform allows book publishers to view live hall availability and reserve stalls, gate staff to verify attendee passes using camera QR scanning, and administrators to oversee reservations, stall inventory, and staff duties.
 
 ---
 
 ## 🏛️ System Architecture
 
-The application is built as a **modular monolith** with a Spring Boot 3 REST API backend and a React 19 single-page frontend.
+The application is built as a **modular monolith** with a Spring Boot REST API backend and a React 19 single-page frontend, using the **Backend-For-Frontend (BFF)** pattern with server-side OAuth 2.0 session cookies.
 
 ```mermaid
 flowchart TD
-    subgraph Clients ["Clients"]
-        Vendor["Publisher / Vendor"]
-        Staff["Gate Staff"]
-        Admin["Administrator"]
+    subgraph Clients ["Client Layer"]
+        Vendor["Publisher / Vendor\n(ROLE_VENDOR)"]
+        Staff["Gate Staff\n(ROLE_EMPLOYEE)"]
+        Admin["Administrator\n(ROLE_ADMIN)"]
     end
 
-    subgraph Frontend ["Frontend (React 19 + Vite + Tailwind CSS)"]
-        UI["Interactive Hall Map, Dashboards & QR Scanner"]
-        Axios["Axios API Client"]
+    subgraph Frontend ["Frontend Tier (React 19 + Vite + Tailwind CSS v4)"]
+        UI["Interactive SVG Hall Map & Dashboards"]
+        Scanner["Camera QR Scanner (HTML5-QRCode)"]
+        ClientService["Axios API Client (with CSRF Interceptor)"]
     end
 
-    subgraph Backend ["Backend (Spring Boot 3 REST API)"]
-        Security["Spring Security + OAuth2 BFF"]
-        Controllers["Stall, Reservation & Duty Controllers"]
-        Services["Business Logic & Pessimistic Lock Engine"]
+    subgraph Backend ["Backend Tier (Spring Boot REST API)"]
+        Security["Spring Security 7 + OAuth2 BFF Engine\n(Encrypted CIBFSESSION Cookie)"]
+        Controllers["REST Controllers\n(Stall, Reservation, Duty, Admin)"]
+        
+        subgraph CoreLogic ["Business Logic & Locking"]
+            LockEngine["Pessimistic Locking Engine\n(SELECT ... FOR UPDATE)"]
+            DutyManager["Staff Duty Scheduler"]
+            QRGen["ZXing QR Code Generator"]
+        end
+
+        subgraph AsyncQueue ["Asynchronous Email Pipeline"]
+            SQSProducer["EmailQueueProducer\n(Fast Publish <10ms)"]
+            SQSConsumer["EmailQueueConsumer\n(Rate-Controlled Poller)"]
+        end
     end
 
-    subgraph Database ["Persistence"]
-        Postgres[("PostgreSQL 16")]
+    subgraph Persistence ["Persistence Tier"]
+        Postgres[("Amazon RDS PostgreSQL\n(Pessimistic Row Locks & Foreign Keys)")]
     end
 
-    subgraph CloudServices ["AWS Services (ap-southeast-2)"]
-        SES["Amazon SES (Email Tickets)"]
-        Cognito["Amazon Cognito (Identity Provider)"]
+    subgraph AWSCloud ["AWS Managed Services (Selected Region: ap-southeast-2)"]
+        Cognito["Amazon Cognito User Pool\n(OAuth2 IdP + PKCE)"]
+        SQS["Amazon SQS Buffer Queue\n(bookfair-email-queue)"]
+        DLQ["Amazon SQS Dead-Letter Queue\n(bookfair-email-dlq)"]
+        SES["Amazon SES\n(Authenticated SMTP / STARTTLS)"]
     end
 
-    Vendor & Staff & Admin --> UI
-    UI --> Axios
-    Axios -->|"Session Cookie / REST API"| Security
+    Vendor & Staff & Admin --> UI & Scanner
+    UI & Scanner --> ClientService
+    ClientService -->|"HTTP/HTTPS with CIBFSESSION Cookie"| Security
+    Security -.-|"Authorization Code Flow (Confidential Client)"| Cognito
     Security --> Controllers
-    Security -.-|"OAuth2 Code Flow"| Cognito
-    Controllers --> Services
-    Services -->|Pessimistic Locking / SQL| Postgres
-    Services -->|SMTP / TLS| SES
+    Controllers --> LockEngine & DutyManager
+    LockEngine -->|"Pessimistic Lock & Commit"| Postgres
+    LockEngine -->|"Trigger Confirmation (<10ms)"| SQSProducer
+    SQSProducer -->|"Enqueue JSON Payload"| SQS
+    SQS -.->|"Failover after 5 Retries"| DLQ
+    SQSConsumer -->|"Long Poll & Rate-Throttle (1/sec)"| SQS
+    SQSConsumer -->|"Render QR & Send MimeMessage"| SES
 ```
 
 ---
 
-## ☁️ Cloud Architecture (Selected Region: `ap-southeast-2`)
+## ☁️ Cloud Infrastructure Architecture (Selected Region: `ap-southeast-2`)
 
-Deployed in AWS Sydney (`ap-southeast-2`) within a custom VPC separating public web tiers from private persistence subnets.
+The infrastructure is deployed in AWS Sydney (**`ap-southeast-2`**) adhering to the **AWS Well-Architected Framework**. It features a custom Multi-AZ Virtual Private Cloud (VPC), dual EC2 compute nodes fronted by an Application Load Balancer, an isolated RDS database, and managed AWS services.
+
+```mermaid
+flowchart TD
+    subgraph PublicInternet ["Public Internet"]
+        Users["Browser & Mobile Clients\n(Publishers, Gate Staff, Admins)"]
+        GHActions["GitHub Actions CI/CD Runner\n(Automated Testing & Builds)"]
+    end
+
+    subgraph AWSCloud ["AWS Cloud (Selected Region: ap-southeast-2)"]
+        IGW["Internet Gateway (bookfair-igw)"]
+
+        subgraph VPC ["Custom VPC: bookfair-vpc (10.0.0.0/16)"]
+            
+            subgraph IngressTier ["High-Availability Ingress Tier"]
+                ALB["AWS Application Load Balancer\n(bookfair-alb :80 / :443)"]
+            end
+
+            subgraph AZ_A ["Availability Zone: ap-southeast-2a"]
+                subgraph PublicSubnetA ["Public Subnet 1 (10.0.1.0/24)"]
+                    EC2_1["EC2 Node 1 (bookfair-web-server-1)\n- Nginx Reverse Proxy (:80)\n- React 19 Static SPA\n- Spring Boot Container (:8080)"]
+                end
+                subgraph PrivateSubnetA ["Private Subnet 1 (10.0.10.0/24)"]
+                    RDS_Master[("Amazon RDS PostgreSQL :5432\n(Primary Master Instance)")]
+                end
+            end
+
+            subgraph AZ_B ["Availability Zone: ap-southeast-2b"]
+                subgraph PublicSubnetB ["Public Subnet 2 (10.0.2.0/24)"]
+                    EC2_2["EC2 Node 2 (bookfair-web-server-2)\n- Nginx Reverse Proxy (:80)\n- React 19 Static SPA\n- Spring Boot Container (:8080)"]
+                end
+                subgraph PrivateSubnetB ["Private Subnet 2 (10.0.20.0/24)"]
+                    RDS_Subnet[("Private Subnet 2\n(VPC DB Subnet Group)")]
+                end
+            end
+        end
+
+        subgraph ManagedServices ["AWS Managed Services Tier (ap-southeast-2)"]
+            Cognito["Amazon Cognito User Pool\n(OAuth2 / OIDC Identity Provider)"]
+            SQSQueue["Amazon SQS Primary Queue\n(bookfair-email-queue)"]
+            SQSDLQ["Amazon SQS Dead-Letter Queue\n(bookfair-email-dlq)"]
+            SESService["Amazon SES\n(email-smtp.ap-southeast-2.amazonaws.com)"]
+            ECR["Amazon ECR Registries\n(cibf-backend, cibf-frontend)"]
+            SSM["AWS Systems Manager\n(SSM RunCommand Deployment Agent)"]
+        end
+    end
+
+    Users -->|"1. HTTPS Requests"| IGW
+    IGW --> ALB
+    ALB -->|"2. Health-Checked Round-Robin"| EC2_1
+    ALB -->|"2. Health-Checked Round-Robin"| EC2_2
+
+    EC2_1 & EC2_2 -->|"3. Private SQL Queries (:5432)"| RDS_Master
+
+    EC2_1 & EC2_2 <-.->|"4. OAuth2 Token Exchange & PKCE"| Cognito
+
+    EC2_1 & EC2_2 -->|"5. Fast Event Enqueue (<10ms)"| SQSQueue
+    SQSQueue -.->|"Max 5 Retries Exceeded"| SQSDLQ
+    SQSQueue -->|"6. Rate-Controlled Pull (1/sec)"| EC2_1 & EC2_2
+
+    EC2_1 & EC2_2 -->|"7. Deliver QR Passes (STARTTLS :587)"| SESService
+
+    GHActions -->|"A. Push Docker Images"| ECR
+    GHActions -->|"B. Dispatch RunShellScript"| SSM
+    SSM -->|"C. Zero-Downtime Hot-Swap"| EC2_1 & EC2_2
+    EC2_1 & EC2_2 -.->|"D. Pull Images"| ECR
+```
+
+---
+
+## ✨ Platform Capabilities
+
+- **Interactive SVG Floor Map:** Real-time visual floor plan of BMICH exhibition halls (A–G and Main Building) dynamically color-coded by stall size and availability status.
+- **Digital QR Tickets & In-Browser Camera Scanner:** Automated confirmation emails with embedded ZXing QR code passes, verifiable on-site by gate security staff using mobile/desktop browser cameras without native app downloads.
+- **Role-Based Access Control (RBAC):** Dedicated views, workflows, and protected API endpoints for Book Publishers (`ROLE_VENDOR`), Gate Security Staff (`ROLE_EMPLOYEE`), and System Administrators (`ROLE_ADMIN`).
+- **Staff Operations & Duty Management:** Centralized administration dashboard to manage user access, schedule and assign event staff shifts, monitor live attendee check-ins, and manage hall inventories.
+- **Transactional Stall Reservations:** Business-limited reservation engine (up to 3 stalls per publisher) with instant price calculations and automated receipt generation.
+
+---
+
+## 🔄 CI/CD & Deployment Workflow
+
+The application uses an automated zero-SSH deployment pipeline configured with GitHub Actions and AWS Systems Manager:
 
 ```mermaid
 flowchart LR
-    Client["User Browser"] -->|HTTPS| ALB["Application Load Balancer\n(bookfair-alb)"]
-
-    subgraph PublicSubnets ["Public Subnets (ap-southeast-2a / 2b)"]
-        ALB -->|"Round-Robin :80"| EC2_1["EC2 Node 1\nNginx + Spring Boot (Docker)"]
-        ALB -->|"Round-Robin :80"| EC2_2["EC2 Node 2\nNginx + Spring Boot (Docker)"]
-    end
-
-    subgraph PrivateSubnet ["Private Subnet (ap-southeast-2a)"]
-        EC2_1 & EC2_2 -->|Port 5432| RDS[("Amazon RDS\nPostgreSQL")]
-    end
-
-    subgraph ManagedServices ["AWS Managed Services (ap-southeast-2)"]
-        EC2_1 & EC2_2 -.-|"OAuth2 Code Flow"| Cognito["Amazon Cognito"]
-        EC2_1 & EC2_2 -->|"SMTP :587"| SES["Amazon SES\n(QR Tickets)"]
-    end
+    Push["1. Git Push\n(main branch)"] --> GHA["2. GitHub Actions\n(Build & Package)"]
+    GHA -->|"Push Immutable SHA Tag"| ECR["3. Amazon ECR\n(Backend & Frontend)"]
+    GHA -->|"AWS-RunShellScript (No Port 22)"| SSM["4. AWS Systems Manager\n(SSM Agent)"]
+    SSM -->|"Deploy on EC2"| EC2["5. Docker Compose\n(Pulls Images & Restarts)"]
 ```
 
----
-
-## ✨ Key Features
-
-- **Interactive Floor Map:** Visual SVG floor plan of BMICH halls (A–G and Main Building) with live stall availability.
-- **Real-Time Stall Booking:** Reserve up to 3 stalls with database pessimistic locking (`SELECT ... FOR UPDATE`) to eliminate double-booking race conditions.
-- **Digital Tickets & QR Verification:** Automated confirmation emails with embedded QR passes via Amazon SES, verifiable in real time using the built-in camera scanner.
-- **Role-Based Access Control:** Dedicated interfaces and permissions for Publishers (`ROLE_VENDOR`), Gate Security (`ROLE_EMPLOYEE`), and Administrators (`ROLE_ADMIN`).
-- **Event Operations Management:** Admin tools to toggle stall availability, adjust pricing, schedule staff duty shifts, and audit reservations.
+1. **Build & Package:** On commit to `main`, `.github/workflows/deploy-aws.yml` builds Docker images for both backend and frontend.
+2. **Amazon ECR:** Images are tagged with the immutable Git commit SHA and pushed to ECR.
+3. **Deployment via SSM:** GitHub Actions dispatches an SSM RunCommand (`aws-deploy.sh`) to the EC2 instance without opening SSH port 22.
+4. **Container Restart:** The host fetches secrets from AWS Secrets Manager and runs `docker compose pull` and `docker compose up -d` to update the running containers.
 
 ---
 
@@ -88,10 +171,11 @@ flowchart LR
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | React 19, Vite, Tailwind CSS v4, React Router v7, HTML5-QRCode, Heroicons |
-| **Backend** | Java 25, Spring Boot 4.x, Spring Security 7, Spring Data JPA, ZXing (QR) |
-| **Database** | PostgreSQL 16 |
-| **Cloud (AWS `ap-southeast-2`)** | EC2 (Ubuntu), Amazon RDS PostgreSQL, Amazon SES, Amazon Cognito |
-| **DevOps** | Docker, Docker Compose, Nginx, GitHub Actions |
+| **Backend** | Java 17+ (LTS, compatible up to Java 25), Spring Boot 4.x, Spring Security 7, Spring Data JPA, Hibernate, ZXing (QR) |
+| **AWS SDK & Cloud** | AWS SDK for Java v2 (`software.amazon.awssdk:sqs`), Jackson Databind |
+| **Database** | PostgreSQL 16 (Amazon RDS) |
+| **Cloud (AWS `ap-southeast-2`)** | Application Load Balancer, EC2 (Dual Linux Nodes), Amazon SQS + DLQ, Amazon SES, Amazon Cognito, Amazon ECR, AWS SSM |
+| **DevOps & CI/CD** | Docker, Nginx (Reverse Proxy & Static Asset Caching), GitHub Actions |
 
 ---
 
@@ -172,11 +256,17 @@ erDiagram
 
 ---
 
+## 📖 API Documentation
+
+Complete REST API specifications, request/response models, validation rules, and error handling formats are documented in [API.md](API.md).
+
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 - [Docker & Docker Compose](https://www.docker.com/) (recommended)
-- *Or manual:* Java 25+, Node.js 18+, PostgreSQL 15+
+- *Or manual:* Java 17+, Node.js 20+, PostgreSQL 16+
 
 ### Quickstart with Docker Compose
 
@@ -185,25 +275,19 @@ erDiagram
    cp .env.example .env
    ```
 
-2. **Generate a JWT secret:**
-   ```bash
-   openssl rand -base64 32
-   ```
-   Paste the generated string into `JWT_SECRET` in `.env`.
-
-3. **Start all services:**
+2. **Start all services:**
    ```bash
    docker compose up --build
    ```
 
-4. **Access the application:**
-   - **Frontend:** `http://localhost:3000` (or `http://localhost:5173` if running Vite dev server)
+3. **Access the application:**
+   - **Frontend:** `http://localhost:3000` (or `http://localhost:5173` in Vite dev server)
    - **Backend API:** `http://localhost:8080/api`
    - **Database:** `localhost:5432`
 
 ---
 
-### Manual Setup (Without Docker)
+### Manual Setup (Local Development)
 
 #### 1. Database Setup
 ```bash
@@ -213,8 +297,7 @@ psql -U postgres -d bookfair_db -f database/seed.sql
 ```
 
 #### 2. Backend Setup
-
-Copy `.env.example` to `.env` in the project root and fill in the Cognito pool ID, client ID, client secret, and hosted domain. For an IntelliJ run, Spring Boot reads this file automatically. Start PostgreSQL locally and set `SPRING_DATASOURCE_PASSWORD` in `.env` to the same password configured for the local database.
+Set environment variables in `.env` in the project root, then run:
 
 ```bash
 cd backend
@@ -232,15 +315,30 @@ npm run dev
 
 ## ⚙️ Environment Variables
 
-| Variable | Description | Default / Example |
+| Variable | Description | Example / Default |
 | :--- | :--- | :--- |
-| `POSTGRES_DB` | Database name | `bookfair_db` |
-| `POSTGRES_USER` | Database user | `postgres` |
-| `POSTGRES_PASSWORD` | Database password | *(Set a strong password)* |
-| `JWT_SECRET` | 256-bit Base64 HMAC secret key | `openssl rand -base64 32` |
-| `SPRING_MAIL_HOST` | Amazon SES SMTP Host (selected Region) | `email-smtp.ap-southeast-2.amazonaws.com` |
-| `SPRING_MAIL_PORT` | Amazon SES SMTP Port | `465` (SMTPS) or `587` (STARTTLS) |
-| `SPRING_MAIL_USERNAME`| Amazon SES SMTP Username | *(From AWS SES credentials)* |
-| `SPRING_MAIL_PASSWORD`| Amazon SES SMTP Password | *(From AWS SES credentials)* |
-| `APP_MAIL_FROM` | Verified sender email address | `tickets@yourdomain.com` |
-| `CORS_ALLOWED_ORIGINS`| Whitelisted CORS origin URLs | `http://localhost:3000,http://localhost:5173` |
+| `SPRING_DATASOURCE_URL` | PostgreSQL JDBC connection URL | `jdbc:postgresql://localhost:5432/bookfair_db` |
+| `SPRING_DATASOURCE_USERNAME` | Database username | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | Database password | *(Your database password)* |
+| `AWS_REGION` | AWS Selected Region | `ap-southeast-2` |
+| `COGNITO_USER_POOL_ID` | Amazon Cognito User Pool ID | `ap-southeast-2_mLvwS715O` |
+| `COGNITO_CLIENT_ID` | Cognito App Client ID | `1jdabc0u4b9anjg83mmfjgpcj9` |
+| `COGNITO_CLIENT_SECRET` | Cognito App Client Secret | *(Confidential key)* |
+| `COGNITO_DOMAIN` | Cognito Hosted UI OAuth2 domain | `https://your-prefix.auth.ap-southeast-2.amazoncognito.com` |
+| `APP_PUBLIC_URL` | Public-facing URL (ALB or localhost) | `http://localhost:5173` |
+| `SESSION_COOKIE_SECURE` | HTTPS-only session cookies | `false` (dev) / `true` (prod) |
+| `CSRF_COOKIE_SECURE` | HTTPS-only CSRF cookies | `false` (dev) / `true` (prod) |
+| `SPRING_MAIL_HOST` | Amazon SES SMTP Endpoint | `email-smtp.ap-southeast-2.amazonaws.com` |
+| `SPRING_MAIL_PORT` | Amazon SES SMTP Port | `587` (STARTTLS) |
+| `SPRING_MAIL_USERNAME` | Amazon SES SMTP Username | *(AWS IAM SMTP Access Key)* |
+| `SPRING_MAIL_PASSWORD` | Amazon SES SMTP Password | *(AWS IAM SMTP Secret)* |
+| `APP_MAIL_FROM` | Verified SES sender email | `bgykanishka@gmail.com` |
+| `AWS_SQS_EMAIL_QUEUE_URL` | Amazon SQS Email Buffer Queue URL | `https://sqs.ap-southeast-2.amazonaws.com/744264411889/bookfair-email-queue` |
+| `AWS_ACCESS_KEY_ID` | AWS IAM Access Key ID (for SQS SDK calls) | `AKIA...` |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM Secret Access Key (for SQS SDK calls) | `...` |
+| `AWS_SESSION_TOKEN` | AWS Session Token (for temporary STS/SSO keys) | `...` *(optional)* |
+| `AWS_SQS_RATE_DELAY_MS` | Delay between email sends (throttling) | `1000` (1 sec for SES Sandbox) |
+| `AWS_SQS_POLL_INTERVAL_MS` | Polling interval for email queue consumer | `3000` (3 sec default) |
+| `CORS_ALLOWED_ORIGINS` | Whitelisted frontend CORS origins | `http://localhost:5173,http://localhost:3000` |
+
+---

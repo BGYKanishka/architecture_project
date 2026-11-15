@@ -1,5 +1,6 @@
 package com.bookfair.system.service;
 
+import com.bookfair.system.dto.message.ReservationEmailMessage;
 import com.bookfair.system.dto.request.ReservationRequest;
 import com.bookfair.system.dto.response.AdminReservationResponse;
 import com.bookfair.system.dto.response.ReservationResponse;
@@ -38,7 +39,7 @@ public class ReservationService {
     private final StallRepository stallRepository;
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
-    private final EmailService emailService;
+    private final EmailQueueProducer emailQueueProducer;
 
     @Transactional
     public ReservationResponse createReservation(Long userId, ReservationRequest request) {
@@ -137,13 +138,14 @@ public class ReservationService {
                     .map(s -> s.getStallCode() + " (" + s.getSize() + ")")
                     .collect(Collectors.joining(", "));
 
-            emailService.sendReservationEmail(
-                    user.getEmail(),
-                    user.getName(),
-                    user.getContactNumber() != null ? user.getContactNumber() : "N/A",
-                    paymentStatus,
-                    qrImageBase64,
-                    stallDetails);
+            emailQueueProducer.enqueueReservationEmail(ReservationEmailMessage.builder()
+                    .toEmail(user.getEmail())
+                    .userName(user.getName())
+                    .mobileNumber(user.getContactNumber() != null ? user.getContactNumber() : "N/A")
+                    .paymentStatus(paymentStatus)
+                    .qrCodeBase64(qrImageBase64)
+                    .stallDetails(stallDetails)
+                    .build());
 
             return ReservationResponse.builder()
                     .reservationCode(qrToken)

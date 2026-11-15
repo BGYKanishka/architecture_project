@@ -15,9 +15,14 @@ on:
         type: string
         required: true
       bookfair_ec2_instance_id:
-        description: EC2 instance ID managed by Systems Manager
+        description: Primary EC2 Instance ID (e.g. Node 1)
         type: string
         required: true
+      bookfair_ec2_instance_id_2:
+        description: Secondary EC2 Instance ID (e.g. Node 2 - optional)
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -36,7 +41,8 @@ jobs:
       AWS_REGION: ${{ inputs.aws_region }}
       AWS_ACCOUNT_ID: ${{ inputs.aws_account_id }}
       ECR_REGISTRY: ${{ inputs.aws_account_id }}.dkr.ecr.${{ inputs.aws_region }}.amazonaws.com
-      EC2_INSTANCE_ID: ${{ inputs.bookfair_ec2_instance_id }}
+      EC2_INSTANCE_ID_1: ${{ inputs.bookfair_ec2_instance_id }}
+      EC2_INSTANCE_ID_2: ${{ inputs.bookfair_ec2_instance_id_2 }}
       IMAGE_TAG: ${{ github.sha }}
     steps:
       - name: Check deployment configuration
@@ -46,7 +52,10 @@ jobs:
           [[ "${GITHUB_REF}" == "refs/heads/main" ]] || { echo "Deploy only from main." >&2; exit 1; }
           [[ "${IMAGE_TAG}" =~ ^[0-9a-f]{40}$ ]]
           [[ "${AWS_ACCOUNT_ID}" =~ ^[0-9]{12}$ ]]
-          [[ "${EC2_INSTANCE_ID}" =~ ^i-[0-9a-f]+$ ]]
+          [[ "${EC2_INSTANCE_ID_1}" =~ ^i-[0-9a-f]+$ ]]
+          if [[ -n "${EC2_INSTANCE_ID_2}" ]]; then
+            [[ "${EC2_INSTANCE_ID_2}" =~ ^i-[0-9a-f]+$ ]]
+          fi
           [[ "${AWS_REGION}" == "ap-southeast-2" ]]
 
       - name: Check out source
@@ -75,34 +84,70 @@ jobs:
             docker push "${ECR_REGISTRY}/cibf-frontend:${IMAGE_TAG}"
           fi
 
-      - name: Deploy the image through Systems Manager
+      - name: Deploy the image through Systems Manager (Rolling Deployment)
         shell: bash
         run: |
           set -euo pipefail
+          TARGET_INSTANCES=("${EC2_INSTANCE_ID_1}")
+          if [[ -n "${EC2_INSTANCE_ID_2}" ]]; then
+            TARGET_INSTANCES+=("${EC2_INSTANCE_ID_2}")
+          fi
+
           parameters="{\"commands\":[\"sudo /opt/bookfair/aws-deploy.sh ${IMAGE_TAG}\"]}"
-          command_id=$(aws ssm send-command \
-            --region "${AWS_REGION}" \
-            --instance-ids "${EC2_INSTANCE_ID}" \
-            --document-name AWS-RunShellScript \
-            --parameters "${parameters}" \
-            --comment "Deploy CIBF ${IMAGE_TAG}" \
-            --query 'Command.CommandId' \
-            --output text)
-          if ! aws ssm wait command-executed \
-            --region "${AWS_REGION}" \
-            --command-id "${command_id}" \
-            --instance-id "${EC2_INSTANCE_ID}"; then
+
+          for inst in "${TARGET_INSTANCES[@]}"; do
+            echo "=== Deploying CIBF ${IMAGE_TAG} to ${inst} ==="
+            command_id=$(aws ssm send-command \
+              --region "${AWS_REGION}" \
+              --instance-ids "${inst}" \
+              --document-name AWS-RunShellScript \
+              --parameters "${parameters}" \
+              --comment "Deploy CIBF ${IMAGE_TAG} to ${inst}" \
+              --query 'Command.CommandId' \
+              --output text)
+
+            echo "SSM command ${command_id} dispatched to ${inst}. Waiting for deployment to complete..."
+
+            # Robust polling loop (waits up to 10 minutes for Docker pull + Spring Boot startup)
+            TIMEOUT_SECONDS=600
+            ELAPSED=0
+            STATUS="InProgress"
+
+            while [[ "${STATUS}" == "InProgress" || "${STATUS}" == "Pending" || "${STATUS}" == "Delayed" ]]; do
+              sleep 10
+              ELAPSED=$((ELAPSED + 10))
+
+              STATUS=$(aws ssm get-command-invocation \
+                --region "${AWS_REGION}" \
+                --command-id "${command_id}" \
+                --instance-id "${inst}" \
+                --query 'Status' \
+                --output text 2>/dev/null || echo "InProgress")
+
+              echo "Deployment status on ${inst} (${ELAPSED}s elapsed): ${STATUS}"
+
+              if [[ "${ELAPSED}" -ge "${TIMEOUT_SECONDS}" ]]; then
+                echo "Deployment timed out after ${TIMEOUT_SECONDS}s on ${inst}!" >&2
+                break
+              fi
+            done
+
+            if [[ "${STATUS}" != "Success" ]]; then
+              echo "Deployment ended with status '${STATUS}' on ${inst}!" >&2
+              aws ssm get-command-invocation \
+                --region "${AWS_REGION}" \
+                --command-id "${command_id}" \
+                --instance-id "${inst}" \
+                --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
+                --output yaml
+              exit 1
+            fi
+
+            echo "Successfully deployed to ${inst}!"
             aws ssm get-command-invocation \
               --region "${AWS_REGION}" \
               --command-id "${command_id}" \
-              --instance-id "${EC2_INSTANCE_ID}" \
+              --instance-id "${inst}" \
               --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
               --output yaml
-            exit 1
-          fi
-          aws ssm get-command-invocation \
-            --region "${AWS_REGION}" \
-            --command-id "${command_id}" \
-            --instance-id "${EC2_INSTANCE_ID}" \
-            --query '{Status:Status,Output:StandardOutputContent,Error:StandardErrorContent}' \
-            --output yaml
+          done
