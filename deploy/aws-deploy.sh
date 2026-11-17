@@ -39,6 +39,13 @@ aws secretsmanager get-secret-value \
   --query SecretString \
   --output text > "${secret_tmp}"
 chmod 600 "${secret_tmp}"
+
+# Enforce production custom HTTPS domain and cookie security settings
+sed -i 's|^APP_PUBLIC_URL=.*|APP_PUBLIC_URL=https://bookfair.larmora.com|' "${secret_tmp}"
+sed -i 's|^SESSION_COOKIE_SECURE=.*|SESSION_COOKIE_SECURE=true|' "${secret_tmp}"
+sed -i 's|^CSRF_COOKIE_SECURE=.*|CSRF_COOKIE_SECURE=true|' "${secret_tmp}"
+sed -i 's|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=https://bookfair.larmora.com,http://localhost:3000|' "${secret_tmp}"
+
 for required_key in \
   SPRING_DATASOURCE_URL SPRING_DATASOURCE_USERNAME SPRING_DATASOURCE_PASSWORD \
   AWS_REGION \

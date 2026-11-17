@@ -23,12 +23,12 @@ flowchart TD
     end
 
     subgraph Backend ["Backend Tier (Spring Boot REST API)"]
-        Security["Spring Security 7 + OAuth2 BFF Engine\n(Encrypted CIBFSESSION Cookie)"]
-        Controllers["REST Controllers\n(Stall, Reservation, Duty, Admin)"]
+        Security["Spring Security 7 + OAuth2 BFF Engine\n(HttpOnly CIBFSESSION Cookie)"]
+        Controllers["REST Controllers\n(Stall, Reservation, Duty, Admin, Employee)"]
         
         subgraph CoreLogic ["Business Logic & Locking"]
             LockEngine["Pessimistic Locking Engine\n(SELECT ... FOR UPDATE)"]
-            DutyManager["Staff Duty Scheduler"]
+            DutyManager["Staff Duty Scheduler\n(DutyService)"]
             QRGen["ZXing QR Code Generator"]
         end
 
@@ -49,18 +49,24 @@ flowchart TD
         SES["Amazon SES\n(Authenticated SMTP / STARTTLS)"]
     end
 
-    Vendor & Staff & Admin --> UI & Scanner
+    Vendor & Admin --> UI
+    Staff --> UI
+    Staff -->|"Camera QR Scan"| Scanner
     UI & Scanner --> ClientService
     ClientService -->|"HTTP/HTTPS with CIBFSESSION Cookie"| Security
-    Security -.-|"Authorization Code Flow (Confidential Client)"| Cognito
+    Security <-->|"Authorization Code Flow (Confidential Client)"| Cognito
     Security --> Controllers
     Controllers --> LockEngine & DutyManager
+    Controllers -->|"Verify Token & Check Status"| Postgres
     LockEngine -->|"Pessimistic Lock & Commit"| Postgres
+    DutyManager -->|"Persist Duties"| Postgres
+    LockEngine -->|"Generate Pass"| QRGen
     LockEngine -->|"Trigger Confirmation (<10ms)"| SQSProducer
+    QRGen -.->|"Embed QR Base64"| SQSProducer
     SQSProducer -->|"Enqueue JSON Payload"| SQS
     SQS -.->|"Failover after 5 Retries"| DLQ
     SQSConsumer -->|"Long Poll & Rate-Throttle (1/sec)"| SQS
-    SQSConsumer -->|"Render QR & Send MimeMessage"| SES
+    SQSConsumer -->|"Deliver MimeMessage with QR Pass"| SES
 ```
 
 ---
@@ -72,7 +78,7 @@ The infrastructure is deployed in AWS Sydney (**`ap-southeast-2`**) adhering to 
 ```mermaid
 flowchart TD
     subgraph PublicInternet ["Public Internet"]
-        Users["Browser & Mobile Clients\n(Publishers, Gate Staff, Admins)"]
+        Users["Browser & Mobile Clients\n(https://bookfair.larmora.com)"]
         GHActions["GitHub Actions CI/CD Runner\n(Automated Testing & Builds)"]
     end
 
@@ -85,21 +91,25 @@ flowchart TD
                 ALB["AWS Application Load Balancer\n(bookfair-alb :80 / :443)"]
             end
 
-            subgraph AZ_A ["Availability Zone: ap-southeast-2a"]
-                subgraph PublicSubnetA ["Public Subnet 1 (10.0.1.0/24)"]
-                    EC2_1["EC2 Node 1 (bookfair-web-server-1)\n- Nginx Reverse Proxy (:80)\n- React 19 Static SPA\n- Spring Boot Container (:8080)"]
+            subgraph ComputeTier ["Multi-AZ Compute Tier (Public Subnets)"]
+                direction LR
+                subgraph AZ_A_Web ["AZ: ap-southeast-2a (Public Subnet 1 - 10.0.1.0/24)"]
+                    EC2_1["EC2 Node 1 (bookfair-web-server-1)\n- Nginx Reverse Proxy (:80)\n- React 19 Frontend Container (:3000)\n- Spring Boot Backend Container (:8080)"]
                 end
-                subgraph PrivateSubnetA ["Private Subnet 1 (10.0.10.0/24)"]
-                    RDS_Master[("Amazon RDS PostgreSQL :5432\n(Primary Master Instance)")]
+
+                subgraph AZ_B_Web ["AZ: ap-southeast-2b (Public Subnet 2 - 10.0.2.0/24)"]
+                    EC2_2["EC2 Node 2 (bookfair-web-server-2)\n- Nginx Reverse Proxy (:80)\n- React 19 Frontend Container (:3000)\n- Spring Boot Backend Container (:8080)"]
                 end
             end
 
-            subgraph AZ_B ["Availability Zone: ap-southeast-2b"]
-                subgraph PublicSubnetB ["Public Subnet 2 (10.0.2.0/24)"]
-                    EC2_2["EC2 Node 2 (bookfair-web-server-2)\n- Nginx Reverse Proxy (:80)\n- React 19 Static SPA\n- Spring Boot Container (:8080)"]
+            subgraph DatabaseTier ["Multi-AZ Persistence Tier (VPC DB Subnet Group)"]
+                direction LR
+                subgraph AZ_A_DB ["AZ: ap-southeast-2a (Private Subnet 1 - 10.0.10.0/24)"]
+                    RDS_Master[("Amazon RDS PostgreSQL :5432\n(Primary Master Instance)")]
                 end
-                subgraph PrivateSubnetB ["Private Subnet 2 (10.0.20.0/24)"]
-                    RDS_Subnet[("Private Subnet 2\n(VPC DB Subnet Group)")]
+
+                subgraph AZ_B_DB ["AZ: ap-southeast-2b (Private Subnet 2 - 10.0.20.0/24)"]
+                    SubnetStandby["Multi-AZ DB Subnet Reserve\n(Scale-Up Ready)"]
                 end
             end
         end
@@ -111,6 +121,7 @@ flowchart TD
             SESService["Amazon SES\n(email-smtp.ap-southeast-2.amazonaws.com)"]
             ECR["Amazon ECR Registries\n(cibf-backend, cibf-frontend)"]
             SSM["AWS Systems Manager\n(SSM RunCommand Deployment Agent)"]
+            SecretsManager["AWS Secrets Manager\n(Runtime App & DB Secrets)"]
         end
     end
 
@@ -119,20 +130,22 @@ flowchart TD
     ALB -->|"2. Health-Checked Round-Robin"| EC2_1
     ALB -->|"2. Health-Checked Round-Robin"| EC2_2
 
-    EC2_1 & EC2_2 -->|"3. Private SQL Queries (:5432)"| RDS_Master
+    EC2_1 -->|"3. Private SQL (:5432)"| RDS_Master
+    EC2_2 -->|"3. Cross-AZ Private SQL (:5432)"| RDS_Master
 
-    EC2_1 & EC2_2 <-.->|"4. OAuth2 Token Exchange & PKCE"| Cognito
+    EC2_1 & EC2_2 <-->|"4. OAuth2 Token Exchange & PKCE"| Cognito
 
     EC2_1 & EC2_2 -->|"5. Fast Event Enqueue (<10ms)"| SQSQueue
     SQSQueue -.->|"Max 5 Retries Exceeded"| SQSDLQ
-    SQSQueue -->|"6. Rate-Controlled Pull (1/sec)"| EC2_1 & EC2_2
+    EC2_1 & EC2_2 -.->|"6. Long Poll Messages (1/sec)"| SQSQueue
 
     EC2_1 & EC2_2 -->|"7. Deliver QR Passes (STARTTLS :587)"| SESService
 
     GHActions -->|"A. Push Docker Images"| ECR
     GHActions -->|"B. Dispatch RunShellScript"| SSM
-    SSM -->|"C. Zero-Downtime Hot-Swap"| EC2_1 & EC2_2
-    EC2_1 & EC2_2 -.->|"D. Pull Images"| ECR
+    SSM -->|"C. Execute aws-deploy.sh"| EC2_1 & EC2_2
+    EC2_1 & EC2_2 -.->|"D. Fetch Secrets"| SecretsManager
+    EC2_1 & EC2_2 -.->|"E. Pull Images"| ECR
 ```
 
 ---
@@ -156,12 +169,14 @@ flowchart LR
     Push["1. Git Push\n(main branch)"] --> GHA["2. GitHub Actions\n(Build & Package)"]
     GHA -->|"Push Immutable SHA Tag"| ECR["3. Amazon ECR\n(Backend & Frontend)"]
     GHA -->|"AWS-RunShellScript (No Port 22)"| SSM["4. AWS Systems Manager\n(SSM Agent)"]
-    SSM -->|"Deploy on EC2"| EC2["5. Docker Compose\n(Pulls Images & Restarts)"]
+    SSM -->|"Execute aws-deploy.sh"| EC2["5. Dual EC2 Hosts\n(Docker Compose)"]
+    Secrets["AWS Secrets Manager"] -.->|"Fetch Runtime Env"| EC2
+    ECR -.->|"Pull Images"| EC2
 ```
 
-1. **Build & Package:** On commit to `main`, `.github/workflows/deploy-aws.yml` builds Docker images for both backend and frontend.
+1. **Build & Package:** Triggered manually via GitHub Actions (`workflow_dispatch`), `.github/workflows/deploy-aws.yml` builds Docker images for both backend and frontend.
 2. **Amazon ECR:** Images are tagged with the immutable Git commit SHA and pushed to ECR.
-3. **Deployment via SSM:** GitHub Actions dispatches an SSM RunCommand (`aws-deploy.sh`) to the EC2 instance without opening SSH port 22.
+3. **Deployment via SSM:** GitHub Actions dispatches an SSM RunCommand (`aws-deploy.sh`) to the EC2 instances without opening SSH port 22.
 4. **Container Restart:** The host fetches secrets from AWS Secrets Manager and runs `docker compose pull` and `docker compose up -d` to update the running containers.
 
 ---
@@ -174,7 +189,7 @@ flowchart LR
 | **Backend** | Java 17+ (LTS, compatible up to Java 25), Spring Boot 4.x, Spring Security 7, Spring Data JPA, Hibernate, ZXing (QR) |
 | **AWS SDK & Cloud** | AWS SDK for Java v2 (`software.amazon.awssdk:sqs`), Jackson Databind |
 | **Database** | PostgreSQL 16 (Amazon RDS) |
-| **Cloud (AWS `ap-southeast-2`)** | Application Load Balancer, EC2 (Dual Linux Nodes), Amazon SQS + DLQ, Amazon SES, Amazon Cognito, Amazon ECR, AWS SSM |
+| **Cloud (AWS `ap-southeast-2`)** | Application Load Balancer, EC2 (Dual Linux Nodes), Amazon SQS + DLQ, Amazon SES, Amazon Cognito, Amazon ECR, AWS SSM, AWS Secrets Manager |
 | **DevOps & CI/CD** | Docker, Nginx (Reverse Proxy & Static Asset Caching), GitHub Actions |
 
 ---
@@ -186,7 +201,7 @@ erDiagram
     users ||--o{ user_genres : "selects"
     genres ||--o{ user_genres : "assigned to"
     users ||--o{ reservations : "places"
-    users ||--o{ duties : "assigned"
+    users |o--o{ duties : "assigned"
     floors ||--o{ stalls : "contains"
     stall_types ||--o{ stalls : "classifies"
     reservations ||--|{ reservation_stalls : "reserves"
@@ -237,8 +252,8 @@ erDiagram
         SERIAL id PK
         INT reservation_id FK, UK
         NUMERIC amount
-        VARCHAR payment_method
         VARCHAR payment_status "PENDING, PAID, FAILED"
+        VARCHAR payment_method
         TIMESTAMP payment_date
     }
 
@@ -252,13 +267,23 @@ erDiagram
         TIMESTAMP created_at
         TIMESTAMP updated_at
     }
+
+    genres {
+        SERIAL id PK
+        VARCHAR name UK
+    }
+
+    user_genres {
+        INT user_id PK, FK
+        INT genre_id PK, FK
+    }
+
+    reservation_stalls {
+        SERIAL id PK
+        INT reservation_id FK
+        INT stall_id FK
+    }
 ```
-
----
-
-## 📖 API Documentation
-
-Complete REST API specifications, request/response models, validation rules, and error handling formats are documented in [API.md](API.md).
 
 ---
 
