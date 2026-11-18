@@ -1,6 +1,9 @@
 name: Build and deploy to AWS
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       aws_region:
@@ -33,19 +36,22 @@ concurrency:
   group: cibf-production-deploy
   cancel-in-progress: false
 
+# Shared by all jobs
+env:
+  AWS_REGION: ${{ inputs.aws_region || 'ap-southeast-2' }}
+  AWS_ACCOUNT_ID: ${{ inputs.aws_account_id || '744264411889' }}
+  ECR_REGISTRY: ${{ inputs.aws_account_id || '744264411889' }}.dkr.ecr.${{ inputs.aws_region || 'ap-southeast-2' }}.amazonaws.com
+  EC2_INSTANCE_ID_1: ${{ inputs.bookfair_ec2_instance_id || 'i-0fb5b0b8e9355ca49' }}
+  EC2_INSTANCE_ID_2: ${{ inputs.bookfair_ec2_instance_id_2 || 'i-039e842e3b7fa3c82' }}
+  IMAGE_TAG: ${{ github.sha }}
+
 jobs:
-  deploy:
-    name: Build, publish, deploy
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    env:
-      AWS_REGION: ${{ inputs.aws_region || 'ap-southeast-2' }}
-      AWS_ACCOUNT_ID: ${{ inputs.aws_account_id || '744264411889' }}
-      ECR_REGISTRY: ${{ (inputs.aws_account_id || '744264411889') }}.dkr.ecr.${{ (inputs.aws_region || 'ap-southeast-2') }}.amazonaws.com
-      EC2_INSTANCE_ID_1: ${{ inputs.bookfair_ec2_instance_id || 'i-0fb5b0b8e9355ca49' }}
-      EC2_INSTANCE_ID_2: ${{ inputs.bookfair_ec2_instance_id_2 || 'i-039e842e3b7fa3c82' }}
-      IMAGE_TAG: ${{ github.sha }}
+  # ---------------------------------------------------------------------------
+  # 1. VALIDATE - fail fast before spending any build minutes
+  # ---------------------------------------------------------------------------
+  validate:
+    name: Validate configuration
+    runs-on: ubuntu-24.04
     steps:
       - name: Check deployment configuration
         shell: bash
@@ -60,11 +66,24 @@ jobs:
           fi
           [[ "${AWS_REGION}" == "ap-southeast-2" ]]
 
+  # ---------------------------------------------------------------------------
+  # 2. BUILD & PUBLISH - builds backend and frontend in parallel and pushes
+  #    directly to Amazon ECR. Skips building if the image tag already exists.
+  # ---------------------------------------------------------------------------
+  build-and-publish:
+    name: Build & Publish ${{ matrix.component }}
+    needs: validate
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: true
+      matrix:
+        component: [backend, frontend]
+    steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -73,18 +92,41 @@ jobs:
       - name: Sign in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push immutable images
+      - name: Build and push if not already in ECR
         shell: bash
         run: |
           set -euo pipefail
-          if ! aws ecr describe-images --repository-name cibf-backend --image-ids "imageTag=${IMAGE_TAG}" >/dev/null 2>&1; then
-            docker build --pull -f backend/Dockerfile -t "${ECR_REGISTRY}/cibf-backend:${IMAGE_TAG}" backend
-            docker push "${ECR_REGISTRY}/cibf-backend:${IMAGE_TAG}"
+          repo="cibf-${{ matrix.component }}"
+
+          # Check before building to save runner minutes and cost
+          if aws ecr describe-images --repository-name "${repo}" --image-ids "imageTag=${IMAGE_TAG}" >/dev/null 2>&1; then
+            echo "${repo}:${IMAGE_TAG} already exists in ECR, skipping build."
+            exit 0
           fi
-          if ! aws ecr describe-images --repository-name cibf-frontend --image-ids "imageTag=${IMAGE_TAG}" >/dev/null 2>&1; then
-            docker build --pull -f frontend/Dockerfile -t "${ECR_REGISTRY}/cibf-frontend:${IMAGE_TAG}" frontend
-            docker push "${ECR_REGISTRY}/cibf-frontend:${IMAGE_TAG}"
-          fi
+
+          echo "Building ${repo}:${IMAGE_TAG}..."
+          docker build --pull \
+            -f "${{ matrix.component }}/Dockerfile" \
+            -t "${ECR_REGISTRY}/${repo}:${IMAGE_TAG}" \
+            "${{ matrix.component }}"
+
+          echo "Pushing ${repo}:${IMAGE_TAG} to ECR..."
+          docker push "${ECR_REGISTRY}/${repo}:${IMAGE_TAG}"
+
+  # ---------------------------------------------------------------------------
+  # 3. DEPLOY - rolling deploy through Systems Manager (SSM).
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy to EC2 (rolling)
+    needs: build-and-publish
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy the image through Systems Manager (Rolling Deployment)
         shell: bash
@@ -110,7 +152,7 @@ jobs:
 
             echo "SSM command ${command_id} dispatched to ${inst}. Waiting for deployment to complete..."
 
-            # Robust polling loop (waits up to 10 minutes for Docker pull + Spring Boot startup)
+            # Waits up to 10 minutes for Docker pull + Spring Boot startup
             TIMEOUT_SECONDS=600
             ELAPSED=0
             STATUS="InProgress"

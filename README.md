@@ -174,7 +174,7 @@ flowchart LR
     ECR -.->|"Pull Images"| EC2
 ```
 
-1. **Build & Package:** Triggered manually via GitHub Actions (`workflow_dispatch`), `.github/workflows/deploy-aws.yml` builds Docker images for both backend and frontend.
+1. **Build & Package:** Triggered automatically on push to `main` (or manually via `workflow_dispatch`), `.github/workflows/deploy-aws.yml` builds Docker images for both backend and frontend.
 2. **Amazon ECR:** Images are tagged with the immutable Git commit SHA and pushed to ECR.
 3. **Deployment via SSM:** GitHub Actions dispatches an SSM RunCommand (`aws-deploy.sh`) to the EC2 instances without opening SSH port 22.
 4. **Container Restart:** The host fetches secrets from AWS Secrets Manager and runs `docker compose pull` and `docker compose up -d` to update the running containers.
