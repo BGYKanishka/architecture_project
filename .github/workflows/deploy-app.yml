@@ -1,9 +1,15 @@
-name: Build and deploy to AWS
+name: Build and deploy application to AWS
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'deploy/**'
+      - 'docker-compose*.yml'
+      - '.github/workflows/deploy-app.yml'
   workflow_dispatch:
     inputs:
       aws_region:

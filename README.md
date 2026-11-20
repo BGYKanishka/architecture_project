@@ -122,6 +122,7 @@ flowchart TD
             ECR["Amazon ECR Registries\n(cibf-backend, cibf-frontend)"]
             SSM["AWS Systems Manager\n(SSM RunCommand Deployment Agent)"]
             SecretsManager["AWS Secrets Manager\n(Runtime App & DB Secrets)"]
+            S3State["Amazon S3 + DynamoDB\n(Remote Terraform State & Locks)"]
         end
     end
 
@@ -162,23 +163,17 @@ flowchart TD
 
 ## 🔄 CI/CD & Deployment Workflow
 
-The application uses an automated zero-SSH deployment pipeline configured with GitHub Actions and AWS Systems Manager:
+The deployment workflow uses Terraform for cloud provisioning and GitHub Actions for automated, zero-SSH container delivery:
 
 ```mermaid
 flowchart LR
-    Push["1. Git Push\n(main branch)"] --> GHA["2. GitHub Actions\n(Build & Package)"]
-    GHA -->|"Push Immutable SHA Tag"| ECR["3. Amazon ECR\n(Backend & Frontend)"]
-    GHA -->|"AWS-RunShellScript (No Port 22)"| SSM["4. AWS Systems Manager\n(SSM Agent)"]
-    SSM -->|"Execute aws-deploy.sh"| EC2["5. Dual EC2 Hosts\n(Docker Compose)"]
-    Secrets["AWS Secrets Manager"] -.->|"Fetch Runtime Env"| EC2
+    TF["1. Terraform (IaC)"] -->|"Provisions Cloud"| AWS["AWS Infrastructure\n(VPC, ALB, EC2, RDS)"]
+    Push["2. Git Push\n(main branch)"] --> GHA["3. GitHub Actions"]
+    GHA -->|"Build & Push Docker Images"| ECR["4. Amazon ECR"]
+    GHA -->|"Deploy via SSM (No Port 22)"| EC2["5. Dual EC2 Servers\n(Docker Compose)"]
     ECR -.->|"Pull Images"| EC2
+    Secrets["AWS Secrets Manager"] -.->|"Runtime Env"| EC2
 ```
-
-1. **Build & Package:** Triggered automatically on push to `main` (or manually via `workflow_dispatch`), `.github/workflows/deploy-aws.yml` builds Docker images for both backend and frontend.
-2. **Amazon ECR:** Images are tagged with the immutable Git commit SHA and pushed to ECR.
-3. **Deployment via SSM:** GitHub Actions dispatches an SSM RunCommand (`aws-deploy.sh`) to the EC2 instances without opening SSH port 22.
-4. **Container Restart:** The host fetches secrets from AWS Secrets Manager and runs `docker compose pull` and `docker compose up -d` to update the running containers.
-
 ---
 
 ## 🛠️ Tech Stack
@@ -186,12 +181,11 @@ flowchart LR
 | Layer | Technologies |
 | :--- | :--- |
 | **Frontend** | React 19, Vite, Tailwind CSS v4, React Router v7, HTML5-QRCode, Heroicons |
-| **Backend** | Java 17+ (LTS, compatible up to Java 25), Spring Boot 4.x, Spring Security 7, Spring Data JPA, Hibernate, ZXing (QR) |
+| **Backend** | Java 17+ (LTS), Spring Boot 4.x, Spring Security 7, Spring Data JPA, Hibernate, ZXing (QR) |
 | **AWS SDK & Cloud** | AWS SDK for Java v2 (`software.amazon.awssdk:sqs`), Jackson Databind |
 | **Database** | PostgreSQL 16 (Amazon RDS) |
-| **Cloud (AWS `ap-southeast-2`)** | Application Load Balancer, EC2 (Dual Linux Nodes), Amazon SQS + DLQ, Amazon SES, Amazon Cognito, Amazon ECR, AWS SSM, AWS Secrets Manager |
-| **DevOps & CI/CD** | Docker, Nginx (Reverse Proxy & Static Asset Caching), GitHub Actions |
-
+| **Cloud (AWS `ap-southeast-2`)** | Application Load Balancer, EC2 (Dual Linux Nodes), Amazon RDS, Amazon SQS + DLQ, Amazon SES, Amazon Cognito, Amazon ECR, AWS SSM, AWS Secrets Manager, Amazon S3, Amazon DynamoDB |
+| **DevOps & IaC** | HashiCorp Terraform, Docker, Nginx, GitHub Actions |
 ---
 
 ## 🗄️ Database Schema
@@ -291,7 +285,7 @@ erDiagram
 
 ### Prerequisites
 - [Docker & Docker Compose](https://www.docker.com/) (recommended)
-- *Or manual:* Java 17+, Node.js 20+, PostgreSQL 16+
+- *Or manual:* Java 17+, Node.js 22+, PostgreSQL 16+
 
 ### Quickstart with Docker Compose
 
@@ -338,32 +332,3 @@ npm run dev
 
 ---
 
-## ⚙️ Environment Variables
-
-| Variable | Description | Example / Default |
-| :--- | :--- | :--- |
-| `SPRING_DATASOURCE_URL` | PostgreSQL JDBC connection URL | `jdbc:postgresql://localhost:5432/bookfair_db` |
-| `SPRING_DATASOURCE_USERNAME` | Database username | `postgres` |
-| `SPRING_DATASOURCE_PASSWORD` | Database password | *(Your database password)* |
-| `AWS_REGION` | AWS Selected Region | `ap-southeast-2` |
-| `COGNITO_USER_POOL_ID` | Amazon Cognito User Pool ID | `ap-southeast-2_mLvwS715O` |
-| `COGNITO_CLIENT_ID` | Cognito App Client ID | `1jdabc0u4b9anjg83mmfjgpcj9` |
-| `COGNITO_CLIENT_SECRET` | Cognito App Client Secret | *(Confidential key)* |
-| `COGNITO_DOMAIN` | Cognito Hosted UI OAuth2 domain | `https://your-prefix.auth.ap-southeast-2.amazoncognito.com` |
-| `APP_PUBLIC_URL` | Public-facing URL (ALB or localhost) | `http://localhost:5173` |
-| `SESSION_COOKIE_SECURE` | HTTPS-only session cookies | `false` (dev) / `true` (prod) |
-| `CSRF_COOKIE_SECURE` | HTTPS-only CSRF cookies | `false` (dev) / `true` (prod) |
-| `SPRING_MAIL_HOST` | Amazon SES SMTP Endpoint | `email-smtp.ap-southeast-2.amazonaws.com` |
-| `SPRING_MAIL_PORT` | Amazon SES SMTP Port | `587` (STARTTLS) |
-| `SPRING_MAIL_USERNAME` | Amazon SES SMTP Username | *(AWS IAM SMTP Access Key)* |
-| `SPRING_MAIL_PASSWORD` | Amazon SES SMTP Password | *(AWS IAM SMTP Secret)* |
-| `APP_MAIL_FROM` | Verified SES sender email | `bgykanishka@gmail.com` |
-| `AWS_SQS_EMAIL_QUEUE_URL` | Amazon SQS Email Buffer Queue URL | `https://sqs.ap-southeast-2.amazonaws.com/744264411889/bookfair-email-queue` |
-| `AWS_ACCESS_KEY_ID` | AWS IAM Access Key ID (for SQS SDK calls) | `AKIA...` |
-| `AWS_SECRET_ACCESS_KEY` | AWS IAM Secret Access Key (for SQS SDK calls) | `...` |
-| `AWS_SESSION_TOKEN` | AWS Session Token (for temporary STS/SSO keys) | `...` *(optional)* |
-| `AWS_SQS_RATE_DELAY_MS` | Delay between email sends (throttling) | `1000` (1 sec for SES Sandbox) |
-| `AWS_SQS_POLL_INTERVAL_MS` | Polling interval for email queue consumer | `3000` (3 sec default) |
-| `CORS_ALLOWED_ORIGINS` | Whitelisted frontend CORS origins | `http://localhost:5173,http://localhost:3000` |
-
----

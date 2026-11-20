@@ -1,0 +1,133 @@
+name: Terraform Cloud Infrastructure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform.yml'
+  workflow_dispatch:
+    inputs:
+      apply_changes:
+        description: 'Set to true to apply changes to AWS'
+        type: boolean
+        required: true
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-infrastructure
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: ap-southeast-2
+  TF_WORKING_DIR: terraform/environments/prod
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. LINT - format check only (no network, no provider download)
+  # ---------------------------------------------------------------------------
+  validate:
+    name: Lint & Validate
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.2
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive terraform/
+
+  # ---------------------------------------------------------------------------
+  # 2. PLAN - manual dispatch only (requires AWS credentials & DB_PASSWORD secret)
+  # ---------------------------------------------------------------------------
+  plan:
+    name: Terraform Plan
+    needs: validate
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.2
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        env:
+          TF_VAR_db_password: ${{ secrets.DB_PASSWORD }}
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Upload Execution Plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TF_WORKING_DIR }}/tfplan
+          retention-days: 5
+
+  # ---------------------------------------------------------------------------
+  # 3. APPLY - safety-gated: only executes on explicit manual dispatch
+  # ---------------------------------------------------------------------------
+  apply:
+    name: Terraform Apply
+    needs: plan
+    if: github.event_name == 'workflow_dispatch' && inputs.apply_changes == true
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIR }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v5
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.17.2
+
+      - name: Download Execution Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false tfplan
