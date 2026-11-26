@@ -13,7 +13,7 @@ const VendorRoute = ({ children, user: propUser, authLoading }) => {
     }
 
     if (!user) {
-        return <Navigate to="/" replace />;
+        return <Navigate to="/login" replace />;
     }
 
     const roles = Array.isArray(user?.roles) ? user.roles : [];

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import StallService from "../services/stall.service";
+import AuthService from "../services/auth.service";
 import HallMap from "./HallMap";
 import HallShapeWrapper from "./HallShapeWrapper";
 import ConfirmationModal from "./common/ConfirmationModal";
@@ -188,6 +189,13 @@ const StallMap = () => {
   const currentLayout = hallLayouts[hallName];
 
   const handleConfirmReservation = () => {
+    // Redirect unauthenticated users to login instead of letting the
+    // router silently bounce them back to the landing page.
+    if (!AuthService.getCurrentUser()) {
+      navigate("/login", { state: { from: `/map/${hallName || ""}` } });
+      return;
+    }
+
     if (selectedStalls.length + reservationCount > 3) {
       showAlert(
         "Limit Reached",
